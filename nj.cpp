@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <node.h>
 #include <v8.h>
+#include <string>
 #include <mutex>
 #include <thread>
 #include <chrono>
