@@ -5,7 +5,7 @@
       "target_name": "nj",
       "sources":     [ "nj.cpp" ],
       "cflags!":     [ "-fno-exceptions" ],
-      "cflags":      [ "-std=c++11" , "-stdlib=libc++" ],
+      "cflags":      [ "-std=c++11" ],
       "cflags_cc!":  [ "-fno-exceptions" ],
       "conditions":
       [
