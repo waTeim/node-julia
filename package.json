@@ -1,0 +1,6 @@
+{
+  "name":"node-julia",
+  "description":"Glotted Julia"
+  "version":"0.1.0",
+  "main":"lib/nj.js"
+}
