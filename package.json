@@ -1,6 +1,6 @@
 {
-  "name":"node-julia",
-  "description":"A NodeJS Julia Mashup",
+  "name":"nj",
+  "description":"A NodeJS portal to Juliax ",
   "version":"0.1.0",
   "main":"lib/nj.js",
   "dependencies":
