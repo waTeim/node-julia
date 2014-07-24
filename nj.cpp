@@ -2,34 +2,12 @@
 #include <node.h>
 #include <v8.h>
 #include <string>
-#include <mutex>
-#include <thread>
-#include <chrono>
+#include "JuliaExecEnv.h"
 
 using namespace std;
 using namespace v8;
 
-
-class JuliaEnv
-{
-   protected:
-
-      mutex state_m;
-      string s;
-
-   public:
-
-      JuliaEnv(string s) {  this->s = s; }
-  
-      string getS()
-      { 
-         unique_lock<mutex> lock(state_m);
- 
-         return s;
-      }
-};
-
-static JuliaEnv *J = 0;
+static JuliaExecEnv *J = 0;
 
 void doStart(const FunctionCallbackInfo<Value> &args)
 {
@@ -48,9 +26,9 @@ void doStart(const FunctionCallbackInfo<Value> &args)
 
    if(plainText_av.length() > 0)
    {
-      if(!J) J = new JuliaEnv(*plainText_av);
+      if(!J) J = new JuliaExecEnv(*plainText_av);
 
-      args.GetReturnValue().Set(String::NewFromUtf8(I,J->getS().c_str()));
+      args.GetReturnValue().Set(String::NewFromUtf8(I,"Julia Started"));
    }
    else args.GetReturnValue().Set(String::NewFromUtf8(I,""));
 }

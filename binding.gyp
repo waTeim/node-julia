@@ -3,9 +3,9 @@
   [
     {
       "target_name": "nj",
-      "sources":     [ "nj.cpp" ],
+      "sources":     [ "nj.cpp" , "Exception.cpp" , "JMain.cpp" , "JuliaExecEnv.cpp" ],
       "cflags!":     [ "-fno-exceptions" ],
-      "cflags":      [ "-std=c++11" ],
+      "cflags":      [ "-std=c++11" , "-I/usr/local/julia/include/julia" ],
       "cflags_cc!":  [ "-fno-exceptions" ],
       "conditions":
       [
