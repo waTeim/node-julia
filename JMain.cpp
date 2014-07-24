@@ -1,8 +1,4 @@
-extern "C"
-{
-   #include <julia.h>
-};
-
+#include <julia.h>
 #include "JMain.h"
 
 using namespace std;
