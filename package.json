@@ -2,5 +2,9 @@
   "name":"node-julia",
   "description":"A NodeJS Julia Mashup",
   "version":"0.1.0",
-  "main":"lib/nj.js"
+  "main":"lib/nj.js",
+  "dependencies":
+  {
+     "bindings":"x"
+  }
 }
