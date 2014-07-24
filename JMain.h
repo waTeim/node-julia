@@ -19,7 +19,7 @@ class JMain
       bool initialized;
       std::string install_directory;
       std::mutex m_state;
-      std::list<std::shared_ptr<nj::Expr>> expr_queue;
+      std::list<std::shared_ptr<nj::Expr> > expr_queue;
 
       void eval(const std::shared_ptr<nj::Expr> &expr);
 
