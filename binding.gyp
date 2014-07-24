@@ -15,7 +15,7 @@
             { 
               "MACOSX_DEPLOYMENT_TARGET":"10.7",
               "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
-              "OTHER_CPLUSPLUSFLAGS": [ "-std=c++11" , "-stdlib=libc++" ],
+              "OTHER_CPLUSPLUSFLAGS": [ "-stdlib=libc++" ],
               "OTHER_LDFLAGS": ["-stdlib=libc++"]
             }
           }
