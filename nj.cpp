@@ -31,7 +31,7 @@ class JuliaEnv
 
 static JuliaEnv *J = 0;
 
-void doTest(const FunctionCallbackInfo<Value> &args)
+void doStart(const FunctionCallbackInfo<Value> &args)
 {
    Isolate *I = Isolate::GetCurrent();
    HandleScope scope(I);
@@ -57,7 +57,7 @@ void doTest(const FunctionCallbackInfo<Value> &args)
 
 void init(Handle<Object> exports)
 {
-  NODE_SET_METHOD(exports,"test",doTest);
+  NODE_SET_METHOD(exports,"start",doStart);
 }
 
 NODE_MODULE(nj,init)
