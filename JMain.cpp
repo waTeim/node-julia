@@ -44,12 +44,17 @@ printf("Waiting for an expression\n");
          if(!deactivated)
          {
 printf("Checking end of queue\n");
-            expr = queue.back();
+            if((expr = queue.back()))
+            {
 printf("Got expr\n");
-printf("Expr text = %s\n",expr->getText().c_str());
-            queue.pop_back();
+               queue.pop_back();
 printf("Poped end of queue\n");
-            if(expr.get()) done = true;
+               if(expr.get())
+               {
+                  done = true;
+                  printf("Expr text = %s\n",expr->getText().c_str());
+               }
+            }
          }
          else done = true;
       }
