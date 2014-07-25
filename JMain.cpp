@@ -81,11 +81,11 @@ printf("got an expr\n");
 
          if(expr.get())
          {
-printf("expr text = %s\n",expr->getText());
+printf("expr text = %s\n",expr->getText().c_str());
             shared_ptr<nj::Expr> result = eval(expr);
 
 printf("Got a result\n");
-printf("Expr result = %s\n",result->getText());
+printf("Expr result = %s\n",result->getText().c_str());
             if(result.get())
             {
               unique_lock<mutex> lock(m_state); 
