@@ -44,8 +44,9 @@ printf("Waiting for an expression\n");
          if(!deactivated)
          {
 printf("Checking end of queue\n");
-            if((expr = queue.back()))
+            if(queue.size() != 0)
             {
+               expr = queue.back();
 printf("Got expr\n");
                queue.pop_back();
 printf("Poped end of queue\n");
