@@ -91,13 +91,14 @@ printf("expr text = %s\n",expr->getText().c_str());
             shared_ptr<nj::Expr> result = eval(expr);
 
 printf("Got a result\n");
-printf("Expr result = %s\n",result->getText().c_str());
             if(result.get())
             {
+printf("Expr result = %s\n",result->getText().c_str());
               unique_lock<mutex> lock(m_state); 
 
               if(!deactivated)
               {
+printf("Pushing result\n");
                  result_queue.push_front(result);
                  c_state.notify_all();
               }
@@ -121,8 +122,13 @@ printf("Received an expr %s\n",expressionText.c_str());
 string JMain::resultQueueGet()
 {
    shared_ptr<nj::Expr> expr = de_queue(result_queue); 
-
-   if(expr.get()) return expr->getText();
+printf("Got Result\n");
+   if(expr.get())
+   {
+printf("Result text = %s\n",expr->getText().c_str());
+    return expr->getText();
+   }
+printf("Result text = ""\n");
    return "";
 }
 
