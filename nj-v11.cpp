@@ -9,6 +9,36 @@ using namespace v8;
 
 static JuliaExecEnv *J = 0;
 
+void returnString(const FunctionCallbackInfo<Value> &args,Isolate *I,const string &s)
+{
+   args.GetReturnValue().Set(String::NewFromUtf8(I,""));
+}
+
+void doEval(const FunctionCallbackInfo<Value> &args)
+{
+   Isolate *I = Isolate::GetCurrent();
+   HandleScope scope(I);
+   int numArgs = args.Length();
+
+   if(numArgs == 0 || !J)
+   {
+      returnString(args,I,"");
+      return;
+   }
+
+   Local<String> arg0 = args[0]->ToString();
+   String::Utf8Value expressionText(arg0);
+   JMain *engine;
+
+   if(expressionText.length() > 0 && (engine = J->getEngine()))
+   {
+      engine->evalQueuePut(*expressionText);
+      returnString(args,I,engine->resultQueueGet());
+   }
+   else returnString(args,I,"");
+}
+
+
 void doStart(const FunctionCallbackInfo<Value> &args)
 {
    Isolate *I = Isolate::GetCurrent();
@@ -17,7 +47,7 @@ void doStart(const FunctionCallbackInfo<Value> &args)
 
    if(numArgs == 0)
    {
-      args.GetReturnValue().Set(String::NewFromUtf8(I,""));
+      returnString(args,I,"");
       return;
    }
 
@@ -28,9 +58,9 @@ void doStart(const FunctionCallbackInfo<Value> &args)
    {
       if(!J) J = new JuliaExecEnv(*plainText_av);
 
-      args.GetReturnValue().Set(String::NewFromUtf8(I,"Julia Started"));
+      returnString(args,I,"Julia Started");
    }
-   else args.GetReturnValue().Set(String::NewFromUtf8(I,""));
+   else returnString(args,I,"");
 }
 
 void init(Handle<Object> exports)
