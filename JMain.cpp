@@ -109,7 +109,12 @@ printf("Pushing result\n");
               }
               else done = true;
             }
-            else result_queue.push_front(result);
+            else
+            {
+               result_queue.push_front(result);
+               c_state.notify_all();
+               printf("Pushing null result\n");
+            }
          }
          else printf("Expr was null\n");
       }
