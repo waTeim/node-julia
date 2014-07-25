@@ -103,12 +103,11 @@ printf("Expr result = %s\n",result->getText().c_str());
    }
 }
 
-
 void JMain::evalQueuePut(const string &expressionText)
 {
    unique_lock<mutex> lock(m_state);
    shared_ptr<nj::Expr> expr(new nj::Expr(expressionText));
-
+printf("Received an expr %s\n",expressionText.c_str());
    eval_queue.push_front(expr);
    c_state.notify_all();
 }
