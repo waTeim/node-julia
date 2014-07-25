@@ -108,6 +108,7 @@ printf("Pushing result\n");
               }
               else done = true;
             }
+            else result_queue.push_front(result);
          }
          else printf("Expr was null\n");
       }
