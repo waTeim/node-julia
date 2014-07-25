@@ -36,14 +36,19 @@ shared_ptr<nj::Expr> JMain::de_queue(list<shared_ptr<nj::Expr>> &queue)
 
          while(eval_queue.empty() && !done)
          {
+printf("Waiting for an expression\n");
             c_state.wait(lock);
             if(deactivated) done = true;
          }
 
          if(!deactivated)
          {
+printf("Checking end of queue\n");
             expr = queue.back();
+printf("Got expr\n");
+printf("Expr text = %s\n",expr->getText().c_str());
             queue.pop_back();
+printf("Poped end of queue\n");
             if(expr.get()) done = true;
          }
          else done = true;
@@ -75,6 +80,7 @@ void JMain::operator()()
 
       while(!done)
       {
+printf("entering de_queue\n");
          expr = de_queue(eval_queue);
 
 printf("got an expr\n");
