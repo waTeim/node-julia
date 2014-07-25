@@ -76,12 +76,11 @@ void JMain::operator()()
       JL_SET_STACK_BASE;
 
       done = false;
-      shared_ptr<nj::Expr> expr;
 
       while(!done)
       {
 printf("entering de_queue\n");
-         expr = de_queue(eval_queue);
+         shared_ptr<nj::Expr> expr = de_queue(eval_queue);
 
 printf("got an expr\n");
 
@@ -105,7 +104,7 @@ printf("Pushing result\n");
               else done = true;
             }
          }
-         else done = true;
+         else printf("Expr was null\n");
       }
    }
 }
