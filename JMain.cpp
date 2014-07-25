@@ -77,10 +77,15 @@ void JMain::operator()()
       {
          expr = de_queue(eval_queue);
 
+printf("got an expr\n");
+
          if(expr.get())
          {
+printf("expr text = %s\n",expr->getText());
             shared_ptr<nj::Expr> result = eval(expr);
 
+printf("Got a result\n");
+printf("Expr result = %s\n",result->getText());
             if(result.get())
             {
               unique_lock<mutex> lock(m_state); 
