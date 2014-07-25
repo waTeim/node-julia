@@ -66,6 +66,7 @@ void doStart(const FunctionCallbackInfo<Value> &args)
 void init(Handle<Object> exports)
 {
   NODE_SET_METHOD(exports,"start",doStart);
+  NODE_SET_METHOD(exports,"eval",doEval);
 }
 
 NODE_MODULE(nj,init)
