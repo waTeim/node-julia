@@ -34,20 +34,14 @@ shared_ptr<nj::Expr> JMain::dequeue(list<shared_ptr<nj::Expr>> &queue,mutex &m_q
       {
          unique_lock<mutex> lock(m_queue);
 
-         if(eval_queue.empty())
-         {
-printf("Waiting for an expression\n");
-            c_queue.wait(lock);
-         }
-printf("Checking end of queue\n");
+         if(queue.empty()) c_queue.wait(lock);
          if(!queue.empty())
          {
             expr = queue.back();
-printf("Got expr\n");
             queue.pop_back();
-printf("Poped end of queue\n");
             done = true;
-            if(expr.get()) printf("Expr text = %s\n",expr->getText().c_str());
+            if(expr.get()) printf("Dequeued Expr text = %s\n",expr->getText().c_str());
+            else printf("Dequeued Null text\n");
          }
       }
       {
