@@ -27,7 +27,7 @@ class JMain
       std::list<std::shared_ptr<nj::Expr>> result_queue;
 
       std::shared_ptr<nj::Expr> eval(const std::shared_ptr<nj::Expr> &expr);
-      std::shared_ptr<nj::Expr> dequeue(std::list<std::shared_ptr<nj::Expr>> &queue,std::mutex &m_queue);
+      std::shared_ptr<nj::Expr> dequeue(std::list<std::shared_ptr<nj::Expr>> &queue,std::mutex &m_queue,std::condition_variable &c_queue);
       void enqueue(std::shared_ptr<nj::Expr> &expr,std::list<std::shared_ptr<nj::Expr>> &queue,std::mutex &m_queue,std::condition_variable &c_queue);
 
    public:
