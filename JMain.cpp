@@ -24,7 +24,7 @@ void JMain::initialize(int argc,const char *argv[]) throw(nj::InitializationExce
    initialized = true;
 }
 
-shared_ptr<nj::Expr> JMain::de_queue(list<shared_ptr<nj::Expr>> &queue)
+shared_ptr<nj::Expr> JMain::dequeue(list<shared_ptr<nj::Expr>> &queue,mutex &m_queue)
 {
    bool done = false;
    shared_ptr<nj::Expr> expr;
@@ -32,7 +32,7 @@ shared_ptr<nj::Expr> JMain::de_queue(list<shared_ptr<nj::Expr>> &queue)
    while(!done)
    {
       {
-         unique_lock<mutex> lock(m_state);
+         unique_lock<mutex> lock(m_queue);
 
          while(eval_queue.empty() && !done)
          {
@@ -41,26 +41,35 @@ printf("Waiting for an expression\n");
             if(deactivated) done = true;
          }
 
-         if(!deactivated)
-         {
 printf("Checking end of queue\n");
-            if(queue.size() != 0)
-            {
-               expr = queue.back();
+         if(queue.size() != 0)
+         {
+            expr = queue.back();
 printf("Got expr\n");
-               queue.pop_back();
+            queue.pop_back();
 printf("Poped end of queue\n");
-               if(expr.get())
-               {
-                  done = true;
-                  printf("Expr text = %s\n",expr->getText().c_str());
-               }
+            if(expr.get())
+            {
+               done = true;
+               printf("Expr text = %s\n",expr->getText().c_str());
             }
          }
-         else done = true;
+      }
+      {
+         unique_lock<mutex> lock(m_queue);
+
+         if(deactivated) done = true;
       }
    }
    return expr;
+}
+
+void JMain::enqueue(shared_ptr<nj::Expr> &expr,list<shared_ptr<nj::Expr>> &queue,mutex &m_queue,condition_variable &c_queue)
+{
+   unique_lock<mutex> lock(m_queue);
+
+   queue.push_front(expr);
+   c_queue.notify_all();
 }
 
 void JMain::operator()()
@@ -86,7 +95,7 @@ void JMain::operator()()
       while(!done)
       {
 printf("entering de_queue\n");
-         shared_ptr<nj::Expr> expr = de_queue(eval_queue);
+         shared_ptr<nj::Expr> expr = dequeue(eval_queue,m_evalq);
 
 printf("got an expr\n");
 
@@ -94,45 +103,35 @@ printf("got an expr\n");
          {
 printf("expr text = %s\n",expr->getText().c_str());
             shared_ptr<nj::Expr> result = eval(expr);
-
-printf("Got a result\n");
-            if(result.get())
-            {
-printf("Expr result = %s\n",result->getText().c_str());
-              unique_lock<mutex> lock(m_state); 
-
-              if(!deactivated)
-              {
-printf("Pushing result\n");
-                 result_queue.push_front(result);
-                 c_state.notify_all();
-              }
-              else done = true;
-            }
-            else
-            {
-               result_queue.push_front(result);
-               c_state.notify_all();
-               printf("Pushing null result\n");
-            }
+printf("Eval expr\n");
+            enqueue(result,result_queue,m_resultq,c_resultq);
          }
-         else printf("Expr was null\n");
+         else
+         {
+            printf("Expr to eval is null result will be null\n");
+            shared_ptr<nj::Expr> result;
+            
+            enqueue(result,result_queue,m_resultq,c_resultq);
+         }
+         {
+            unique_lock<mutex> lock(m_state);
+
+            if(deactivated) done = true;
+         }
       }
    }
 }
 
 void JMain::evalQueuePut(const string &expressionText)
 {
-   unique_lock<mutex> lock(m_state);
    shared_ptr<nj::Expr> expr(new nj::Expr(expressionText));
-printf("Received an expr %s\n",expressionText.c_str());
-   eval_queue.push_front(expr);
-   c_state.notify_all();
+printf("Received an expr from Outside%s\n",expressionText.c_str());
+   enqueue(expr,eval_queue,m_evalq,c_evalq);
 }
 
 string JMain::resultQueueGet()
 {
-   shared_ptr<nj::Expr> expr = de_queue(result_queue); 
+   shared_ptr<nj::Expr> expr = dequeue(result_queue,m_resultq); 
 printf("Got Result\n");
    if(expr.get())
    {
