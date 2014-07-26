@@ -56,7 +56,7 @@ printf("Poped end of queue\n");
          }
       }
       {
-         unique_lock<mutex> lock(m_queue);
+         unique_lock<mutex> lock(m_state);
 
          if(deactivated) done = true;
       }
