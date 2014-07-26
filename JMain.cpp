@@ -5,9 +5,14 @@ using namespace std;
 
 shared_ptr<nj::Expr> JMain::eval(const shared_ptr<nj::Expr> &expr)
 {
-   shared_ptr<nj::Expr> result;
+   jl_value_t *res = (jl_value_t*)jl_eval_string((char*)expr->getText().c_str());
 
-   return result;
+   if(jl_is_float64(res))
+   {
+      double res_unboxed = jl_unbox_float64(res);
+      return shared_ptr<nj::Expr>(new nj::Expr(to_string(res_unboxed)));
+   }
+   return shared_ptr<nj::Expr>();
 }
 
 JMain::JMain()
@@ -40,8 +45,6 @@ shared_ptr<nj::Expr> JMain::dequeue(list<shared_ptr<nj::Expr>> &queue,mutex &m_q
             expr = queue.back();
             queue.pop_back();
             done = true;
-            if(expr.get()) printf("Dequeued Expr text = %s\n",expr->getText().c_str());
-            else printf("Dequeued Null text\n");
          }
       }
       {
@@ -83,21 +86,18 @@ void JMain::operator()()
 
       while(!done)
       {
-printf("entering de_queue\n");
          shared_ptr<nj::Expr> expr = dequeue(eval_queue,m_evalq,c_evalq);
-
-printf("got an expr\n");
 
          if(expr.get())
          {
-printf("expr text = %s\n",expr->getText().c_str());
+printf("Eval-ing expr; text = %s\n",expr->getText().c_str());
             shared_ptr<nj::Expr> result = eval(expr);
-printf("Eval expr\n");
+printf("Evaled expr\n");
             enqueue(result,result_queue,m_resultq,c_resultq);
          }
          else
          {
-            printf("Expr to eval is null result will be null\n");
+            printf("Evaled null to null\n");
             shared_ptr<nj::Expr> result;
             
             enqueue(result,result_queue,m_resultq,c_resultq);
@@ -114,14 +114,13 @@ printf("Eval expr\n");
 void JMain::evalQueuePut(const string &expressionText)
 {
    shared_ptr<nj::Expr> expr(new nj::Expr(expressionText));
-printf("Received an expr from Outside%s\n",expressionText.c_str());
+printf("Received an expr from Outside; %s\n",expressionText.c_str());
    enqueue(expr,eval_queue,m_evalq,c_evalq);
 }
 
 string JMain::resultQueueGet()
 {
    shared_ptr<nj::Expr> expr = dequeue(result_queue,m_resultq,c_resultq); 
-printf("Got Result\n");
    if(expr.get())
    {
 printf("Result text = %s\n",expr->getText().c_str());
