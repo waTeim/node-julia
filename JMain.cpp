@@ -34,13 +34,13 @@ shared_ptr<nj::Expr> JMain::dequeue(list<shared_ptr<nj::Expr>> &queue,mutex &m_q
       {
          unique_lock<mutex> lock(m_queue);
 
-         while(eval_queue.empty() && !done)
+         if(eval_queue.empty())
          {
 printf("Waiting for an expression\n");
             c_queue.wait(lock);
          }
 printf("Checking end of queue\n");
-         if(queue.size() != 0)
+         if(!queue.empty())
          {
             expr = queue.back();
 printf("Got expr\n");
@@ -143,6 +143,8 @@ void JMain::stop()
 
    deactivated = true;
    c_state.notify_all();
+   c_evalq.notify_all();
+   c_resultq.notify_all();
 }
 
 
