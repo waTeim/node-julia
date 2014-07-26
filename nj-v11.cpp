@@ -11,7 +11,7 @@ static JuliaExecEnv *J = 0;
 
 void returnString(const FunctionCallbackInfo<Value> &args,Isolate *I,const string &s)
 {
-   args.GetReturnValue().Set(String::NewFromUtf8(I,""));
+   args.GetReturnValue().Set(String::NewFromUtf8(I,s.c_str()));
 }
 
 void doEval(const FunctionCallbackInfo<Value> &args)
