@@ -6,6 +6,7 @@ using namespace std;
 
 shared_ptr<vector<shared_ptr<nj::Value>>> JMain::eval(const shared_ptr<nj::Expr> &expr)
 {
+printf("In JMain::eval\n");
    if(expr.get()) return shared_ptr<vector<shared_ptr<nj::Value>>>(new vector<shared_ptr<nj::Value>>(expr->eval()));
    return shared_ptr<vector<shared_ptr<nj::Value>>>(new vector<shared_ptr<nj::Value>>());
 }

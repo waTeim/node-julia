@@ -22,6 +22,7 @@ namespace nj
 
       std::vector<std::shared_ptr<Value>> eval()
       {
+         printf("In Expr::eval\n");
          if(F.get()) return F->eval(args);
          return args;
       }
