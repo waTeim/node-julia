@@ -78,6 +78,8 @@ void doEval(const FunctionCallbackInfo<Value> &args)
       engine->evalQueuePut(*text);
       std::shared_ptr<std::vector<std::shared_ptr<nj::Value>>> res = engine->resultQueueGet();
   
+printf("Dequeued a Result\n");
+
       if(res.get())
       {
          int argc = res->size();
