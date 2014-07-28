@@ -7,7 +7,6 @@
 namespace nj
 {
    struct Expr;
-   struct jl_value_t;
 
    class EvalFunc
    {

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-vector<shared_ptr<nj::Value>> eval(vector<shared_ptr<nj::Value>> &args)
+vector<shared_ptr<nj::Value>> nj::Immediate::eval(vector<shared_ptr<nj::Value>> &args)
 {
    vector<shared_ptr<nj::Value>> res;
 
