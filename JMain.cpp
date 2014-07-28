@@ -48,9 +48,9 @@ void JMain::operator()()
       {
          shared_ptr<nj::Expr> expr = dequeue(eval_queue,m_evalq,c_evalq);
 
+printf("Dequeued an Expr\n");
          if(expr.get())
          {
-printf("Dequeued an Expr\n");
             shared_ptr<vector<shared_ptr<nj::Value>>> result = eval(expr);
 printf("Evaled an Expr\n");
             enqueue<vector<shared_ptr<nj::Value>>>(result,result_queue,m_resultq,c_resultq);

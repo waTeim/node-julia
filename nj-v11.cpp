@@ -76,6 +76,7 @@ void doEval(const FunctionCallbackInfo<Value> &args)
    if(text.length() > 0 && (engine = J->getEngine()))
    {
       engine->evalQueuePut(*text);
+printf("enqueud a query %s\n",*text);
       std::shared_ptr<std::vector<std::shared_ptr<nj::Value>>> res = engine->resultQueueGet();
   
 printf("Dequeued a Result\n");
