@@ -9,9 +9,9 @@ vector<shared_ptr<nj::Value>> nj::Immediate::eval(vector<shared_ptr<nj::Value>> 
 
    if(args.size() != 1) return res;
 
-printf("evaling %s\n",args[1]->toString().c_str());
+printf("evaling %s\n",args[0]->toString().c_str());
 
-   jl_value_t *jvalue = (jl_value_t*)jl_eval_string((char*)args[1]->toString().c_str());
+   jl_value_t *jvalue = (jl_value_t*)jl_eval_string((char*)args[0]->toString().c_str());
 
    if(jl_is_null(jvalue))
    {
