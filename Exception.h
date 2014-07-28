@@ -20,6 +20,7 @@ namespace nj
    };
 
    class SystemException:public Exception {  public: SystemException(const std::string &what);  };
+   class InvalidException:public Exception {  public: InvalidException(const std::string &what);  };
    class InitializationException:public Exception {  public: InitializationException(std::string what):Exception(what) {} };
 }
 

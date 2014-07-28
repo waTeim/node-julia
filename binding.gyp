@@ -7,7 +7,14 @@
          "version":"<!(node --version | sed -e 's/^v\([0-9]*\.[0-9]*\).*$/\\1.x/')"
       },
       "target_name": "nj",
-      "sources":     [ "Exception.cpp" , "JMain.cpp" , "JuliaExecEnv.cpp" ],
+      "sources":     
+      [ 
+        "Exception.cpp",
+        "Types.cpp",
+        "Immediate.cpp",
+        "JMain.cpp",
+        "JuliaExecEnv.cpp"
+      ],
       "cflags!":     [ "-fno-exceptions" ],
       "cflags":      [ "-std=c++11" , "-I/usr/local/julia/include/julia" ],
       "cflags_cc!":  [ "-fno-exceptions" ],

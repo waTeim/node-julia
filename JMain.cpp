@@ -1,18 +1,13 @@
 #include <julia.h>
 #include "JMain.h"
+#include "Immediate.h"
 
 using namespace std;
 
-shared_ptr<nj::Expr> JMain::eval(const shared_ptr<nj::Expr> &expr)
+shared_ptr<vector<shared_ptr<nj::Value>>> JMain::eval(const shared_ptr<nj::Expr> &expr)
 {
-   jl_value_t *res = (jl_value_t*)jl_eval_string((char*)expr->getText().c_str());
-
-   if(jl_is_float64(res))
-   {
-      double res_unboxed = jl_unbox_float64(res);
-      return shared_ptr<nj::Expr>(new nj::Expr(to_string(res_unboxed)));
-   }
-   return shared_ptr<nj::Expr>();
+   if(expr.get()) return shared_ptr<vector<shared_ptr<nj::Value>>>(new vector<shared_ptr<nj::Value>>(expr->eval()));
+   return shared_ptr<vector<shared_ptr<nj::Value>>>(new vector<shared_ptr<nj::Value>>());
 }
 
 JMain::JMain()
@@ -27,41 +22,6 @@ void JMain::initialize(int argc,const char *argv[]) throw(nj::InitializationExce
 
    if(argc >= 1) install_directory = argv[0];
    initialized = true;
-}
-
-shared_ptr<nj::Expr> JMain::dequeue(list<shared_ptr<nj::Expr>> &queue,mutex &m_queue,condition_variable &c_queue)
-{
-   bool done = false;
-   shared_ptr<nj::Expr> expr;
-
-   while(!done)
-   {
-      {
-         unique_lock<mutex> lock(m_queue);
-
-         if(queue.empty()) c_queue.wait(lock);
-         if(!queue.empty())
-         {
-            expr = queue.back();
-            queue.pop_back();
-            done = true;
-         }
-      }
-      {
-         unique_lock<mutex> lock(m_state);
-
-         if(deactivated) done = true;
-      }
-   }
-   return expr;
-}
-
-void JMain::enqueue(shared_ptr<nj::Expr> &expr,list<shared_ptr<nj::Expr>> &queue,mutex &m_queue,condition_variable &c_queue)
-{
-   unique_lock<mutex> lock(m_queue);
-
-   queue.push_front(expr);
-   c_queue.notify_all();
 }
 
 void JMain::operator()()
@@ -90,17 +50,14 @@ void JMain::operator()()
 
          if(expr.get())
          {
-printf("Eval-ing expr; text = %s\n",expr->getText().c_str());
-            shared_ptr<nj::Expr> result = eval(expr);
-printf("Evaled expr\n");
-            enqueue(result,result_queue,m_resultq,c_resultq);
+            shared_ptr<vector<shared_ptr<nj::Value>>> result = eval(expr);
+            enqueue<vector<shared_ptr<nj::Value>>>(result,result_queue,m_resultq,c_resultq);
          }
          else
          {
-            printf("Evaled null to null\n");
-            shared_ptr<nj::Expr> result;
+            shared_ptr<vector<shared_ptr<nj::Value>>> result;
             
-            enqueue(result,result_queue,m_resultq,c_resultq);
+            enqueue<vector<shared_ptr<nj::Value>>>(result,result_queue,m_resultq,c_resultq);
          }
          {
             unique_lock<mutex> lock(m_state);
@@ -111,23 +68,18 @@ printf("Evaled expr\n");
    }
 }
 
-void JMain::evalQueuePut(const string &expressionText)
+void JMain::evalQueuePut(const string &text)
 {
-   shared_ptr<nj::Expr> expr(new nj::Expr(expressionText));
-printf("Received an expr from Outside; %s\n",expressionText.c_str());
+   shared_ptr<nj::Expr> expr(new nj::Expr());
+   expr->args.push_back(shared_ptr<nj::Value>(new nj::String(text)));
+   expr->F = shared_ptr<nj::EvalFunc>(new nj::Immediate);
+   
    enqueue(expr,eval_queue,m_evalq,c_evalq);
 }
 
-string JMain::resultQueueGet()
+shared_ptr<vector<shared_ptr<nj::Value>>> JMain::resultQueueGet()
 {
-   shared_ptr<nj::Expr> expr = dequeue(result_queue,m_resultq,c_resultq); 
-   if(expr.get())
-   {
-printf("Result text = %s\n",expr->getText().c_str());
-    return expr->getText();
-   }
-printf("Result text = ""\n");
-   return "";
+   return dequeue<vector<shared_ptr<nj::Value>>>(result_queue,m_resultq,c_resultq); 
 }
 
 void JMain::stop()
