@@ -28,26 +28,32 @@ void callback(const FunctionCallbackInfo<Value>& args,Isolate *I,const Local<Fun
 void buildArgs(Isolate *I,const std::shared_ptr<std::vector<std::shared_ptr<nj::Value>>> &res,int argc,Local<Value> *argv)
 {
    int index = 0;
-
+printf("In build args\n");
    for(std::shared_ptr<nj::Value> value: *res)
    {
+printf("building arg %d\n",index);
       if(value.get())
       {
          switch(value->getTypeId())
          {
             case nj::null_type:
+printf("arg is null\n");
                argv[index++] = Null(I);
             break;
             case nj::boolean_type:
+printf("arg is %d\n",value->toBoolean());
                argv[index++] = Boolean::New(I,value->toBoolean());
             break;
             case nj::int_type:
+printf("arg is %lld\n",value->toInt());
                argv[index++] = Number::New(I,value->toInt());
             break;
             case nj::float_type:
+printf("arg is %f\n",value->toFloat());
                argv[index++] = Number::New(I,value->toFloat());
             break;
             case nj::string_type:
+printf("arg is %s\n",value->toString().c_str());
                argv[index++] = String::NewFromUtf8(I,value->toString().c_str());
             break;
          }
