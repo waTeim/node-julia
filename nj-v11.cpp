@@ -28,7 +28,6 @@ void callback(const FunctionCallbackInfo<Value>& args,Isolate *I,const Local<Fun
 void buildArgs(Isolate *I,const std::shared_ptr<std::vector<std::shared_ptr<nj::Value>>> &res,int argc,Local<Value> *argv)
 {
    int index = 0;
-printf("In build args\n");
    for(std::shared_ptr<nj::Value> value: *res)
    {
 printf("building arg %d\n",index);
@@ -82,11 +81,8 @@ void doEval(const FunctionCallbackInfo<Value> &args)
    if(text.length() > 0 && (engine = J->getEngine()))
    {
       engine->evalQueuePut(*text);
-printf("enqueud a query %s\n",*text);
       std::shared_ptr<std::vector<std::shared_ptr<nj::Value>>> res = engine->resultQueueGet();
   
-printf("Dequeued a Result\n");
-
       if(res.get())
       {
          int argc = res->size();

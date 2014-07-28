@@ -6,7 +6,6 @@ using namespace std;
 
 shared_ptr<vector<shared_ptr<nj::Value>>> JMain::eval(const shared_ptr<nj::Expr> &expr)
 {
-printf("In JMain::eval\n");
    if(expr.get()) return shared_ptr<vector<shared_ptr<nj::Value>>>(new vector<shared_ptr<nj::Value>>(expr->eval()));
    return shared_ptr<vector<shared_ptr<nj::Value>>>(new vector<shared_ptr<nj::Value>>());
 }
@@ -49,13 +48,10 @@ void JMain::operator()()
       {
          shared_ptr<nj::Expr> expr = dequeue(eval_queue,m_evalq,c_evalq);
 
-printf("Dequeued an Expr\n");
          if(expr.get())
          {
             shared_ptr<vector<shared_ptr<nj::Value>>> result = eval(expr);
-printf("Evaled an Expr\n");
             enqueue<vector<shared_ptr<nj::Value>>>(result,result_queue,m_resultq,c_resultq);
-printf("Enqueued a Result\n");
          }
          else
          {
