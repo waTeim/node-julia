@@ -7,9 +7,11 @@ vector<shared_ptr<nj::Value>> nj::Immediate::eval(vector<shared_ptr<nj::Value>> 
 {
    vector<shared_ptr<nj::Value>> res;
 
-   if(args.size() != 1) return res;
+   if(args.size() != 1 || !args[0]->isPrimitive()) return res;
 
-   jl_value_t *jvalue = (jl_value_t*)jl_eval_string((char*)args[0]->toString().c_str());
+   Primitive &p = static_cast<Primitive&>(*args[0]);
+
+   jl_value_t *jvalue = (jl_value_t*)jl_eval_string((char*)p.toString().c_str());
 
    if(jl_is_null(jvalue))
    {

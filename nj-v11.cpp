@@ -31,29 +31,31 @@ void buildArgs(Isolate *I,const std::shared_ptr<std::vector<std::shared_ptr<nj::
    for(std::shared_ptr<nj::Value> value: *res)
    {
 printf("building arg %d\n",index);
-      if(value.get())
+      if(value.get() && value->isPrimitive())
       {
-         switch(value->getTypeId())
+         const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
+
+         switch(primitive.typeAtom())
          {
             case nj::null_type:
 printf("arg is null\n");
                argv[index++] = Null(I);
             break;
             case nj::boolean_type:
-printf("arg is %d\n",value->toBoolean());
-               argv[index++] = Boolean::New(I,value->toBoolean());
+printf("arg is %d\n",primitive.toBoolean());
+               argv[index++] = Boolean::New(I,primitive.toBoolean());
             break;
             case nj::int_type:
-printf("arg is %lld\n",value->toInt());
-               argv[index++] = Number::New(I,value->toInt());
+printf("arg is %lld\n",primitive.toInt());
+               argv[index++] = Number::New(I,primitive.toInt());
             break;
             case nj::float_type:
-printf("arg is %f\n",value->toFloat());
-               argv[index++] = Number::New(I,value->toFloat());
+printf("arg is %f\n",primitive.toFloat());
+               argv[index++] = Number::New(I,primitive.toFloat());
             break;
             case nj::string_type:
-printf("arg is %s\n",value->toString().c_str());
-               argv[index++] = String::NewFromUtf8(I,value->toString().c_str());
+printf("arg is %s\n",primitive.toString().c_str());
+               argv[index++] = String::NewFromUtf8(I,primitive.toString().c_str());
             break;
          }
       }
