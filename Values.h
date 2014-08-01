@@ -1,7 +1,8 @@
-#ifndef __nj_Types
-#define __nj_Types
+#ifndef __nj_Values
+#define __nj_Values
 
 #include "Value.h"
+#include "Types.h"
 
 namespace nj
 {
@@ -10,7 +11,7 @@ namespace nj
       public:
 
          Null(){}
-         virtual int typeAtom() const {  return null_type;  }
+         virtual const Type *type() const {  return Null_t::instance();  }
          virtual bool toBoolean() const throw(InvalidException)  {  throw InvalidException("is null");  }
          virtual int64_t toInt() const throw(InvalidException)  {  throw InvalidException("is null");  }
          virtual double toFloat() const throw(InvalidException) {  throw InvalidException("is null");  }
@@ -22,16 +23,16 @@ namespace nj
    {
       protected:
 
-         VTraits<bool,boolean_type> traits;
+         bool b;
 
       public:
 
-         Boolean(bool b):traits(b) {}
-         virtual int typeAtom() const {  return traits.getId();  }
-         virtual bool toBoolean() const throw(InvalidException) {  return traits.getValue();  }
-         virtual int64_t toInt() const throw(InvalidException) {  return traits.getValue()?1:0;  }
-         virtual double toFloat() const throw(InvalidException) {  return traits.getValue()?1:0;  }
-         virtual std::string toString() const throw(InvalidException) {  return traits.getValue()?"true":"false";  }
+         Boolean(bool b) {  this->b = b;  }
+         virtual const Type *type() const {  return Boolean_t::instance(0);  }
+         virtual bool toBoolean() const throw(InvalidException) {  return b;  }
+         virtual int64_t toInt() const throw(InvalidException) {  return b?1:0;  }
+         virtual double toFloat() const throw(InvalidException) {  return b?1:0;  }
+         virtual std::string toString() const throw(InvalidException) {  return b?"true":"false";  }
          virtual ~Boolean() {}
    };
 
@@ -39,16 +40,16 @@ namespace nj
    {
       protected:
 
-         VTraits<int64_t,int_type> traits;
+         int64_t i;
 
       public:
 
-         Int(int64_t i):traits(i) {}
-         virtual int typeAtom() const {  return traits.getId();  }
-         virtual bool toBoolean() const throw(InvalidException) {  return traits.getValue() != 0;  }
-         virtual int64_t toInt() const throw(InvalidException) {  return traits.getValue();  }
-         virtual double toFloat() const throw(InvalidException) {  return traits.getValue();  }
-         virtual std::string toString() const throw(InvalidException) {  return std::to_string(traits.getValue());  }
+         Int(int64_t i) {  this->i = i;  }
+         virtual const Type *type() const {  return Int_t::instance(0);  }
+         virtual bool toBoolean() const throw(InvalidException) {  return i != 0;  }
+         virtual int64_t toInt() const throw(InvalidException) {  return i;  }
+         virtual double toFloat() const throw(InvalidException) {  return i;  }
+         virtual std::string toString() const throw(InvalidException) {  return std::to_string(i);  }
          virtual ~Int() {}
    }; 
 
@@ -56,16 +57,16 @@ namespace nj
    {
       protected:
    
-         VTraits<double,float_type> traits;
+         double d;
    
       public:
 
-         Float(double d):traits(d) {}
-         virtual int typeAtom() const {  return traits.getId();  }
-         virtual bool toBoolean() const throw(InvalidException) {  return traits.getValue() != 0;  }
-         virtual int64_t toInt() const throw(InvalidException) {  return traits.getValue();  }
-         virtual double toFloat() const throw(InvalidException) {  return traits.getValue();  }
-         virtual std::string toString() const throw(InvalidException) {  return std::to_string(traits.getValue());  }
+         Float(double d) {  this->d = d;  }
+         virtual const Type *type() const {  return Float_t::instance(0);  }
+         virtual bool toBoolean() const throw(InvalidException) {  return d != 0;  }
+         virtual int64_t toInt() const throw(InvalidException) {  return d;  }
+         virtual double toFloat() const throw(InvalidException) {  return d;  }
+         virtual std::string toString() const throw(InvalidException) {  return std::to_string(d);  }
          virtual ~Float() {}
    };    
 
@@ -73,16 +74,16 @@ namespace nj
    {
       protected:
     
-         VTraits<std::string,string_type> traits;
+         std::string s;
 
       public:
 
-         String(const std::string &s):traits(s) {}
-         virtual int typeAtom() const {  return traits.getId();  }
+         String(const std::string &s) {  this->s = s;  }
+         virtual const Type *type() const {  return String_t::instance(0);  }
          virtual bool toBoolean() const throw(InvalidException);
          virtual int64_t toInt() const throw(InvalidException);
          virtual double toFloat() const throw(InvalidException);
-         virtual std::string toString() const throw(InvalidException) {  return traits.getValue();  }
+         virtual std::string toString() const throw(InvalidException) {  return s;  }
          virtual ~String() {}
    };
 };

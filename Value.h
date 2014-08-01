@@ -7,23 +7,6 @@
 
 namespace nj
 {
-
-   template<typename V,int id> class VTraits
-   {
-      protected:
-  
-         V value;
-
-      public:
-
-         VTraits(const V &value) {  this->value = value;  }
-
-         int getId() const {  return id;  }
-         V getValue() const {  return value;  }
-         
-         ~VTraits() {}
-   };
-
    class Value
    {
       public:
@@ -33,12 +16,6 @@ namespace nj
          virtual const std::vector<int> &dim() const = 0;
          virtual ~Value() {}
    };
-
-   const int null_type = 0;
-   const int boolean_type = 1;
-   const int int_type = 2;
-   const int float_type = 3;
-   const int string_type = 4;
 
    class Primitive: public Value
    {

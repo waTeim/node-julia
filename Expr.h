@@ -2,7 +2,7 @@
 #define __nj_interface
 
 #include <vector>
-#include "Types.h"
+#include "Values.h"
 
 namespace nj
 {

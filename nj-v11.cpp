@@ -35,7 +35,7 @@ printf("building arg %d\n",index);
       {
          const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
 
-         switch(primitive.typeAtom())
+         switch(primitive.type()->getId())
          {
             case nj::null_type:
 printf("arg is null\n");

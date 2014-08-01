@@ -10,7 +10,7 @@
       "sources":     
       [ 
         "Exception.cpp",
-        "Types.cpp",
+        "Values.cpp",
         "Immediate.cpp",
         "JMain.cpp",
         "JuliaExecEnv.cpp"
