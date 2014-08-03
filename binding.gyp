@@ -11,6 +11,7 @@
       [ 
         "Exception.cpp",
         "Values.cpp",
+        "lvalue.cpp",
         "Immediate.cpp",
         "JMain.cpp",
         "JuliaExecEnv.cpp"

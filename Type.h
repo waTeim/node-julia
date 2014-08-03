@@ -11,7 +11,6 @@ namespace nj
       protected:
 
          int id;
-         int card;
    
       public:
  
@@ -23,22 +22,23 @@ namespace nj
             return i;
          }
 
-         template<class T> static Type *instance(int card)
-         {
-            static std::map<int,Type*> instances;
-
-            if(instances.find(card) == instances.end()) instances[card] = new T(card);
-            return instances[card]; 
-         }
-
-         Type(int id,int card)
+         Type(int id)
          {  
             this->id = id;
-            this->card = card;
          }
 
-         int getId() const {  return id;  }
-         int getCard() const {  return card;  }
+         virtual int getId() const {  return id;  }
+   };
+
+   const int array_type = 0;
+
+   class Array_t:public Type
+   {
+      public:
+
+         static Type *instance() {  return Type::instance<Array_t>();  }
+
+         Array_t():Type(array_type) {}
    };
 };
 

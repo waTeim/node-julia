@@ -5,11 +5,11 @@
 
 namespace nj
 {
-   const int null_type = 0;
-   const int boolean_type = 1;
-   const int int_type = 2;
-   const int float_type = 3;
-   const int string_type = 4;
+   const int null_type = 1;
+   const int boolean_type = 2;
+   const int int_type = 3;
+   const int float_type = 4;
+   const int string_type = 5;
 
    class Null_t:public Type
    {
@@ -17,51 +17,43 @@ namespace nj
 
          static Type *instance() {  return Type::instance<Null_t>();  }
       
-         Null_t():Type(null_type,0) {}
+         Null_t():Type(null_type) {}
    };
 
    class Boolean_t:public Type
    {
       public:
 
-         static Type *instance(int card) {  return Type::instance<Boolean_t>(card);  }
+         static Type *instance() {  return Type::instance<Boolean_t>();  }
       
-         Boolean_t(int card):Type(boolean_type,card) {}
+         Boolean_t():Type(boolean_type) {}
    };
 
    class Int_t:public Type
    {
       public:
 
-         static Type *instance(int card) {  return Type::instance<Int_t>(card);  }
+         static Type *instance() {  return Type::instance<Int_t>();  }
 
-         Int_t(int card):Type(int_type,card) {}
+         Int_t():Type(int_type) {}
    };
 
-   template class Float_t:public Type
+   class Float_t:public Type
    {
-      protected:
-
-         int card;
-
       public:
 
-         static Type *instance(int card) {  return Type::instance<Float_t>(card);  }
+         static Type *instance() {  return Type::instance<Float_t>();  }
 
-         Float_t(int card):Type(float_type,card) {}
+         Float_t():Type(float_type) {}
    };
 
-   template class String_t:public Type
+   class String_t:public Type
    {
-      protected:
-
-         int card;
-
       public:
 
-         static Type *instance(int card) {  return Type::instance<String_t>(card);  }
+         static Type *instance() {  return Type::instance<String_t>();  }
 
-         String_t(int card):Type(string_type,card) {}
+         String_t():Type(string_type) {}
    };
 };
 

@@ -25,38 +25,47 @@ void callback(const FunctionCallbackInfo<Value>& args,Isolate *I,const Local<Fun
   cb->Call(I->GetCurrentContext()->Global(),argc,argv);
 }
 
+void buildPrimitive(Isolate *I,const nj::Primitive &primitive,int index,Local<Value> *argv)
+{
+   switch(primitive.type()->getId())
+   {
+      case nj::null_type:
+printf("arg is null\n");
+         argv[index] = Null(I);
+      break;
+      case nj::boolean_type:
+printf("arg is %d\n",primitive.toBoolean());
+         argv[index] = Boolean::New(I,primitive.toBoolean());
+      break;
+      case nj::int_type:
+printf("arg is %lld\n",primitive.toInt());
+         argv[index] = Number::New(I,primitive.toInt());
+      break;
+      case nj::float_type:
+printf("arg is %f\n",primitive.toFloat());
+         argv[index] = Number::New(I,primitive.toFloat());
+      break;
+      case nj::string_type:
+printf("arg is %s\n",primitive.toString().c_str());
+         argv[index] = String::NewFromUtf8(I,primitive.toString().c_str());
+      break;
+   }
+}
+
 void buildArgs(Isolate *I,const std::shared_ptr<std::vector<std::shared_ptr<nj::Value>>> &res,int argc,Local<Value> *argv)
 {
    int index = 0;
+
    for(std::shared_ptr<nj::Value> value: *res)
    {
-printf("building arg %d\n",index);
-      if(value.get() && value->isPrimitive())
+      if(value.get()
       {
-         const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
-
-         switch(primitive.type()->getId())
+printf("building arg %d\n",index);
+         if(value->isPrimitive())
          {
-            case nj::null_type:
-printf("arg is null\n");
-               argv[index++] = Null(I);
-            break;
-            case nj::boolean_type:
-printf("arg is %d\n",primitive.toBoolean());
-               argv[index++] = Boolean::New(I,primitive.toBoolean());
-            break;
-            case nj::int_type:
-printf("arg is %lld\n",primitive.toInt());
-               argv[index++] = Number::New(I,primitive.toInt());
-            break;
-            case nj::float_type:
-printf("arg is %f\n",primitive.toFloat());
-               argv[index++] = Number::New(I,primitive.toFloat());
-            break;
-            case nj::string_type:
-printf("arg is %s\n",primitive.toString().c_str());
-               argv[index++] = String::NewFromUtf8(I,primitive.toString().c_str());
-            break;
+            const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
+
+            buildPrimitive(I,primitive,index++,argv);
          }
       }
    }

@@ -28,7 +28,7 @@ namespace nj
       public:
 
          Boolean(bool b) {  this->b = b;  }
-         virtual const Type *type() const {  return Boolean_t::instance(0);  }
+         virtual const Type *type() const {  return Boolean_t::instance();  }
          virtual bool toBoolean() const throw(InvalidException) {  return b;  }
          virtual int64_t toInt() const throw(InvalidException) {  return b?1:0;  }
          virtual double toFloat() const throw(InvalidException) {  return b?1:0;  }
@@ -45,7 +45,7 @@ namespace nj
       public:
 
          Int(int64_t i) {  this->i = i;  }
-         virtual const Type *type() const {  return Int_t::instance(0);  }
+         virtual const Type *type() const {  return Int_t::instance();  }
          virtual bool toBoolean() const throw(InvalidException) {  return i != 0;  }
          virtual int64_t toInt() const throw(InvalidException) {  return i;  }
          virtual double toFloat() const throw(InvalidException) {  return i;  }
@@ -62,7 +62,7 @@ namespace nj
       public:
 
          Float(double d) {  this->d = d;  }
-         virtual const Type *type() const {  return Float_t::instance(0);  }
+         virtual const Type *type() const {  return Float_t::instance();  }
          virtual bool toBoolean() const throw(InvalidException) {  return d != 0;  }
          virtual int64_t toInt() const throw(InvalidException) {  return d;  }
          virtual double toFloat() const throw(InvalidException) {  return d;  }
@@ -79,7 +79,7 @@ namespace nj
       public:
 
          String(const std::string &s) {  this->s = s;  }
-         virtual const Type *type() const {  return String_t::instance(0);  }
+         virtual const Type *type() const {  return String_t::instance();  }
          virtual bool toBoolean() const throw(InvalidException);
          virtual int64_t toInt() const throw(InvalidException);
          virtual double toFloat() const throw(InvalidException);
