@@ -10,9 +10,9 @@ vector<shared_ptr<nj::Value>> nj::Immediate::eval(vector<shared_ptr<nj::Value>> 
 
    if(args.size() != 1 || !args[0]->isPrimitive()) return res;
 
-   Primitive &p = static_cast<Primitive&>(*args[0]);
+   Primitive &text = static_cast<Primitive&>(*args[0]);
 
-   jl_value_t *jvalue = (jl_value_t*)jl_eval_string((char*)p.toString().c_str());
+   jl_value_t *jvalue = (jl_value_t*)jl_eval_string((char*)text.toString().c_str());
 
    return lvalue(jvalue);
 }

@@ -10,10 +10,11 @@ vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jvalue)
 
    if(jl_is_null(jvalue))
    {
+printf("Result is null\n");
       shared_ptr<nj::Value>  value(new nj::Null);
       res.push_back(value);
    }
-   else if(jl_is_array_type(jvalue))
+   else if(jl_is_array(jvalue))
    {
       double *p = (double*)jl_array_data(jvalue);
       int ndims = jl_array_ndims(jvalue);
