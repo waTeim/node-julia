@@ -58,7 +58,7 @@ void buildArgs(Isolate *I,const std::shared_ptr<std::vector<std::shared_ptr<nj::
 
    for(std::shared_ptr<nj::Value> value: *res)
    {
-      if(value.get()
+      if(value.get())
       {
 printf("building arg %d\n",index);
          if(value->isPrimitive())
