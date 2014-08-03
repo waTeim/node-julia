@@ -10,6 +10,7 @@
       "sources":     
       [ 
         "Exception.cpp",
+        "Value.cpp",
         "Values.cpp",
         "lvalue.cpp",
         "Immediate.cpp",
