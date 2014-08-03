@@ -52,7 +52,7 @@ printf("arg is %s\n",primitive.toString().c_str());
    }
 }
 
-void buildArgs(Isolate *I,const std::shared_ptr<std::vector<std::shared_ptr<nj::Value>>> &res,int argc,Local<Value> *argv)
+int buildArgs(Isolate *I,const std::shared_ptr<std::vector<std::shared_ptr<nj::Value>>> &res,int argc,Local<Value> *argv)
 {
    int index = 0;
 
@@ -69,6 +69,7 @@ printf("building arg %d\n",index);
          }
       }
    }
+   return index;
 }
 
 
@@ -98,7 +99,7 @@ void doEval(const FunctionCallbackInfo<Value> &args)
       {
          int argc = res->size();
          Local<Value> *argv = new Local<Value>[argc];
-         buildArgs(I,res,argc,argv);
+         argc = buildArgs(I,res,argc,argv);
          callback(args,I,cb,argc,argv);
       }
    }
