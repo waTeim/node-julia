@@ -14,5 +14,8 @@ vector<shared_ptr<nj::Value>> nj::Immediate::eval(vector<shared_ptr<nj::Value>> 
 
    jl_value_t *jvalue = (jl_value_t*)jl_eval_string((char*)text.toString().c_str());
 
-   return lvalue(jvalue);
+   JL_GC_PUSH1(&jvalue);
+   res = lvalue(jvalue);
+   JL_GC_POP();
+   return res;
 }

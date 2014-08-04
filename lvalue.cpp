@@ -19,6 +19,7 @@ printf("Result is null\n");
    else if(jl_is_array(jvalue))
    {
       double *p = (double*)jl_array_data(jvalue);
+
       int ndims = jl_array_ndims(jvalue);
       vector<int> dims;
       shared_ptr<nj::Value> value;
@@ -29,6 +30,7 @@ printf("Result is null\n");
       
       value.reset(array);
       memcpy(array->ptr(),p,array->size()*sizeof(double));
+
       for(int i = 0;i < array->size();i++)
       {
          printf("%f ",array->ptr()[i]);
