@@ -10,12 +10,13 @@
       "sources":     
       [ 
         "Exception.cpp",
-        "Value.cpp",
-        "Values.cpp",
-        "lvalue.cpp",
         "Immediate.cpp",
         "JMain.cpp",
-        "JuliaExecEnv.cpp"
+        "JuliaExecEnv.cpp",
+        "Type.cpp",
+        "Value.cpp",
+        "Values.cpp",
+        "lvalue.cpp"
       ],
       "cflags!":     [ "-fno-exceptions" ],
       "cflags":      [ "-std=c++11" , "-I/usr/local/julia/include/julia" ],
