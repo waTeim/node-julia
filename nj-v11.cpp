@@ -52,10 +52,12 @@ printf("arg is %s\n",primitive.toString().c_str());
    }
 }
 
-void buildArray(Isolate *I,const shared_ptr<nj::Value> &value,Local<Value> &arg)
+Local<Array> buildArray(const shared_ptr<nj::Value> &value)
 {
    const nj::Array_t *array_type = static_cast<const nj::Array_t*>(value->type());
    const nj::Type *element_type = array_type->getElementType();
+   Isolate *I = Isolate::GetCurrent();
+   EscapableHandleScope scope(I);
 
    switch(element_type->getId())
    {
@@ -63,6 +65,7 @@ void buildArray(Isolate *I,const shared_ptr<nj::Value> &value,Local<Value> &arg)
       {
          const nj::Array<double,nj::Float_t> &array = static_cast<const nj::Array<double,nj::Float_t>&>(*value);
 
+         if(array.size() == 0) return Local<Array>();
          if(array.dims().size() == 1)
          {
             size_t size0 = array.dims()[0];
@@ -70,7 +73,7 @@ void buildArray(Isolate *I,const shared_ptr<nj::Value> &value,Local<Value> &arg)
             Local<Array> dest = Array::New(I,size0);
 
             for(size_t i = 0;i < size0;i++) dest->Set(i,Number::New(I,p[i]));
-            arg = dest;
+            return scope.Escape(dest);
          }
          else if(array.dims().size() == 2)
          {
@@ -86,16 +89,17 @@ void buildArray(Isolate *I,const shared_ptr<nj::Value> &value,Local<Value> &arg)
                dest->Set(i,row);
                for(size_t j = 0;j < size1;j++)
                {
-                  printf("Storing X(%zu,%zu) = %f\n",i,j,p[size0*j + i]);
-                  row->Set(j,Number::New(I,*(p + size0*j + i)));
+                  printf("Returning X(%zu,%zu) = %f\n",i,j,p[size0*j + i]);
+                  row->Set(j,Number::New(I,p[size0*j + i]));
                }
             }
-            arg = dest;
+            return scope.Escape(dest);
          }
+         return Local<Array>();
       }
+      break;
+      default: return Local<Array>(); break;
    }
-
-   //arg = Array::New(I,array);
 }
 
 
@@ -116,7 +120,7 @@ printf("building arg %d\n",index);
          }
          else
          {
-            buildArray(I,value,argv[index++]);
+            argv[index++] = buildArray(value);
          }
       }
    }
