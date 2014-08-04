@@ -12,7 +12,6 @@ vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jvalue)
 
    if(jl_is_null(jvalue))
    {
-printf("Result is null\n");
       shared_ptr<nj::Value>  value(new nj::Null);
       res.push_back(value);
    }
@@ -30,15 +29,6 @@ printf("Result is null\n");
       
       value.reset(array);
       memcpy(array->ptr(),p,array->size()*sizeof(double));
-
-      for(int i = 0;i < array->size();i++)
-      {
-         printf("%f ",array->ptr()[i]);
-      }
-      printf("\nResults was arrays: %lu %lu\n",array->dims().size(),array->size());
-cout << "Array Results:";
-for(int i:array->dims()) cout << " " << i;
-cout << " size == " << array->size() << endl;
       res.push_back(value);
    }
    else

@@ -72,11 +72,7 @@ Local<Array> buildArray(const shared_ptr<nj::Value> &value)
             double *p = array.ptr();
             Local<Array> dest = Array::New(I,size0);
 
-            for(size_t i = 0;i < size0;i++)
-            {
-               printf("Returning X(%zu) = %f\n",i,p[i]);
-               dest->Set(i,Number::New(I,p[i]));
-            }
+            for(size_t i = 0;i < size0;i++) dest->Set(i,Number::New(I,p[i]));
             return scope.Escape(dest);
          }
          else if(array.dims().size() == 2)
@@ -91,11 +87,7 @@ Local<Array> buildArray(const shared_ptr<nj::Value> &value)
                Local<Array> row  = Array::New(I,size1);
 
                dest->Set(i,row);
-               for(size_t j = 0;j < size1;j++)
-               {
-                  printf("Returning X(%zu,%zu) = %f\n",i,j,p[size0*j + i]);
-                  row->Set(j,Number::New(I,p[size0*j + i]));
-               }
+               for(size_t j = 0;j < size1;j++) row->Set(j,Number::New(I,p[size0*j + i]));
             }
             return scope.Escape(dest);
          }
@@ -115,7 +107,6 @@ int buildArgs(Isolate *I,const shared_ptr<vector<shared_ptr<nj::Value>>> &res,in
    {
       if(value.get())
       {
-printf("building arg %d\n",index);
          if(value->isPrimitive())
          {
             const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
