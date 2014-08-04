@@ -84,7 +84,11 @@ void buildArray(Isolate *I,const shared_ptr<nj::Value> &value,Local<Value> &arg)
                Local<Array> row  = Array::New(I,size1);
 
                dest->Set(i,row);
-               for(size_t j = 0;j < size1;j++) row->Set(j,Number::New(I,*(p + size0*j + i)));
+               for(size_t j = 0;j < size1;j++)
+               {
+                  printf("Storing X(%zu,%zu) = %f\n",i,j,p[size0*j + i]);
+                  row->Set(j,Number::New(I,*(p + size0*j + i)));
+               }
             }
             arg = dest;
          }
