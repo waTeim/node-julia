@@ -32,7 +32,7 @@ printf("Result is null\n");
       printf("Results was arrays: %lu %lu\n",array->dims().size(),array->size());
 cout << "Array Results:";
 for(int i:array->dims()) cout << " " << i;
-cout << "size == " << array->size() << endl;
+cout << " size == " << array->size() << endl;
       res.push_back(value);
    }
    else

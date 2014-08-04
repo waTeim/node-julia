@@ -52,11 +52,54 @@ printf("arg is %s\n",primitive.toString().c_str());
    }
 }
 
-int buildArgs(Isolate *I,const std::shared_ptr<std::vector<std::shared_ptr<nj::Value>>> &res,int argc,Local<Value> *argv)
+void buildArray(Isolate *I,const shared_ptr<nj::Value> &value,Local<Value> &arg)
+{
+   const nj::Array_t *array_type = static_cast<const nj::Array_t*>(value->type());
+   const nj::Type *element_type = array_type->getElementType();
+
+   switch(element_type->getId())
+   {
+      case nj::float_type:
+      {
+         const nj::Array<double,nj::Float_t> &array = static_cast<const nj::Array<double,nj::Float_t>&>(*value);
+
+         if(array.dims().size() == 1)
+         {
+            size_t size0 = array.dims()[0];
+            double *p = array.ptr();
+            Local<Array> dest = Array::New(I,size0);
+
+            for(size_t i = 0;i < size0;i++) dest->Set(i,Number::New(I,p[i]));
+            arg = dest;
+         }
+         else if(array.dims().size() == 2)
+         {
+            size_t size0 = array.dims()[0];
+            size_t size1 = array.dims()[1];
+            double *p = array.ptr();
+            Local<Array> dest = Array::New(I,size0);
+
+            for(size_t i = 0;i < size0;i++)
+            {
+               Local<Array> row  = Array::New(I,size1);
+
+               dest->Set(i,row);
+               for(size_t j = 0;j < size1;j++) row->Set(j,Number::New(I,*(p + size0*j + i)));
+            }
+            arg = dest;
+         }
+      }
+   }
+
+   //arg = Array::New(I,array);
+}
+
+
+int buildArgs(Isolate *I,const shared_ptr<vector<shared_ptr<nj::Value>>> &res,int argc,Local<Value> *argv)
 {
    int index = 0;
 
-   for(std::shared_ptr<nj::Value> value: *res)
+   for(shared_ptr<nj::Value> value: *res)
    {
       if(value.get())
       {
@@ -66,6 +109,10 @@ printf("building arg %d\n",index);
             const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
 
             buildPrimitive(I,primitive,index++,argv);
+         }
+         else
+         {
+            buildArray(I,value,argv[index++]);
          }
       }
    }
@@ -93,7 +140,7 @@ void doEval(const FunctionCallbackInfo<Value> &args)
    if(text.length() > 0 && (engine = J->getEngine()))
    {
       engine->evalQueuePut(*text);
-      std::shared_ptr<std::vector<std::shared_ptr<nj::Value>>> res = engine->resultQueueGet();
+      shared_ptr<vector<shared_ptr<nj::Value>>> res = engine->resultQueueGet();
   
       if(res.get())
       {
