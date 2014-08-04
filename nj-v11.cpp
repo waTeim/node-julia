@@ -72,7 +72,11 @@ Local<Array> buildArray(const shared_ptr<nj::Value> &value)
             double *p = array.ptr();
             Local<Array> dest = Array::New(I,size0);
 
-            for(size_t i = 0;i < size0;i++) dest->Set(i,Number::New(I,p[i]));
+            for(size_t i = 0;i < size0;i++)
+            {
+               printf("Returning X(%zu) = %f\n",i,p[i]);
+               dest->Set(i,Number::New(I,p[i]));
+            }
             return scope.Escape(dest);
          }
          else if(array.dims().size() == 2)
