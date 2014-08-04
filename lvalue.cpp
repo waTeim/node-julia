@@ -29,7 +29,11 @@ printf("Result is null\n");
       
       value.reset(array);
       memcpy(array->ptr(),p,array->size()*sizeof(double));
-      printf("Results was arrays: %lu %lu\n",array->dims().size(),array->size());
+      for(int i = 0;i < array->size();i++)
+      {
+         printf("%f ",array->ptr()[i]);
+      }
+      printf("\nResults was arrays: %lu %lu\n",array->dims().size(),array->size());
 cout << "Array Results:";
 for(int i:array->dims()) cout << " " << i;
 cout << " size == " << array->size() << endl;
