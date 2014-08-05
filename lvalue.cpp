@@ -13,12 +13,15 @@ template <typename V,typename E> static shared_ptr<nj::Value> reboxArray(jl_valu
    int ndims = jl_array_ndims(jlarray);
    vector<int> dims;
 
+
    for(int dim = 0;dim < ndims;dim++) dims.push_back(jl_array_dim(jlarray,dim));
 
    nj::Array<V,E> *array = new nj::Array<V,E>(dims);
    
+printf("In rebox array: dim = %lu\n",dims.size());
+
    value.reset(array);
-   memcpy(array->ptr(),p,array->size()*sizeof(double));
+   memcpy(array->ptr(),p,array->size()*sizeof(V));
    return value;
 }
 
@@ -26,6 +29,8 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlarray)
 {
    shared_ptr<nj::Value> value;
    jl_value_t *elementType = jl_tparam0(jl_typeof(jlarray));
+
+printf("In getArray Value\n");
   
    if(jl_is_int64(elementType)) value = reboxArray<int64_t,nj::Int64_t>(jlarray);
    else if(jl_is_int32(elementType)) value = reboxArray<int,nj::Int32_t>(jlarray);
