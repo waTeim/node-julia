@@ -18,8 +18,6 @@ template <typename V,typename E> static shared_ptr<nj::Value> reboxArray(jl_valu
 
    nj::Array<V,E> *array = new nj::Array<V,E>(dims);
    
-printf("In rebox array: dim = %lu\n",dims.size());
-
    value.reset(array);
    memcpy(array->ptr(),p,array->size()*sizeof(V));
    return value;
@@ -30,18 +28,16 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlarray)
    shared_ptr<nj::Value> value;
    jl_value_t *elementType = jl_tparam0(jl_typeof(jlarray));
 
-printf("In getArray Value\n");
-  
-   if(jl_is_int64(elementType)) value = reboxArray<int64_t,nj::Int64_t>(jlarray);
-   else if(jl_is_int32(elementType)) value = reboxArray<int,nj::Int32_t>(jlarray);
-   else if(elementType == (jl_value_t*)jl_float64_type) value = reboxArray<double,nj::Float64_t>(jlarray); 
-   else if(jl_is_float32(elementType)) value = reboxArray<float,nj::Float32_t>(jlarray);
-   else if(jl_is_uint64(elementType)) value = reboxArray<uint64_t,nj::UInt64_t>(jlarray); 
-   else if(jl_is_uint32(elementType)) value = reboxArray<unsigned int,nj::UInt32_t>(jlarray);
-   else if(jl_is_int8(elementType)) value = reboxArray<char,nj::Char_t>(jlarray);
-   else if(jl_is_int16(elementType)) value = reboxArray<short,nj::Int16_t>(jlarray);
-   else if(jl_is_uint8(elementType)) value = reboxArray<unsigned char,nj::UChar_t>(jlarray);
-   else if(jl_is_uint16(elementType)) value = reboxArray<unsigned short,nj::UInt16_t>(jlarray);
+   if(elementType == (jl_value_t*)jl_float64_type) value = reboxArray<double,nj::Float64_t>(jlarray); 
+   else if(elementType == (jl_value_t*)jl_int64_type) value = reboxArray<int64_t,nj::Int64_t>(jlarray);
+   else if(elementType == (jl_value_t*)jl_int32_type) value = reboxArray<int,nj::Int32_t>(jlarray);
+   else if(elementType == (jl_value_t*)jl_int8_type) value = reboxArray<char,nj::Char_t>(jlarray);
+   else if(elementType == (jl_value_t*)jl_float32_type) value = reboxArray<float,nj::Float32_t>(jlarray);
+   else if(elementType == (jl_value_t*)jl_uint64_type) value = reboxArray<uint64_t,nj::UInt64_t>(jlarray); 
+   else if(elementType == (jl_value_t*)jl_uint32_type) value = reboxArray<unsigned int,nj::UInt32_t>(jlarray);
+   else if(elementType == (jl_value_t*)jl_int16_type) value = reboxArray<short,nj::Int16_t>(jlarray);
+   else if(elementType == (jl_value_t*)jl_uint8_type) value = reboxArray<unsigned char,nj::UChar_t>(jlarray);
+   else if(elementType == (jl_value_t*)jl_uint16_type) value = reboxArray<unsigned short,nj::UInt16_t>(jlarray);
 
    return value;
 }
@@ -63,17 +59,17 @@ vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jlvalue)
    {   
       shared_ptr<nj::Value> value;
 
-      if(jl_is_int64(jlvalue)) value.reset(new nj::Int64(jl_unbox_int64(jlvalue)));
+      if(jl_is_float64(jlvalue)) value.reset(new nj::Float64(jl_unbox_float64(jlvalue)));
+      else if(jl_is_int64(jlvalue)) value.reset(new nj::Int64(jl_unbox_int64(jlvalue)));
       else if(jl_is_int32(jlvalue)) value.reset(new nj::Int32(jl_unbox_int32(jlvalue)));
-      else if(jl_is_float64(jlvalue)) value.reset(new nj::Float64(jl_unbox_float64(jlvalue)));
+      else if(jl_is_int8(jlvalue)) value.reset(new nj::Char(jl_unbox_int8(jlvalue)));
+      else if(jl_is_ascii_string(jlvalue)) value.reset(new nj::String((char*)jl_unbox_voidpointer(jlvalue)));
       else if(jl_is_float32(jlvalue)) value.reset(new nj::Float32(jl_unbox_float32(jlvalue)));
       else if(jl_is_uint64(jlvalue)) value.reset(new nj::UInt64(jl_unbox_uint64(jlvalue)));
       else if(jl_is_uint32(jlvalue)) value.reset(new nj::UInt32(jl_unbox_uint32(jlvalue)));
-      else if(jl_is_int8(jlvalue)) value.reset(new nj::Char(jl_unbox_int8(jlvalue)));
       else if(jl_is_int16(jlvalue)) value.reset(new nj::Int16(jl_unbox_int16(jlvalue)));
       else if(jl_is_uint8(jlvalue)) value.reset(new nj::UChar(jl_unbox_uint8(jlvalue)));
       else if(jl_is_uint16(jlvalue)) value.reset(new nj::UInt16(jl_unbox_uint16(jlvalue)));
-      else if(jl_is_ascii_string(jlvalue)) value.reset(new nj::String((char*)jl_unbox_voidpointer(jlvalue)));
 
       if(value.get()) res.push_back(value);
    }
