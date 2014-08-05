@@ -34,7 +34,7 @@ printf("In getArray Value\n");
   
    if(jl_is_int64(elementType)) value = reboxArray<int64_t,nj::Int64_t>(jlarray);
    else if(jl_is_int32(elementType)) value = reboxArray<int,nj::Int32_t>(jlarray);
-   else if(jl_is_float64(elementType)) value = reboxArray<double,nj::Float64_t>(jlarray); 
+   else if(elementType == (jl_value_t*)jl_float64_type) value = reboxArray<double,nj::Float64_t>(jlarray); 
    else if(jl_is_float32(elementType)) value = reboxArray<float,nj::Float32_t>(jlarray);
    else if(jl_is_uint64(elementType)) value = reboxArray<uint64_t,nj::UInt64_t>(jlarray); 
    else if(jl_is_uint32(elementType)) value = reboxArray<unsigned int,nj::UInt32_t>(jlarray);
