@@ -105,15 +105,12 @@ Local<Array> buildArray(const shared_ptr<nj::Value> &value)
             }
             return scope.Escape(dest);
          }
-         return scope.Escape(Local<Array>());
       }
       break;
-      default:
-printf("Default 0 length array...\n");
-         return scope.Escape(Local<Array>());
    }
-}
 
+   return scope.Escape(Array::New(I,0));
+}
 
 int buildArgs(Isolate *I,const shared_ptr<vector<shared_ptr<nj::Value>>> &res,int argc,Local<Value> *argv)
 {
