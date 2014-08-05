@@ -13,7 +13,6 @@ template <typename V,typename E> static shared_ptr<nj::Value> reboxArray(jl_valu
    int ndims = jl_array_ndims(jlarray);
    vector<int> dims;
 
-
    for(int dim = 0;dim < ndims;dim++) dims.push_back(jl_array_dim(jlarray,dim));
 
    nj::Array<V,E> *array = new nj::Array<V,E>(dims);

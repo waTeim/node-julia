@@ -39,22 +39,22 @@ namespace nj
    {
       protected:
 
-         std::vector<int> d;
+         std::vector<int> dimensions;
          std::shared_ptr<V> data;
          size_t numElements;
 
       public:
 
-         Array(const std::vector<int> &d)
+         Array(const std::vector<int> &dimensions)
          {  
-            this->d = d;
+            this->dimensions = dimensions;
             numElements = 1;
-            for(int dim: d) numElements *= dim;
+            for(int dimension: dimensions) numElements *= dimension;
             data = std::shared_ptr<V>(new V[numElements]);
          }
 
          virtual bool isPrimitive() const {  return false;  }
-         virtual const std::vector<int> &dims() const {  return d;  }
+         virtual const std::vector<int> &dims() const {  return dimensions;  }
          virtual const Type *type() const {  return Array_t::instance(E::instance());  }
          virtual V *ptr() const {  return data.get();  }
          virtual size_t size() const {  return numElements;  }
