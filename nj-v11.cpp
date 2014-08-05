@@ -108,7 +108,9 @@ Local<Array> buildArray(const shared_ptr<nj::Value> &value)
          return scope.Escape(Local<Array>());
       }
       break;
-      default: return scope.Escape(Local<Array>());
+      default:
+printf("Default 0 length array...\n");
+         return scope.Escape(Local<Array>());
    }
 }
 

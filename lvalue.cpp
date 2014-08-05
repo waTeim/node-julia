@@ -34,7 +34,7 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlarray)
    else if(elementType == (jl_value_t*)jl_int8_type) value = reboxArray<char,nj::Char_t>(jlarray);
    else if(elementType == (jl_value_t*)jl_float32_type) value = reboxArray<float,nj::Float32_t>(jlarray);
    else if(elementType == (jl_value_t*)jl_uint64_type) value = reboxArray<uint64_t,nj::UInt64_t>(jlarray); 
-   else if(elementType == (jl_value_t*)jl_uint32_type) value = reboxArray<unsigned int,nj::UInt32_t>(jlarray);
+   else if(elementType == (jl_value_t*)jl_uint32_type) value = reboxArray<unsigned,nj::UInt32_t>(jlarray);
    else if(elementType == (jl_value_t*)jl_int16_type) value = reboxArray<short,nj::Int16_t>(jlarray);
    else if(elementType == (jl_value_t*)jl_uint8_type) value = reboxArray<unsigned char,nj::UChar_t>(jlarray);
    else if(elementType == (jl_value_t*)jl_uint16_type) value = reboxArray<unsigned short,nj::UInt16_t>(jlarray);
