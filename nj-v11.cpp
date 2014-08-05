@@ -105,10 +105,10 @@ Local<Array> buildArray(const shared_ptr<nj::Value> &value)
             }
             return scope.Escape(dest);
          }
-         return Local<Array>();
+         return scope.Escape(Local<Array>());
       }
       break;
-      default: return Local<Array>(); break;
+      default: return scope.Escape(Local<Array>());
    }
 }
 
