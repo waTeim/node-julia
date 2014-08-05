@@ -37,11 +37,25 @@ printf("arg is null\n");
 printf("arg is %d\n",primitive.toBoolean());
          argv[index] = Boolean::New(I,primitive.toBoolean());
       break;
-      case nj::int_type:
+      case nj::char_type:
+printf("arg is %d\n",primitive.toChar());
+         argv[index] = String::NewFromUtf8(I,primitive.toString().c_str());
+      break;
+      case nj::int64_type:
+      case nj::int32_type:
+      case nj::int16_type:
 printf("arg is %lld\n",primitive.toInt());
          argv[index] = Number::New(I,primitive.toInt());
       break;
-      case nj::float_type:
+      case nj::uint64_type:
+      case nj::uint32_type:
+      case nj::uint16_type:
+      case nj::uchar_type:
+printf("arg is %lld\n",primitive.toUInt());
+         argv[index] = Number::New(I,primitive.toUInt());
+      break;
+      case nj::float64_type:
+      case nj::float32_type:
 printf("arg is %f\n",primitive.toFloat());
          argv[index] = Number::New(I,primitive.toFloat());
       break;
@@ -61,9 +75,9 @@ Local<Array> buildArray(const shared_ptr<nj::Value> &value)
 
    switch(element_type->getId())
    {
-      case nj::float_type:
+      case nj::float64_type:
       {
-         const nj::Array<double,nj::Float_t> &array = static_cast<const nj::Array<double,nj::Float_t>&>(*value);
+         const nj::Array<double,nj::Float64_t> &array = static_cast<const nj::Array<double,nj::Float64_t>&>(*value);
 
          if(array.size() == 0) return Local<Array>();
          if(array.dims().size() == 1)

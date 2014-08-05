@@ -28,7 +28,9 @@ namespace nj
          virtual bool isPrimitive() const {  return true;  }
          virtual const std::vector<int> &dims() const {  return none;  }
          virtual bool toBoolean() const throw(InvalidException) = 0;
+         virtual char toChar() const throw(InvalidException) = 0;
          virtual int64_t toInt() const throw(InvalidException) = 0;
+         virtual uint64_t toUInt() const throw(InvalidException) = 0;
          virtual double toFloat() const throw(InvalidException) = 0;
          virtual std::string toString() const throw(InvalidException) = 0;
    };

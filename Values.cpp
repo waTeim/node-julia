@@ -11,10 +11,26 @@ bool nj::String::toBoolean() const throw(InvalidException)
    return b;
 }
 
+char nj::String::toChar() const throw(InvalidException)
+{
+   istringstream ss(s);
+   char c;
+   ss >> c;
+   return c;
+}
+
 int64_t nj::String::toInt() const throw(InvalidException)
 {
    istringstream ss(s);
    int64_t i;
+   ss >> i;
+   return  i;
+}
+
+uint64_t nj::String::toUInt() const throw(InvalidException)
+{
+   istringstream ss(s);
+   uint64_t i;
    ss >> i;
    return  i;
 }
