@@ -92,6 +92,41 @@ Local<Value> buildPrimitive(const nj::Primitive &primitive)
    return scope.Escape(Array::New(I,0));
 }
 
+template<typename V,typename E> Local<Array> buildArray(const shared_ptr<nj::Value> &value)
+{
+   Isolate *I = Isolate::GetCurrent();
+   EscapableHandleScope scope(I);
+   const nj::Array<V,E> &array = static_cast<const nj::Array<V,E>&>(*value);
+
+   if(array.size() == 0) return Local<Array>();
+   if(array.dims().size() == 1)
+   {
+      size_t size0 = array.dims()[0];
+      double *p = array.ptr();
+      Local<Array> dest = Array::New(I,size0);
+
+      for(size_t i = 0;i < size0;i++) dest->Set(i,Number::New(I,p[i]));
+      return scope.Escape(dest);
+   }
+   else if(array.dims().size() == 2)
+   {
+      size_t size0 = array.dims()[0];
+      size_t size1 = array.dims()[1];
+      double *p = array.ptr();
+      Local<Array> dest = Array::New(I,size0);
+
+      for(size_t i = 0;i < size0;i++)
+      {
+         Local<Array> row  = Array::New(I,size1);
+
+         dest->Set(i,row);
+         for(size_t j = 0;j < size1;j++) row->Set(j,Number::New(I,p[size0*j + i]));
+      }
+      return scope.Escape(dest);
+   }
+   return scope.Escape(Array::New(I,0));
+}
+
 Local<Array> buildArray(const shared_ptr<nj::Value> &value)
 {
    const nj::Array_t *array_type = static_cast<const nj::Array_t*>(value->type());
@@ -102,36 +137,7 @@ Local<Array> buildArray(const shared_ptr<nj::Value> &value)
    switch(element_type->getId())
    {
       case nj::float64_type:
-      {
-         const nj::Array<double,nj::Float64_t> &array = static_cast<const nj::Array<double,nj::Float64_t>&>(*value);
-
-         if(array.size() == 0) return Local<Array>();
-         if(array.dims().size() == 1)
-         {
-            size_t size0 = array.dims()[0];
-            double *p = array.ptr();
-            Local<Array> dest = Array::New(I,size0);
-
-            for(size_t i = 0;i < size0;i++) dest->Set(i,Number::New(I,p[i]));
-            return scope.Escape(dest);
-         }
-         else if(array.dims().size() == 2)
-         {
-            size_t size0 = array.dims()[0];
-            size_t size1 = array.dims()[1];
-            double *p = array.ptr();
-            Local<Array> dest = Array::New(I,size0);
-
-            for(size_t i = 0;i < size0;i++)
-            {
-               Local<Array> row  = Array::New(I,size1);
-
-               dest->Set(i,row);
-               for(size_t j = 0;j < size1;j++) row->Set(j,Number::New(I,p[size0*j + i]));
-            }
-            return scope.Escape(dest);
-         }
-      }
+         return scope.Escape(buildArray<double,nj::Float64_t>(value));
       break;
    }
 
