@@ -102,7 +102,7 @@ template<typename V,typename E> Local<Array> buildArray(const shared_ptr<nj::Val
    if(array.dims().size() == 1)
    {
       size_t size0 = array.dims()[0];
-      double *p = array.ptr();
+      V *p = array.ptr();
       Local<Array> dest = Array::New(I,size0);
 
       for(size_t i = 0;i < size0;i++) dest->Set(i,Number::New(I,p[i]));
@@ -112,7 +112,7 @@ template<typename V,typename E> Local<Array> buildArray(const shared_ptr<nj::Val
    {
       size_t size0 = array.dims()[0];
       size_t size1 = array.dims()[1];
-      double *p = array.ptr();
+      V *p = array.ptr();
       Local<Array> dest = Array::New(I,size0);
 
       for(size_t i = 0;i < size0;i++)
@@ -136,9 +136,16 @@ Local<Array> buildArray(const shared_ptr<nj::Value> &value)
 
    switch(element_type->getId())
    {
-      case nj::float64_type:
-         return scope.Escape(buildArray<double,nj::Float64_t>(value));
-      break;
+      case nj::float64_type: return scope.Escape(buildArray<double,nj::Float64_t>(value)); break;
+      case nj::float32_type: return scope.Escape(buildArray<float,nj::Float32_t>(value)); break;
+      case nj::int64_type: return scope.Escape(buildArray<int64_t,nj::Int64_t>(value)); break;
+      case nj::int32_type: return scope.Escape(buildArray<int,nj::Int32_t>(value)); break;
+      case nj::int16_type: return scope.Escape(buildArray<short,nj::Int16_t>(value)); break;
+      case nj::uint64_type: return scope.Escape(buildArray<uint64_t,nj::UInt64_t>(value)); break;
+      case nj::uint32_type: return scope.Escape(buildArray<unsigned,nj::UInt32_t>(value)); break;
+      case nj::uint16_type: return scope.Escape(buildArray<unsigned short,nj::UInt16_t>(value)); break;
+      case nj::char_type: return scope.Escape(buildArray<char,nj::Char_t>(value)); break;
+      case nj::uchar_type: return scope.Escape(buildArray<unsigned char,nj::UChar_t>(value)); break;
    }
 
    return scope.Escape(Array::New(I,0));
