@@ -25,38 +25,71 @@ void callback(const FunctionCallbackInfo<Value>& args,Isolate *I,const Local<Fun
   cb->Call(I->GetCurrentContext()->Global(),argc,argv);
 }
 
-void buildPrimitive(Isolate *I,const nj::Primitive &primitive,int index,Local<Value> *argv)
+Local<Value> buildPrimitive(const nj::Primitive &primitive)
 {
+   Isolate *I = Isolate::GetCurrent();
+   EscapableHandleScope scope(I);
+
    switch(primitive.type()->getId())
    {
       case nj::null_type:
-         argv[index] = Null(I);
+      {
+         Local<Value> dest = Null(I);
+
+         return scope.Escape(dest);
+      }
       break;
       case nj::boolean_type:
-         argv[index] = Boolean::New(I,primitive.toBoolean());
+      {
+         Local<Value> dest = Boolean::New(I,primitive.toBoolean());
+
+         return scope.Escape(dest);
+      }
       break;
       case nj::char_type:
-         argv[index] = String::NewFromUtf8(I,primitive.toString().c_str());
+      {
+         Local<Value> dest = String::NewFromUtf8(I,primitive.toString().c_str());
+
+         return scope.Escape(dest);
+      }
       break;
       case nj::int64_type:
       case nj::int32_type:
       case nj::int16_type:
-         argv[index] = Number::New(I,primitive.toInt());
+      {
+         Local<Value> dest = Number::New(I,primitive.toInt());
+
+         return scope.Escape(dest);
+      }
       break;
       case nj::uint64_type:
       case nj::uint32_type:
       case nj::uint16_type:
       case nj::uchar_type:
-         argv[index] = Number::New(I,primitive.toUInt());
+      {
+         Local<Value> dest = Number::New(I,primitive.toUInt());
+
+         return scope.Escape(dest);
+      }
       break;
       case nj::float64_type:
       case nj::float32_type:
-         argv[index] = Number::New(I,primitive.toFloat());
+      {
+         Local<Value> dest = Number::New(I,primitive.toFloat());
+
+         return scope.Escape(dest);
+      }
       break;
       case nj::string_type:
-         argv[index] = String::NewFromUtf8(I,primitive.toString().c_str());
+      {
+         Local<Value> dest = String::NewFromUtf8(I,primitive.toString().c_str());
+
+         return scope.Escape(dest);
+      }
       break;
    }
+
+   return scope.Escape(Array::New(I,0));
 }
 
 Local<Array> buildArray(const shared_ptr<nj::Value> &value)
@@ -117,7 +150,7 @@ int buildArgs(Isolate *I,const shared_ptr<vector<shared_ptr<nj::Value>>> &res,in
          {
             const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
 
-            buildPrimitive(I,primitive,index++,argv);
+            argv[index++] = buildPrimitive(primitive);
          }
          else
          {
