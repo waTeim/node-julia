@@ -130,7 +130,7 @@ template<typename V,typename E> Local<Array> buildArray(const shared_ptr<nj::Val
 Local<Array> buildArray(const shared_ptr<nj::Value> &value)
 {
    const nj::Array_t *array_type = static_cast<const nj::Array_t*>(value->type());
-   const nj::Type *element_type = array_type->getElementType();
+   const nj::Type *element_type = array_type->etype();
    Isolate *I = Isolate::GetCurrent();
    EscapableHandleScope scope(I);
 
@@ -174,6 +174,29 @@ int buildArgs(Isolate *I,const shared_ptr<vector<shared_ptr<nj::Value>>> &res,in
    return index;
 }
 
+void doStart(const FunctionCallbackInfo<Value> &args)
+{
+   Isolate *I = Isolate::GetCurrent();
+   HandleScope scope(I);
+   int numArgs = args.Length();
+
+   if(numArgs == 0)
+   {
+      returnString(args,I,"");
+      return;
+   }
+
+   Local<String> arg0 = args[0]->ToString();
+   String::Utf8Value plainText_av(arg0);
+
+   if(plainText_av.length() > 0)
+   {
+      if(!J) J = new JuliaExecEnv(*plainText_av);
+
+      returnString(args,I,"Julia Started");
+   }
+   else returnString(args,I,"");
+}
 
 void doEval(const FunctionCallbackInfo<Value> &args)
 {
@@ -213,29 +236,42 @@ void doEval(const FunctionCallbackInfo<Value> &args)
    }
 }
 
-
-void doStart(const FunctionCallbackInfo<Value> &args)
+void doExec(const FunctionCallbackInfo<Value> &args)
 {
    Isolate *I = Isolate::GetCurrent();
    HandleScope scope(I);
    int numArgs = args.Length();
 
-   if(numArgs == 0)
+   if(numArgs < 2 || !J)
    {
-      returnString(args,I,"");
+      returnNull(args,I);
       return;
    }
 
    Local<String> arg0 = args[0]->ToString();
-   String::Utf8Value plainText_av(arg0);
+   String::Utf8Value text(arg0);
+   Local<Function> cb = Local<Function>::Cast(args[args.Length() - 1]);
+   JMain *engine;
 
-   if(plainText_av.length() > 0)
+   if(text.length() > 0 && (engine = J->getEngine()))
    {
-      if(!J) J = new JuliaExecEnv(*plainText_av);
-
-      returnString(args,I,"Julia Started");
+      engine->evalQueuePut(*text);
+      shared_ptr<vector<shared_ptr<nj::Value>>> res = engine->resultQueueGet();
+ 
+      if(res.get())
+      {
+         int argc = res->size();
+         Local<Value> *argv = new Local<Value>[argc];
+         argc = buildArgs(I,res,argc,argv);
+         callback(args,I,cb,argc,argv);
+      }
    }
-   else returnString(args,I,"");
+   else
+   {
+      const unsigned argc = 1;
+      Local<Value> argv[argc] = { String::NewFromUtf8(I,"") };
+      callback(args,I,cb,argc,argv);
+   }
 }
 
 void init(Handle<Object> exports)

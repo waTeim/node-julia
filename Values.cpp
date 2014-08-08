@@ -5,7 +5,7 @@ using namespace std;
 
 bool nj::String::toBoolean() const throw(InvalidException)
 {
-   istringstream ss(s);
+   istringstream ss(val());
    bool b;
    ss >> b;
    return b;
@@ -13,7 +13,7 @@ bool nj::String::toBoolean() const throw(InvalidException)
 
 char nj::String::toChar() const throw(InvalidException)
 {
-   istringstream ss(s);
+   istringstream ss(val());
    char c;
    ss >> c;
    return c;
@@ -21,7 +21,7 @@ char nj::String::toChar() const throw(InvalidException)
 
 int64_t nj::String::toInt() const throw(InvalidException)
 {
-   istringstream ss(s);
+   istringstream ss(val());
    int64_t i;
    ss >> i;
    return  i;
@@ -29,7 +29,7 @@ int64_t nj::String::toInt() const throw(InvalidException)
 
 uint64_t nj::String::toUInt() const throw(InvalidException)
 {
-   istringstream ss(s);
+   istringstream ss(val());
    uint64_t i;
    ss >> i;
    return  i;
@@ -37,7 +37,7 @@ uint64_t nj::String::toUInt() const throw(InvalidException)
 
 double nj::String::toFloat() const throw(InvalidException)
 {
-   istringstream ss(s);
+   istringstream ss(val());
    double d;
    ss >> d;
    return d;

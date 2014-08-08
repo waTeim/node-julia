@@ -6,6 +6,19 @@
 
 namespace nj
 {
+
+   template <typename P> class PValue
+   {
+      protected:
+
+         P value;
+
+      public:
+
+         PValue(const P &value) {  this->value = value;  }
+         const P &val() const {  return value;  }
+   };
+
    class Null:public Primitive
    {
       public:
@@ -21,231 +34,183 @@ namespace nj
          virtual ~Null() {}
    };
 
-   class Boolean:public Primitive
+   class Boolean:public Primitive,public PValue<bool>
    {
-      protected:
-
-         bool b;
-
       public:
 
-         Boolean(bool b) {  this->b = b;  }
+         Boolean(bool b):PValue(b) {}
          virtual const Type *type() const {  return Boolean_t::instance();  }
-         virtual bool toBoolean() const throw(InvalidException) {  return b;  }
-         virtual char toChar() const throw(InvalidException) {  return b?1:0;  }
-         virtual int64_t toInt() const throw(InvalidException) {  return b?1:0;  }
-         virtual uint64_t toUInt() const throw(InvalidException) {  return b?1:0;  }
-         virtual double toFloat() const throw(InvalidException) {  return b?1:0;  }
-         virtual std::string toString() const throw(InvalidException) {  return b?"true":"false";  }
+         virtual bool toBoolean() const throw(InvalidException) {  return val();  }
+         virtual char toChar() const throw(InvalidException) {  return val()?1:0;  }
+         virtual int64_t toInt() const throw(InvalidException) {  return val()?1:0;  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return val()?1:0;  }
+         virtual double toFloat() const throw(InvalidException) {  return val()?1:0;  }
+         virtual std::string toString() const throw(InvalidException) {  return val()?"true":"false";  }
          virtual ~Boolean() {}
    };
 
-   class Char:public Primitive
+   class Char:public Primitive,public PValue<char>
    {
-      protected:
-
-         char c;
-
       public:
 
-         Char(char c) {  this->c = c;  }
+         Char(char c):PValue(c) {}
          virtual const Type *type() const {  return Char_t::instance();  }
-         virtual bool toBoolean() const throw(InvalidException) {  return c != 0;  }
-         virtual char toChar() const throw(InvalidException) {  return c;  }
-         virtual int64_t toInt() const throw(InvalidException) {  return c;  }
-         virtual uint64_t toUInt() const throw(InvalidException) {  return c;  }
-         virtual double toFloat() const throw(InvalidException) {  return c;  }
-         virtual std::string toString() const throw(InvalidException) {  return std::to_string(c);  }
+         virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
+         virtual char toChar() const throw(InvalidException) {  return val();  }
+         virtual int64_t toInt() const throw(InvalidException) {  return val();  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
+         virtual double toFloat() const throw(InvalidException) {  return val();  }
+         virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~Char() {}
    }; 
 
-   class UChar:public Primitive
+   class UChar:public Primitive,public PValue<unsigned char>
    {
-      protected:
-
-         unsigned char c;
-
       public:
 
-         UChar(unsigned int c) {  this->c = c;  }
+         UChar(unsigned int c):PValue(c) {}
          virtual const Type *type() const {  return UChar_t::instance();  }
-         virtual bool toBoolean() const throw(InvalidException) {  return c != 0;  }
-         virtual char toChar() const throw(InvalidException) {  return c;  }
-         virtual int64_t toInt() const throw(InvalidException) {  return c;  }
-         virtual uint64_t toUInt() const throw(InvalidException) {  return c;  }
-         virtual double toFloat() const throw(InvalidException) {  return c;  }
-         virtual std::string toString() const throw(InvalidException) {  return std::to_string(c);  }
+         virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
+         virtual char toChar() const throw(InvalidException) {  return val();  }
+         virtual int64_t toInt() const throw(InvalidException) {  return val();  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
+         virtual double toFloat() const throw(InvalidException) {  return val();  }
+         virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~UChar() {}
    }; 
 
-   class Int64:public Primitive
+   class Int64:public Primitive,public PValue<int64_t>
    {
-      protected:
-
-         int64_t i;
-
       public:
 
-         Int64(int64_t i) {  this->i = i;  }
+         Int64(int64_t i):PValue(i) {}
          virtual const Type *type() const {  return Int64_t::instance();  }
-         virtual bool toBoolean() const throw(InvalidException) {  return i != 0;  }
-         virtual char toChar() const throw(InvalidException) {  return i;  }
-         virtual int64_t toInt() const throw(InvalidException) {  return i;  }
-         virtual uint64_t toUInt() const throw(InvalidException) {  return i;  }
-         virtual double toFloat() const throw(InvalidException) {  return i;  }
-         virtual std::string toString() const throw(InvalidException) {  return std::to_string(i);  }
+         virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
+         virtual char toChar() const throw(InvalidException) {  return val();  }
+         virtual int64_t toInt() const throw(InvalidException) {  return val();  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
+         virtual double toFloat() const throw(InvalidException) {  return val();  }
+         virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~Int64() {}
    }; 
 
-   class UInt64:public Primitive
+   class UInt64:public Primitive,public PValue<uint64_t>
    {
-      protected:
-
-         uint64_t i;
-
       public:
 
-         UInt64(uint64_t i) {  this->i = i;  }
+         UInt64(uint64_t i):PValue(i) {}
          virtual const Type *type() const {  return UInt64_t::instance();  }
-         virtual bool toBoolean() const throw(InvalidException) {  return i != 0;  }
-         virtual char toChar() const throw(InvalidException) {  return i;  }
-         virtual int64_t toInt() const throw(InvalidException) {  return i;  }
-         virtual uint64_t toUInt() const throw(InvalidException) {  return i;  }
-         virtual double toFloat() const throw(InvalidException) {  return i;  }
-         virtual std::string toString() const throw(InvalidException) {  return std::to_string(i);  }
+         virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
+         virtual char toChar() const throw(InvalidException) {  return val();  }
+         virtual int64_t toInt() const throw(InvalidException) {  return val();  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
+         virtual double toFloat() const throw(InvalidException) {  return val();  }
+         virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~UInt64() {}
    }; 
 
-   class Int32:public Primitive
+   class Int32:public Primitive,PValue<int>
    {
-      protected:
-
-         int i;
-
       public:
 
-         Int32(int i) {  this->i = i;  }
+         Int32(int i):PValue(i) {}
          virtual const Type *type() const {  return Int32_t::instance();  }
-         virtual bool toBoolean() const throw(InvalidException) {  return i != 0;  }
-         virtual char toChar() const throw(InvalidException) {  return i;  }
-         virtual int64_t toInt() const throw(InvalidException) {  return i;  }
-         virtual uint64_t toUInt() const throw(InvalidException) {  return i;  }
-         virtual double toFloat() const throw(InvalidException) {  return i;  }
-         virtual std::string toString() const throw(InvalidException) {  return std::to_string(i);  }
+         virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
+         virtual char toChar() const throw(InvalidException) {  return val();  }
+         virtual int64_t toInt() const throw(InvalidException) {  return val();  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
+         virtual double toFloat() const throw(InvalidException) {  return val();  }
+         virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~Int32() {}
    }; 
 
-   class UInt32:public Primitive
+   class UInt32:public Primitive,public PValue<unsigned int>
    {
-      protected:
-
-         unsigned int i;
-
       public:
 
-         UInt32(unsigned int i) {  this->i = i;  }
+         UInt32(unsigned int i):PValue(i) {}
          virtual const Type *type() const {  return UInt32_t::instance();  }
-         virtual bool toBoolean() const throw(InvalidException) {  return i != 0;  }
-         virtual char toChar() const throw(InvalidException) {  return i;  }
-         virtual int64_t toInt() const throw(InvalidException) {  return i;  }
-         virtual uint64_t toUInt() const throw(InvalidException) {  return i;  }
-         virtual double toFloat() const throw(InvalidException) {  return i;  }
-         virtual std::string toString() const throw(InvalidException) {  return std::to_string(i);  }
+         virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
+         virtual char toChar() const throw(InvalidException) {  return val();  }
+         virtual int64_t toInt() const throw(InvalidException) {  return val();  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
+         virtual double toFloat() const throw(InvalidException) {  return val();  }
+         virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~UInt32() {}
    }; 
 
-   class Int16:public Primitive
+   class Int16:public Primitive,PValue<short>
    {
-      protected:
-
-         short s;
-
       public:
 
-         Int16(short s) {  this->s = s;  }
+         Int16(short s):PValue(s) {}
          virtual const Type *type() const {  return Int16_t::instance();  }
-         virtual bool toBoolean() const throw(InvalidException) {  return s != 0;  }
-         virtual char toChar() const throw(InvalidException) {  return s;  }
-         virtual int64_t toInt() const throw(InvalidException) {  return s;  }
-         virtual uint64_t toUInt() const throw(InvalidException) {  return s;  }
-         virtual double toFloat() const throw(InvalidException) {  return s;  }
-         virtual std::string toString() const throw(InvalidException) {  return std::to_string(s);  }
+         virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
+         virtual char toChar() const throw(InvalidException) {  return val();  }
+         virtual int64_t toInt() const throw(InvalidException) {  return val();  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
+         virtual double toFloat() const throw(InvalidException) {  return val();  }
+         virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~Int16() {}
    }; 
 
-   class UInt16:public Primitive
+   class UInt16:public Primitive,public PValue<unsigned short>
    {
-      protected:
-
-         unsigned short s;
-
       public:
 
-         UInt16(unsigned int s) {  this->s = s;  }
+         UInt16(unsigned int s):PValue(s) {}
          virtual const Type *type() const {  return UInt16_t::instance();  }
-         virtual bool toBoolean() const throw(InvalidException) {  return s != 0;  }
-         virtual char toChar() const throw(InvalidException) {  return s;  }
-         virtual int64_t toInt() const throw(InvalidException) {  return s;  }
-         virtual uint64_t toUInt() const throw(InvalidException) {  return s;  }
-         virtual double toFloat() const throw(InvalidException) {  return s;  }
-         virtual std::string toString() const throw(InvalidException) {  return std::to_string(s);  }
+         virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
+         virtual char toChar() const throw(InvalidException) {  return val();  }
+         virtual int64_t toInt() const throw(InvalidException) {  return val();  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
+         virtual double toFloat() const throw(InvalidException) {  return val();  }
+         virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~UInt16() {}
    }; 
 
-   class Float64:public Primitive
+   class Float64:public Primitive,PValue<double>
    {
-      protected:
-   
-         double d;
-   
       public:
 
-         Float64(double d) {  this->d = d;  }
+         Float64(double d):PValue(d) {}
          virtual const Type *type() const {  return Float64_t::instance();  }
-         virtual bool toBoolean() const throw(InvalidException) {  return d != 0;  }
+         virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
          virtual char toChar() const throw(InvalidException)  {  throw InvalidException("is float");  }
-         virtual int64_t toInt() const throw(InvalidException) {  return d;  }
-         virtual uint64_t toUInt() const throw(InvalidException) {  return d;  }
-         virtual double toFloat() const throw(InvalidException) {  return d;  }
-         virtual std::string toString() const throw(InvalidException) {  return std::to_string(d);  }
+         virtual int64_t toInt() const throw(InvalidException) {  return val();  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
+         virtual double toFloat() const throw(InvalidException) {  return val();  }
+         virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~Float64() {}
    };    
 
-   class Float32:public Primitive
+   class Float32:public Primitive,PValue<float>
    {
-      protected:
-   
-         float f;
-   
       public:
 
-         Float32(float f) {  this->f = f;  }
+         Float32(float f):PValue(f) {}
          virtual const Type *type() const {  return Float32_t::instance();  }
-         virtual bool toBoolean() const throw(InvalidException) {  return f != 0;  }
+         virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
          virtual char toChar() const throw(InvalidException)  {  throw InvalidException("is float");  }
-         virtual int64_t toInt() const throw(InvalidException) {  return f;  }
-         virtual uint64_t toUInt() const throw(InvalidException) {  return f;  }
-         virtual double toFloat() const throw(InvalidException) {  return f;  }
-         virtual std::string toString() const throw(InvalidException) {  return std::to_string(f);  }
+         virtual int64_t toInt() const throw(InvalidException) {  return val();  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
+         virtual double toFloat() const throw(InvalidException) {  return val();  }
+         virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~Float32() {}
    };    
 
-   class String:public Primitive
+   class String:public Primitive,public PValue<std::string>
    {
-      protected:
-    
-         std::string s;
-
       public:
 
-         String(const std::string &s) {  this->s = s;  }
+         String(const std::string &s):PValue(s) {}
          virtual const Type *type() const {  return String_t::instance();  }
          virtual bool toBoolean() const throw(InvalidException);
          virtual char toChar() const throw(InvalidException);
          virtual int64_t toInt() const throw(InvalidException);
          virtual uint64_t toUInt() const throw(InvalidException);
          virtual double toFloat() const throw(InvalidException);
-         virtual std::string toString() const throw(InvalidException) {  return s;  }
+         virtual std::string toString() const throw(InvalidException) {  return val();  }
          virtual ~String() {}
    };
 };

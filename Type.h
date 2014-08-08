@@ -53,7 +53,7 @@ namespace nj
 
          Array_t(Type *elementType):Type(array_type) {  element_type = elementType;  }
  
-         Type const *getElementType() const {  return element_type;  }
+         Type const *etype() const {  return element_type;  }
    };
 };
 

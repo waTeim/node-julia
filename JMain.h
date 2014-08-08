@@ -70,6 +70,7 @@ class JMain
       void initialize(int argc,const char *argv[]) throw(nj::InitializationException);
       void operator()();
       void evalQueuePut(const std::string &expr);
+      void evalQueuePut(const std::string &funcName,const std::vector<std::shared_ptr<nj::Value>> &argv);
       std::shared_ptr<std::vector<std::shared_ptr<nj::Value>>> resultQueueGet();
       void stop();
       ~JMain();

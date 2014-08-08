@@ -9,6 +9,7 @@
       "target_name": "nj",
       "sources":     
       [ 
+        "Call.cpp",
         "Exception.cpp",
         "Immediate.cpp",
         "JMain.cpp",
