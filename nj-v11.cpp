@@ -222,46 +222,35 @@ template <typename V,typename E> void fillArrayReq(shared_ptr<nj::Value> &to,con
       size_t rows = a.dims()[0];
       size_t cols = a.dims()[1];
 
-cout << "saving NJ " << rows << "x" << cols << " array (" << a.size() << " elements)" << endl;
       for(size_t row = 0;row < rows;row++)
       {
          Local<Array> rowVector = Local<Array>::Cast(from->Get(row));
 
-cout << "saving row " << row << endl;
          for(size_t col = 0;col < cols;col++)
          {
-cout << "saving col " << col << endl;
             switch(atype->etype()->getId())
             {
                case nj::boolean_type:
-cout << "saving boolean " << endl;
                   p[col*rows + row] = rowVector->Get(col)->BooleanValue();
                break;
                case nj::int32_type:
                {
-cout << "saving int " << endl;
                   Local<Value> el = rowVector->Get(col);   
           
-cout << "extracted local" << endl; 
                   if(el->IsInt32())
                   {
-cout << "reading int " << el->Int32Value() << endl;
-                  p[col*rows + row] = el->Int32Value();
+                     p[col*rows + row] = el->Int32Value();
                   }
                }
                break;
                case nj::uint32_type:
-cout << "saving uint " << endl;
                   p[col*rows + row] = rowVector->Get(col)->Uint32Value();
                break;
                case nj::float64_type:
-cout << "saving float " << endl;
                   p[col*rows + row] = rowVector->Get(col)->NumberValue();
                break;
             }
-cout << p[col*rows + row] << " " << endl;
          }
-cout << endl;
       }
    }
 }

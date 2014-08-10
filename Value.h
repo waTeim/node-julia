@@ -1,7 +1,6 @@
 #ifndef __nj_Value
 #define __nj_Value
 
-#include <iostream>
 #include <vector>
 #include "Exception.h"
 #include "Type.h"
@@ -55,7 +54,6 @@ namespace nj
                num_elements = 1;
                for(int dimension: dimensions) num_elements *= dimension;
                if(num_elements) data = std::shared_ptr<V>(new V[num_elements]);
-               std::cout << " allocated " << num_elements*sizeof(V) << " bytes" << std::endl;
             }
          }
 
