@@ -12,8 +12,6 @@ template <typename V,typename E> static shared_ptr<nj::Value> reboxArray(jl_valu
    int ndims = jl_array_ndims(jlarray);
    vector<size_t> dims;
 
-cout << "array element type " << E::instance()->getId()  << endl;
-
    for(int dim = 0;dim < ndims;dim++) dims.push_back(jl_array_dim(jlarray,dim));
 
    nj::Array<V,E> *array = new nj::Array<V,E>(dims);
@@ -50,18 +48,15 @@ vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jl_value)
 
    if(jl_is_null(jl_value))
    {
-cout << "lvalue is null" << endl;
       shared_ptr<nj::Value>  value(new nj::Null);
       res.push_back(value);
    }
    else if(jl_is_array(jl_value))
    {
-cout << "lvalue is array" << endl;
       res.push_back(getArrayValue(jl_value));
    }
    else
    {   
-cout << "lvalue is not array" << endl;
       shared_ptr<nj::Value> value;
 
       if(jl_is_float64(jl_value)) value.reset(new nj::Float64(jl_unbox_float64(jl_value)));
