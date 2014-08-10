@@ -120,7 +120,7 @@ template<typename V,typename E> static jl_array_t *rArray(const shared_ptr<nj::V
    }
    cout << endl;
 
-   for(size_t dim: a.dims()) jl_tupleset(dims,i++,dim);
+   for(size_t dim: a.dims()) jl_tupleset(dims,i++,jl_box_long(dim));
 
    return jl_ptr_to_array(jl_atype,a.ptr(),dims,0);
 }
