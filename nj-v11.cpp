@@ -357,6 +357,7 @@ void init(Handle<Object> exports)
 {
   NODE_SET_METHOD(exports,"start",doStart);
   NODE_SET_METHOD(exports,"eval",doEval);
+  NODE_SET_METHOD(exports,"exec",doExec);
 }
 
 NODE_MODULE(nj,init)
