@@ -227,15 +227,28 @@ cout << "saving NJ " << rows << "x" << cols << " array (" << a.size() << " eleme
       {
          Local<Array> rowVector = Local<Array>::Cast(from->Get(row));
 
-cout << "saving NJ col " << endl;
+cout << "saving row " << row << endl;
          for(size_t col = 0;col < cols;col++)
          {
+cout << "saving col " << col << endl;
             switch(atype->etype()->getId())
             {
-               case nj::boolean_type: p[col*rows + row] = rowVector->Get(col)->BooleanValue(); break;
-               case nj::int32_type: p[col*rows + row] = rowVector->Get(col)->Int32Value(); break;
-               case nj::uint32_type: p[col*rows + row] = rowVector->Get(col)->Uint32Value(); break;
-               case nj::float64_type: p[col*rows + row] = rowVector->Get(col)->NumberValue(); break;
+               case nj::boolean_type:
+cout << "saving boolean " << endl;
+                  p[col*rows + row] = rowVector->Get(col)->BooleanValue();
+               break;
+               case nj::int32_type:
+cout << "saving int " << endl;
+                  p[col*rows + row] = rowVector->Get(col)->Int32Value();
+               break;
+               case nj::uint32_type:
+cout << "saving uint " << endl;
+                  p[col*rows + row] = rowVector->Get(col)->Uint32Value();
+               break;
+               case nj::float64_type:
+cout << "saving float " << endl;
+                  p[col*rows + row] = rowVector->Get(col)->NumberValue();
+               break;
             }
 cout << p[col*rows + row] << " " << endl;
          }
