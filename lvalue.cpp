@@ -42,35 +42,39 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlarray)
    return value;
 }
 
-vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jlvalue)
+vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jl_value)
 {
    vector<shared_ptr<nj::Value>> res;
+  
+   if(!jl_value) return res;
 
-   if(jl_is_null(jlvalue))
+   if(jl_is_null(jl_value))
    {
+cout << "lvalue is null" << endl;
       shared_ptr<nj::Value>  value(new nj::Null);
       res.push_back(value);
    }
-   else if(jl_is_array(jlvalue))
+   else if(jl_is_array(jl_value))
    {
 cout << "lvalue is array" << endl;
-      res.push_back(getArrayValue(jlvalue));
+      res.push_back(getArrayValue(jl_value));
    }
    else
    {   
+cout << "lvalue is not array" << endl;
       shared_ptr<nj::Value> value;
 
-      if(jl_is_float64(jlvalue)) value.reset(new nj::Float64(jl_unbox_float64(jlvalue)));
-      else if(jl_is_int64(jlvalue)) value.reset(new nj::Int64(jl_unbox_int64(jlvalue)));
-      else if(jl_is_int32(jlvalue)) value.reset(new nj::Int32(jl_unbox_int32(jlvalue)));
-      else if(jl_is_int8(jlvalue)) value.reset(new nj::Char(jl_unbox_int8(jlvalue)));
-      else if(jl_is_ascii_string(jlvalue)) value.reset(new nj::String((char*)jl_unbox_voidpointer(jlvalue)));
-      else if(jl_is_float32(jlvalue)) value.reset(new nj::Float32(jl_unbox_float32(jlvalue)));
-      else if(jl_is_uint64(jlvalue)) value.reset(new nj::UInt64(jl_unbox_uint64(jlvalue)));
-      else if(jl_is_uint32(jlvalue)) value.reset(new nj::UInt32(jl_unbox_uint32(jlvalue)));
-      else if(jl_is_int16(jlvalue)) value.reset(new nj::Int16(jl_unbox_int16(jlvalue)));
-      else if(jl_is_uint8(jlvalue)) value.reset(new nj::UChar(jl_unbox_uint8(jlvalue)));
-      else if(jl_is_uint16(jlvalue)) value.reset(new nj::UInt16(jl_unbox_uint16(jlvalue)));
+      if(jl_is_float64(jl_value)) value.reset(new nj::Float64(jl_unbox_float64(jl_value)));
+      else if(jl_is_int64(jl_value)) value.reset(new nj::Int64(jl_unbox_int64(jl_value)));
+      else if(jl_is_int32(jl_value)) value.reset(new nj::Int32(jl_unbox_int32(jl_value)));
+      else if(jl_is_int8(jl_value)) value.reset(new nj::Char(jl_unbox_int8(jl_value)));
+      else if(jl_is_ascii_string(jl_value)) value.reset(new nj::String((char*)jl_unbox_voidpointer(jl_value)));
+      else if(jl_is_float32(jl_value)) value.reset(new nj::Float32(jl_unbox_float32(jl_value)));
+      else if(jl_is_uint64(jl_value)) value.reset(new nj::UInt64(jl_unbox_uint64(jl_value)));
+      else if(jl_is_uint32(jl_value)) value.reset(new nj::UInt32(jl_unbox_uint32(jl_value)));
+      else if(jl_is_int16(jl_value)) value.reset(new nj::Int16(jl_unbox_int16(jl_value)));
+      else if(jl_is_uint8(jl_value)) value.reset(new nj::UChar(jl_unbox_uint8(jl_value)));
+      else if(jl_is_uint16(jl_value)) value.reset(new nj::UInt16(jl_unbox_uint16(jl_value)));
 
       if(value.get()) res.push_back(value);
    }
