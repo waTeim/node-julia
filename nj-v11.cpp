@@ -286,10 +286,10 @@ shared_ptr<nj::Value> buildArrayReq(const Local<Value> &from)
 
       while(el->IsArray())
       {
-         a = Local<Array>::Cast(el);
-         dims.push_back(a->Length());
+         Local<Array> sub = Local<Array>::Cast(el);
+         dims.push_back(sub->Length());
          if(dims[0] == 0) return to;
-         el = a->Get(0);
+         el = sub->Get(0);
       }
       if(!el->IsObject())
       {
