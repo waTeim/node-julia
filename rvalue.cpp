@@ -113,9 +113,9 @@ template<typename V,typename E> static jl_array_t *rArray(const shared_ptr<nj::V
    cout << "]" << endl;
  
    cout << endl;
-   for(int k = 0;k < 10;k++)
+   for(int k = 0;k < a.dims()[1];k++)
    {
-      for(int l = 0;l < 10;l++) cout << a.ptr()[l*10 + k] << " ";
+      for(int l = 0;l < a.dims()]0];l++) cout << a.ptr()[l*a.dims()[1] + k] << " ";
       cout << endl;
    }
    cout << endl;
