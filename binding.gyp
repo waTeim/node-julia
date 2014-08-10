@@ -17,7 +17,8 @@
         "Type.cpp",
         "Value.cpp",
         "Values.cpp",
-        "lvalue.cpp"
+        "lvalue.cpp",
+        "rvalue.cpp"
       ],
       "cflags!":     [ "-fno-exceptions" ],
       "cflags":      [ "-std=c++11" , "-I/usr/local/julia/include/julia" ],

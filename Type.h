@@ -30,7 +30,27 @@ namespace nj
          virtual int getId() const {  return id;  }
    };
 
-   const int array_type = 0;
+   const int null_type = 0;
+   const int any_type = 1;
+   const int array_type = 2;
+
+   class Null_t:public Type
+   {
+      public:
+
+         static Type *instance() {  return Type::instance<Null_t>();  }
+
+         Null_t():Type(null_type) {}
+   };
+
+   class Any_t:public Type
+   {
+      public:
+
+         static Type *instance() {  return Type::instance<Any_t>();  }
+
+         Any_t():Type(any_type) {}
+   };
 
    class Array_t:public Type
    {

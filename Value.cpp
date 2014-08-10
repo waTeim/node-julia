@@ -2,4 +2,4 @@
 
 using namespace std;
 
-vector<int> nj::Primitive::none;
+vector<size_t> nj::Primitive::none;

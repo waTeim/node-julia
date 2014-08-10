@@ -109,7 +109,7 @@ namespace nj
          virtual ~UInt64() {}
    }; 
 
-   class Int32:public Primitive,PValue<int>
+   class Int32:public Primitive,public PValue<int>
    {
       public:
 
@@ -139,7 +139,7 @@ namespace nj
          virtual ~UInt32() {}
    }; 
 
-   class Int16:public Primitive,PValue<short>
+   class Int16:public Primitive,public PValue<short>
    {
       public:
 
@@ -169,7 +169,7 @@ namespace nj
          virtual ~UInt16() {}
    }; 
 
-   class Float64:public Primitive,PValue<double>
+   class Float64:public Primitive,public PValue<double>
    {
       public:
 
@@ -184,7 +184,7 @@ namespace nj
          virtual ~Float64() {}
    };    
 
-   class Float32:public Primitive,PValue<float>
+   class Float32:public Primitive,public PValue<float>
    {
       public:
 

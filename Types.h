@@ -5,28 +5,18 @@
 
 namespace nj
 {
-   const int null_type = 1;
-   const int boolean_type = 2;
-   const int char_type = 3;
-   const int uchar_type = 4;
-   const int int64_type = 5;
-   const int uint64_type = 6;
-   const int int32_type = 7;
-   const int uint32_type = 8;
-   const int int16_type = 9;
-   const int uint16_type = 10;
-   const int float64_type = 11;
-   const int float32_type = 12;
-   const int string_type = 13;
-
-   class Null_t:public Type
-   {
-      public:
-
-         static Type *instance() {  return Type::instance<Null_t>();  }
-      
-         Null_t():Type(null_type) {}
-   };
+   const int boolean_type = 3;
+   const int char_type = 4;
+   const int uchar_type = 5;
+   const int int64_type = 6;
+   const int uint64_type = 7;
+   const int int32_type = 8;
+   const int uint32_type = 9;
+   const int int16_type = 10;
+   const int uint16_type = 11;
+   const int float64_type = 12;
+   const int float32_type = 13;
+   const int string_type = 14;
 
    class Boolean_t:public Type
    {
