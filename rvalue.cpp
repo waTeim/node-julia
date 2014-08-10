@@ -111,6 +111,14 @@ template<typename V,typename E> static jl_array_t *rArray(const shared_ptr<nj::V
    cout<< "Creating array: dim =  " << a.dims().size() << " [";
    for(size_t j = 0;j < a.dims().size();j++) cout << a.dims()[j] << " ";
    cout << "]" << endl;
+ 
+   cout << endl;
+   for(int k = 0;k < 10;k++)
+   {
+      for(int l = 0;l < 10;l++) cout << a.ptr()[l*10 + k] << " ";
+      cout << endl;
+   }
+   cout << endl;
 
    for(size_t dim: a.dims()) jl_tupleset(dims,i++,dim);
 
