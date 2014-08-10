@@ -1,6 +1,7 @@
 #include <julia.h>
 #include "rvalue.h"
 #include "Values.h"
+#include <iostream>
 
 using namespace std;
 
@@ -106,6 +107,10 @@ template<typename V,typename E> static jl_array_t *rArray(const shared_ptr<nj::V
    jl_value_t *jl_atype = jl_apply_array_type(jl_element_type,a.dims().size());
    jl_tuple_t *dims = jl_alloc_tuple(a.dims().size());
    int i = 0;
+
+   cout<< "Creating array: dim =  " << a.dims().size() << " [";
+   for(size_t j = 0;j < a.dims().size();j++) cout << a.dims()[j] << " ";
+   cout << "]" << endl;
 
    for(size_t dim: a.dims()) jl_tupleset(dims,i++,dim);
 
