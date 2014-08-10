@@ -1,3 +1,4 @@
+#include <iostream>
 #include <julia.h>
 #include "Values.h"
 #include "lvalue.h"
@@ -47,11 +48,13 @@ vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jlvalue)
 
    if(jl_is_null(jlvalue))
    {
+cout << "LHS is null" << endl;
       shared_ptr<nj::Value>  value(new nj::Null);
       res.push_back(value);
    }
    else if(jl_is_array(jlvalue))
    {
+cout << "LHS is array" << endl;
       res.push_back(getArrayValue(jlvalue));
    }
    else

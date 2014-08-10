@@ -1,3 +1,4 @@
+#include <iostream>
 #include <julia.h>
 #include "Call.h"
 #include "rvalue.h"
@@ -15,6 +16,8 @@ vector<shared_ptr<nj::Value>> nj::Call::eval(vector<shared_ptr<nj::Value>> &args
    jl_function_t *func = jl_get_function(jl_base_module,funcName.toString().c_str());
    int numArgs = args.size() - 1;
    jl_value_t *jl_res = 0;
+
+cout << "Calling " << funcName.toString().c_str() << endl;
 
    if(numArgs <= 3)
    {
