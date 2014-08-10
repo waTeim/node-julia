@@ -222,10 +222,12 @@ template <typename V,typename E> void fillArrayReq(shared_ptr<nj::Value> &to,con
       size_t rows = a.dims()[0];
       size_t cols = a.dims()[1];
 
+cout << "saving NJ " << rows << "x" << cols << " array" << endl;
       for(size_t row = 0;row < rows;row++)
       {
          Local<Array> rowVector = Local<Array>::Cast(from->Get(row));
 
+cout << "saving NJ col " << endl;
          for(size_t col = 0;col < cols;col++)
          {
             switch(atype->etype()->getId())
