@@ -222,7 +222,7 @@ template <typename V,typename E> void fillArrayReq(shared_ptr<nj::Value> &to,con
       size_t rows = a.dims()[0];
       size_t cols = a.dims()[1];
 
-cout << "saving NJ " << rows << "x" << cols << " array" << endl;
+cout << "saving NJ " << rows << "x" << cols << " array (" << a.size() << " elements)" << endl;
       for(size_t row = 0;row < rows;row++)
       {
          Local<Array> rowVector = Local<Array>::Cast(from->Get(row));
@@ -236,8 +236,8 @@ cout << "saving NJ col " << endl;
                case nj::int32_type: p[col*rows + row] = rowVector->Get(col)->Int32Value(); break;
                case nj::uint32_type: p[col*rows + row] = rowVector->Get(col)->Uint32Value(); break;
                case nj::float64_type: p[col*rows + row] = rowVector->Get(col)->NumberValue(); break;
-cout << p[col*rows + row] << " " << endl;
             }
+cout << p[col*rows + row] << " " << endl;
          }
 cout << endl;
       }
