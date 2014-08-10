@@ -4,7 +4,7 @@
 
 using namespace std;
 
-jl_value_t *rPrimitive(const nj::Primitive &prim)
+static jl_value_t *rPrimitive(const nj::Primitive &prim)
 {
    jl_value_t *res = 0;
 
@@ -100,7 +100,7 @@ jl_value_t *rPrimitive(const nj::Primitive &prim)
    return res;
 }
 
-template<typename V,typename E> jl_array_t *rArray(const shared_ptr<nj::Value> &array,jl_datatype_t *jl_element_type)
+template<typename V,typename E> static jl_array_t *rArray(const shared_ptr<nj::Value> &array,jl_datatype_t *jl_element_type)
 {
    const nj::Array<V,E> &a = static_cast<nj::Array<V,E>&>(*array);
    jl_value_t *jl_atype = jl_apply_array_type(jl_element_type,a.dims().size());
@@ -113,7 +113,7 @@ template<typename V,typename E> jl_array_t *rArray(const shared_ptr<nj::Value> &
 }
 
 
-jl_array_t *rArray(const shared_ptr<nj::Value> &array)
+static jl_array_t *rArray(const shared_ptr<nj::Value> &array)
 {
    jl_array_t *res = 0;
    const nj::Array_t *atype = static_cast<const nj::Array_t*>(array->type());
@@ -135,7 +135,7 @@ jl_array_t *rArray(const shared_ptr<nj::Value> &array)
    return res;
 }
 
-jl_value_t *rvalue(const shared_ptr<nj::Value> &value)
+jl_value_t *nj::rvalue(const shared_ptr<nj::Value> &value)
 {
    if(value->isPrimitive())
    {
