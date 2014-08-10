@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <iostream>
 #include <node.h>
 #include <v8.h>
 #include <string>
@@ -233,8 +234,10 @@ template <typename V,typename E> void fillArrayReq(shared_ptr<nj::Value> &to,con
                case nj::int32_type: p[col*rows + row] = rowVector->Get(col)->Int32Value(); break;
                case nj::uint32_type: p[col*rows + row] = rowVector->Get(col)->Uint32Value(); break;
                case nj::float64_type: p[col*rows + row] = rowVector->Get(col)->NumberValue(); break;
+cout << p[col*rows + row] << " ";
             }
          }
+cout << endl;
       }
    }
 }
