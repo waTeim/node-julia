@@ -238,9 +238,17 @@ cout << "saving boolean " << endl;
                   p[col*rows + row] = rowVector->Get(col)->BooleanValue();
                break;
                case nj::int32_type:
+               {
 cout << "saving int " << endl;
-cout << "reading int " << rowVector->Get(col)->Int32Value() << endl;
-                  p[col*rows + row] = rowVector->Get(col)->Int32Value();
+                  Local<Value> el = rowVector->Get(col);   
+          
+cout << "extracted local" << endl; 
+                  if(el->IsInt32())
+                  {
+cout << "reading int " << el->Int32Value() << endl;
+                  p[col*rows + row] = el->Int32Value();
+                  }
+               }
                break;
                case nj::uint32_type:
 cout << "saving uint " << endl;
