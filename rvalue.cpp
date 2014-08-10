@@ -110,7 +110,7 @@ template<typename V,typename E> static jl_array_t *rArray(const shared_ptr<nj::V
 
    cout<< "Creating array: dim =  " << a.dims().size() << " [";
    for(size_t j = 0;j < a.dims().size();j++) cout << a.dims()[j] << " ";
-   cout << "]" << endl;
+   cout << "(" << a.size() << " elements total)]" << endl;
  
    cout << endl;
    for(size_t k = 0;k < a.dims()[1];k++)
