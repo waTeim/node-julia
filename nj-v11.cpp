@@ -236,7 +236,7 @@ cout << "saving NJ col " << endl;
                case nj::int32_type: p[col*rows + row] = rowVector->Get(col)->Int32Value(); break;
                case nj::uint32_type: p[col*rows + row] = rowVector->Get(col)->Uint32Value(); break;
                case nj::float64_type: p[col*rows + row] = rowVector->Get(col)->NumberValue(); break;
-cout << p[col*rows + row] << " ";
+cout << p[col*rows + row] << " " << endl;
             }
          }
 cout << endl;
