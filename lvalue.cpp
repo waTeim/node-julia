@@ -1,3 +1,4 @@
+#include <iostream>
 #include <julia.h>
 #include "Values.h"
 #include "lvalue.h"
@@ -10,6 +11,8 @@ template <typename V,typename E> static shared_ptr<nj::Value> reboxArray(jl_valu
    V *p = (V*)jl_array_data(jlarray);
    int ndims = jl_array_ndims(jlarray);
    vector<size_t> dims;
+
+cout << "array element type " << E::instance()->getId()  << endl;
 
    for(int dim = 0;dim < ndims;dim++) dims.push_back(jl_array_dim(jlarray,dim));
 
@@ -50,6 +53,7 @@ vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jlvalue)
    }
    else if(jl_is_array(jlvalue))
    {
+cout << "lvalue is array" << endl;
       res.push_back(getArrayValue(jlvalue));
    }
    else
