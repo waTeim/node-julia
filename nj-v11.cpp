@@ -215,6 +215,7 @@ template <typename V,typename E> void fillArrayReq(shared_ptr<nj::Value> &to,con
             case nj::boolean_type: *p++ = from->Get(index)->BooleanValue(); break;
             case nj::int32_type: *p++ = from->Get(index)->Int32Value(); break;
             case nj::uint32_type: *p++ = from->Get(index)->Uint32Value(); break;
+            case nj::int64_type: *p++ = from->Get(index)->IntegerValue(); break;
             case nj::float64_type: *p++ = from->Get(index)->NumberValue(); break;
          }
       }
@@ -247,6 +248,9 @@ template <typename V,typename E> void fillArrayReq(shared_ptr<nj::Value> &to,con
                break;
                case nj::uint32_type:
                   p[col*rows + row] = rowVector->Get(col)->Uint32Value();
+               break;
+               case nj::int64_type:
+                  p[col*rows + row] = rowVector->Get(col)->IntegerValue();
                break;
                case nj::float64_type:
                   p[col*rows + row] = rowVector->Get(col)->NumberValue();
