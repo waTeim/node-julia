@@ -180,8 +180,9 @@ shared_ptr<nj::Value> buildPrimitiveReq(const Local<Value> &prim)
    shared_ptr<nj::Value> v;
 
    if(prim->IsBoolean()) v.reset(new nj::Boolean(prim->BooleanValue()));
-   else if(prim->IsInt32()) v.reset(new nj::Int32(prim->Int32Value()));
-   else if(prim->IsUint32()) v.reset(new nj::UInt32(prim->Uint32Value()));
+   //else if(prim->IsInt32()) v.reset(new nj::Int32(prim->Int32Value()));
+   //else if(prim->IsUint32()) v.reset(new nj::UInt32(prim->Uint32Value()));
+   else if(prim->IsInt32() || prim->IsUint32()) v.reset(new nj::Int64(prim->IntegerValue()));
    else if(prim->IsNumber()) v.reset(new nj::Float64(prim->NumberValue()));
 
    return v;
@@ -190,9 +191,10 @@ shared_ptr<nj::Value> buildPrimitiveReq(const Local<Value> &prim)
 nj::Type *getPrimitiveType(const Local<Value> &prim)
 {   
    if(prim->IsBoolean()) return nj::Boolean_t::instance();
-   if(prim->IsInt32()) return nj::Int32_t::instance();
-   if(prim->IsUint32()) return nj::UInt32_t::instance();
-   if(prim->IsNumber()) return nj::Float64_t::instance();
+   //else if(prim->IsInt32()) return nj::Int32_t::instance();
+   //else if(prim->IsUint32()) return nj::UInt32_t::instance();
+   else if(prim->IsInt32() || prim->IsUint32()) return nj::Int64_t::instance();
+   else if(prim->IsNumber()) return nj::Float64_t::instance();
    return 0;
 }
 
@@ -299,6 +301,10 @@ shared_ptr<nj::Value> buildArrayReq(const Local<Value> &from)
                case nj::uint32_type:
                   to.reset(new nj::Array<unsigned int,nj::UInt32_t>(dims));
                   fillArrayReq<unsigned int,nj::UInt32_t>(to,a);
+               break;
+               case nj::int64_type:
+                  to.reset(new nj::Array<int64_t,nj::Int64_t>(dims));
+                  fillArrayReq<int64_t,nj::Int64_t>(to,a);
                break;
                case nj::float64_type:
                   to.reset(new nj::Array<double,nj::Float64_t>(dims));
