@@ -30,7 +30,6 @@ static jl_value_t *rPrimitive(const nj::Primitive &prim)
       case nj::int64_type:
       {
          const nj::Int64 &v = static_cast<const nj::Int64&>(prim);
-cout << "boxing int64: " << v.toInt() << endl;
          res = jl_box_int64(v.val());
       }
       break;
