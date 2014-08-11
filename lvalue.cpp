@@ -40,20 +40,27 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlarray)
    return value;
 }
 
-vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jl_value)
+void addLValueElements(jl_value_t *jl_value,vector<shared_ptr<nj::Value>> &res)
 {
-   vector<shared_ptr<nj::Value>> res;
-  
-   if(!jl_value) return res;
+   if(!jl_value) return;
 
    if(jl_is_null(jl_value))
    {
       shared_ptr<nj::Value>  value(new nj::Null);
       res.push_back(value);
    }
-   else if(jl_is_array(jl_value))
+   else if(jl_is_array(jl_value)) res.push_back(getArrayValue(jl_value));
+   else if(jl_is_tuple(jl_value))
    {
-      res.push_back(getArrayValue(jl_value));
+      jl_tuple_t *t = (jl_tuple_t*)jl_value;
+      size_t tupleLen = jl_tuple_len(t);
+
+      for(size_t i = 0;i < tupleLen;i++) 
+      {
+         jl_value_t *element = jl_tupleref(t,i);
+
+         addLValueElements(element,res);
+      }
    }
    else
    {   
@@ -73,5 +80,13 @@ vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jl_value)
 
       if(value.get()) res.push_back(value);
    }
+}
+
+vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jl_value)
+{
+   vector<shared_ptr<nj::Value>> res;
+ 
+   addLValueElements(jl_value,res);
+
    return res;
 }
