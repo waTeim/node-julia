@@ -36,7 +36,7 @@
               [
                 "-stdlib=libc++",
                 "-L/usr/local/julia/lib/julia",
-                "-rpath /usr/local/julia/lib/julia",
+                "-rpath=/usr/local/julia/lib/julia",
                 "-ljulia",
                 "-lopenblas",
                 "-ldSFMT"
