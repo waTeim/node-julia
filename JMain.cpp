@@ -40,7 +40,11 @@ void JMain::operator()()
    if(!deactivated)
    {
       if(install_directory == "") jl_init(0);
-      else jl_init((char*)install_directory.c_str());
+      else
+      {
+         jl_init_with_image((char*)install_directory.c_str(),(char*)"sys.jl");
+      //   jl_init((char*)install_directory.c_str());
+      }
       JL_SET_STACK_BASE;
 
       done = false;
