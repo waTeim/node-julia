@@ -36,10 +36,11 @@
               [
                 "-stdlib=libc++",
                 "-L/usr/local/julia/lib/julia",
-                "-Wl,-rpath /usr/local/julia/lib/julia",
-                "-ljulia"
-#                "-lopenblas",
-#                "-ldSFMT"
+#                "-Wl,-rpath /usr/local/julia/lib/julia",
+                "-Wl,-rpath /usr/local/julia-6d0eb7b236/lib/julia",
+                "-ljulia",
+                "-lopenblas",
+                "-ldSFMT"
               ]
             }
           }
