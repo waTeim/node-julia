@@ -4,7 +4,8 @@
     {
       "variables":
       {
-         "version":"<!(node --version | sed -e 's/^v\([0-9]*\.[0-9]*\).*$/\\1.x/')"
+         "version":"<!(node --version | sed -e 's/^v\([0-9]*\.[0-9]*\).*$/\\1.x/')",
+         "julia":"<!(python tools/find_julia.py)"
       },
       "target_name": "nj",
       "sources":     
@@ -21,7 +22,7 @@
         "rvalue.cpp"
       ],
       "cflags!":     [ "-fno-exceptions" ],
-      "cflags":      [ "-std=c++11" , "-I/usr/local/julia/include/julia" ],
+      "cflags":      [ "-std=c++11" , "-I<(julia)/include/julia" ],
       "cflags_cc!":  [ "-fno-exceptions" ],
       "conditions":
       [
@@ -31,12 +32,12 @@
             { 
               "MACOSX_DEPLOYMENT_TARGET":"10.7",
               "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
-              "OTHER_CPLUSPLUSFLAGS": [ "-std=c++11" , "-stdlib=libc++" , "-I/usr/local/julia/include/julia" ],
+              "OTHER_CPLUSPLUSFLAGS": [ "-std=c++11" , "-stdlib=libc++" , "-I<(julia)/include/julia" ],
               "OTHER_LDFLAGS":
               [
                 "-stdlib=libc++",
-                "-L/usr/local/julia/lib/julia",
-                "-Wl,-rpath,/usr/local/julia/lib/julia",
+                "-L<(julia)/lib/julia",
+                "-Wl,-rpath,<(julia)/lib/julia",
                 "-ljulia"
               ]
             }
