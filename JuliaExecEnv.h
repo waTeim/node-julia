@@ -14,7 +14,7 @@ class JuliaExecEnv
 
    public:
 
-      JuliaExecEnv(const std::string &installDir);
+      JuliaExecEnv(const std::string &installDir = "");
   
       JMain *getEngine() {  return engine;  }
 };

@@ -335,20 +335,16 @@ void doStart(const FunctionCallbackInfo<Value> &args)
 
    if(numArgs == 0)
    {
-      returnString(args,I,"");
+      if(!J) J = new JuliaExecEnv();
+      returnString(args,I,"Julia Started");
       return;
    }
 
    Local<String> arg0 = args[0]->ToString();
    String::Utf8Value plainText_av(arg0);
 
-   if(plainText_av.length() > 0)
-   {
-      if(!J) J = new JuliaExecEnv(*plainText_av);
-
-      returnString(args,I,"Julia Started");
-   }
-   else returnString(args,I,"");
+   if(!J) J = new JuliaExecEnv(*plainText_av);
+   returnString(args,I,"Julia Started");
 }
 
 void doEval(const FunctionCallbackInfo<Value> &args)

@@ -8,7 +8,7 @@ JuliaExecEnv::JuliaExecEnv(const std::string &installDir)
 
    engine = new JMain();
    if(installDir != "") argv[0] = installDir.c_str();
-   else argv[0] = JULIA_DIR "/lib/julia";
+   else argv[0] = JULIA_DIR "/lib";
    j_main_thread = new thread(&JMain::operator(),engine);
    engine->initialize(1,argv);
 }
