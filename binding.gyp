@@ -22,7 +22,7 @@
         "rvalue.cpp"
       ],
       "cflags!":     [ "-fno-exceptions" ],
-      "cflags":      [ "-std=c++11" , "-I<(julia)/include/julia" ],
+      "cflags":      [ "-std=c++11" , "-DJULIA_DIR=<(julia)" , "-I<(julia)/include/julia" ],
       "cflags_cc!":  [ "-fno-exceptions" ],
       "conditions":
       [
@@ -32,7 +32,7 @@
             { 
               "MACOSX_DEPLOYMENT_TARGET":"10.7",
               "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
-              "OTHER_CPLUSPLUSFLAGS": [ "-std=c++11" , "-stdlib=libc++" , "-I<(julia)/include/julia" ],
+              "OTHER_CPLUSPLUSFLAGS": [ "-std=c++11" , "-stdlib=libc++" , '-DJULIA_DIR="<(julia)"' , "-I<(julia)/include/julia" ],
               "OTHER_LDFLAGS":
               [
                 "-stdlib=libc++",
