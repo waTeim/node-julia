@@ -19,7 +19,8 @@
         "Value.cpp",
         "Values.cpp",
         "lvalue.cpp",
-        "rvalue.cpp"
+        "rvalue.cpp",
+        "nj-vi.cpp"
       ],
       "cflags!":     [ "-fno-exceptions" ],
       "cflags":      [ "-std=c++11" , "-DJULIA_DIR=<(julia)" , "-I<(julia)/include/julia" ],
