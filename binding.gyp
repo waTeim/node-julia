@@ -5,7 +5,7 @@
       "variables":
       {
          "version":"<!(node --version | sed -e 's/^v\([0-9]*\.[0-9]*\).*$/\\1.x/')",
-         "julia":"<!(python tools/find_julia.py)"
+         "julia":"<!(python tools/find_julia.py <(OS))"
       },
       "target_name": "nj",
       "sources":     
@@ -41,6 +41,11 @@
                 "-ljulia"
               ]
             }
+          }
+        ],
+        [ "version=='0.10.x'",
+          {
+             "sources": [ "nj-v10.cpp" ]
           }
         ],
         [ "version=='0.11.x'",
