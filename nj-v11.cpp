@@ -241,6 +241,7 @@ void doExec(const FunctionCallbackInfo<Value> &args)
       {
          int argc = res->size();
          Local<Value> *argv = new Local<Value>[argc];
+
          argc = buildResponse(res,argc,argv);
          callback(args,I,cb,argc,argv);
       }
@@ -249,6 +250,7 @@ void doExec(const FunctionCallbackInfo<Value> &args)
    {
       const unsigned argc = 1;
       Local<Value> argv[argc] = { String::NewFromUtf8(I,"") };
+
       callback(args,I,cb,argc,argv);
    }
 }
