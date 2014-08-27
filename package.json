@@ -1,7 +1,7 @@
 {
-  "name":"nj",
+  "name":"node-julia",
   "description":"A NodeJS portal to Juliax ",
-  "version":"0.1.0",
+  "version":"0.0.1",
   "main":"lib/nj.js",
   "dependencies":
   {

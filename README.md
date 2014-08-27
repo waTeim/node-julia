@@ -24,7 +24,7 @@ necessary embedding API that comes with the language.
 
 #Use and Syntax#
 
-    julia = require('nj');
+    julia = require('node-julia');
 
 Currently, there are 3 exported functions; **start**, **eval**, and **exec**.  
 
