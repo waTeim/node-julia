@@ -7,7 +7,7 @@
 using namespace std;
 using namespace v8;
 
-void returnNull(const FunctionCallbackInfo<Value> &args,Isolate *I)
+void returnNull(const FunctionCallbackInfo<Value> &args)
 {
    args.GetReturnValue().SetNull();
 }
@@ -162,9 +162,9 @@ void doStart(const FunctionCallbackInfo<Value> &args)
    }
 
    Local<String> arg0 = args[0]->ToString();
-   String::Utf8Value plainText_av(arg0);
+   String::Utf8Value juliaDirectory(arg0);
 
-   if(!J) J = new JuliaExecEnv(*plainText_av);
+   if(!J) J = new JuliaExecEnv(*juliaDirectory);
    returnString(args,I,"Julia Started");
 }
 
@@ -181,8 +181,8 @@ void doEval(const FunctionCallbackInfo<Value> &args)
    }
 
    Local<String> arg0 = args[0]->ToString();
-   String::Utf8Value text(arg0);
    Local<Function> cb = Local<Function>::Cast(args[1]);
+   String::Utf8Value text(arg0);
    JMain *engine;
 
    if(text.length() > 0 && (engine = J->getEngine()))
@@ -194,6 +194,7 @@ void doEval(const FunctionCallbackInfo<Value> &args)
       {
          int argc = res->size();
          Local<Value> *argv = new Local<Value>[argc];
+
          argc = buildResponse(res,argc,argv);
          callback(args,I,cb,argc,argv);
       }
@@ -218,7 +219,7 @@ void doExec(const FunctionCallbackInfo<Value> &args)
       return;
    }
 
-   Local<String> arg0 = args[0]->ToString();
+   Local<String> arg0 = Local<String>::Cast(args[0]);
    String::Utf8Value funcName(arg0);
    Local<Function> cb = Local<Function>::Cast(args[args.Length() - 1]);
    JMain *engine;
