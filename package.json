@@ -6,7 +6,7 @@
   "repository":
   {
      "type":"git",
-     "url":"git://github.com/waTeim/node-julia.git",
+     "url":"git://github.com/waTeim/node-julia.git"
   },
   "dependencies":
   {
