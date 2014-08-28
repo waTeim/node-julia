@@ -5,9 +5,9 @@ import subprocess
 
 def julia_from_which_julia():
    path = "";
-   which_julia = subprocess.Popen(["/usr/bin/which","julia"],stdout=subprocess.PIPE).communicate()[0].split()[0]
-   if which_julia:
-      real_path = os.path.realpath(which_julia)
+   which_julia = subprocess.Popen(["/usr/bin/which","julia"],stdout=subprocess.PIPE).communicate()[0];
+   if len(which_julia) > 0:
+      real_path = os.path.realpath(which_julia.split()[0])
       if real_path:
          head,tail = os.path.split(real_path)
          path,tail = os.path.split(head)

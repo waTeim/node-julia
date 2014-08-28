@@ -1,6 +1,6 @@
 {
   "name":"node-julia",
-  "version":"0.1.0",
+  "version":"0.1.1",
   "description":"A node.js portal to Julia",
   "main":"lib/nj.js",
   "repository":
