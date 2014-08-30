@@ -16,12 +16,8 @@ vector<shared_ptr<nj::Value>> nj::Call::eval(vector<shared_ptr<nj::Value>> &args
    int numArgs = args.size() - 1;
    jl_value_t *jl_res = 0;
 
-printf("Calling ... %s\n",funcName.toString().c_str());
-if(!func)
-{
-   printf("f is null, checking main\n");
-   func = jl_get_function(jl_main_module,funcName.toString().c_str());
-}
+   if(!func) func = jl_get_function(jl_main_module,funcName.toString().c_str());
+   if(!func) return res;
 
    if(numArgs <= 3)
    {
