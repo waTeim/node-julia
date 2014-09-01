@@ -1,3 +1,4 @@
+#include <iostream>
 #include <julia.h>
 #include "Call.h"
 #include "rvalue.h"

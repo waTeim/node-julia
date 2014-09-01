@@ -7,17 +7,17 @@
 using namespace std;
 using namespace v8;
 
-void returnNull(const FunctionCallbackInfo<Value> &args)
+void returnNull(Isolate *I,const FunctionCallbackInfo<Value> &args)
 {
    args.GetReturnValue().SetNull();
 }
 
-void returnString(const FunctionCallbackInfo<Value> &args,Isolate *I,const string &s)
+void returnString(Isolate *I,const FunctionCallbackInfo<Value> &args,const string &s)
 {
    args.GetReturnValue().Set(String::NewFromUtf8(I,s.c_str()));
 }
 
-void callback(const FunctionCallbackInfo<Value>& args,Isolate *I,const Local<Function> &cb,int argc,Local<Value> *argv)
+void callback(Isolate *I,const FunctionCallbackInfo<Value>& args,const Local<Function> &cb,int argc,Local<Value> *argv)
 {
   cb->Call(I->GetCurrentContext()->Global(),argc,argv);
 }
@@ -148,6 +148,29 @@ Local<Array> buildArrayResponse(const shared_ptr<nj::Value> &value)
    return scope.Escape(Array::New(I,0));
 }
 
+int buildResponse(const shared_ptr<vector<shared_ptr<nj::Value>>> &res,int argc,Local<Value> *argv)
+{
+   int index = 0;
+
+   for(shared_ptr<nj::Value> value: *res)
+   {
+      if(value.get())
+      {
+         if(value->isPrimitive())
+         {
+            const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
+
+            argv[index++] = buildPrimitiveResponse(primitive);
+         }
+         else
+         {
+            argv[index++] = buildArrayResponse(value);
+         }
+      }
+   }
+   return index;
+}
+
 void doStart(const FunctionCallbackInfo<Value> &args)
 {
    Isolate *I = Isolate::GetCurrent();
@@ -157,7 +180,7 @@ void doStart(const FunctionCallbackInfo<Value> &args)
    if(numArgs == 0)
    {
       if(!J) J = new JuliaExecEnv();
-      returnString(args,I,"Julia Started");
+      returnString(I,args,"Julia Started");
       return;
    }
 
@@ -165,7 +188,7 @@ void doStart(const FunctionCallbackInfo<Value> &args)
    String::Utf8Value juliaDirectory(arg0);
 
    if(!J) J = new JuliaExecEnv(*juliaDirectory);
-   returnString(args,I,"Julia Started");
+   returnString(I,args,"Julia Started");
 }
 
 void doEval(const FunctionCallbackInfo<Value> &args)
@@ -176,7 +199,7 @@ void doEval(const FunctionCallbackInfo<Value> &args)
 
    if(numArgs < 2 || !J)
    {
-      returnNull(args,I);
+      returnNull(I,args);
       return;
    }
 
@@ -196,14 +219,14 @@ void doEval(const FunctionCallbackInfo<Value> &args)
          Local<Value> *argv = new Local<Value>[argc];
 
          argc = buildResponse(res,argc,argv);
-         callback(args,I,cb,argc,argv);
+         callback(I,args,cb,argc,argv);
       }
    }
    else
    {
       const unsigned argc = 1;
       Local<Value> argv[argc] = { String::NewFromUtf8(I,"") };
-      callback(args,I,cb,argc,argv);
+      callback(I,args,cb,argc,argv);
    }
 }
 
@@ -215,7 +238,7 @@ void doExec(const FunctionCallbackInfo<Value> &args)
 
    if(numArgs < 2 || !J)
    {
-      returnNull(args,I);
+      returnNull(I,args);
       return;
    }
 
@@ -243,7 +266,7 @@ void doExec(const FunctionCallbackInfo<Value> &args)
          Local<Value> *argv = new Local<Value>[argc];
 
          argc = buildResponse(res,argc,argv);
-         callback(args,I,cb,argc,argv);
+         callback(I,args,cb,argc,argv);
       }
    }
    else
@@ -251,7 +274,7 @@ void doExec(const FunctionCallbackInfo<Value> &args)
       const unsigned argc = 1;
       Local<Value> argv[argc] = { String::NewFromUtf8(I,"") };
 
-      callback(args,I,cb,argc,argv);
+      callback(I,args,cb,argc,argv);
    }
 }
 

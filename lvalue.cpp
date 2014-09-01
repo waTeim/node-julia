@@ -25,8 +25,6 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlarray)
 {
    shared_ptr<nj::Value> value;
 
-cout << "Returning Array LValue (" << jl_array_ndims(jlarray) << " dims)" << endl;
-
    jl_value_t *elementType = jl_tparam0(jl_typeof(jlarray));
 
    if(elementType == (jl_value_t*)jl_float64_type) value = reboxArray<double,nj::Float64_t>(jlarray); 

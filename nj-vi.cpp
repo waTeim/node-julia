@@ -162,27 +162,3 @@ shared_ptr<nj::Value> buildRequest(const Local<Value> &value)
    if(value->IsArray()) return buildArrayRequest(value);
    return buildPrimitiveRequest(value);
 }
-
-int buildResponse(const shared_ptr<vector<shared_ptr<nj::Value>>> &res,int argc,Local<Value> *argv)
-{
-   int index = 0;
-
-   for(shared_ptr<nj::Value> value: *res)
-   {
-      if(value.get())
-      {
-         if(value->isPrimitive())
-         {
-            const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
-
-            argv[index++] = buildPrimitiveResponse(primitive);
-         }
-         else
-         {
-            argv[index++] = buildArrayResponse(value);
-         }
-      }
-   }
-   return index;
-}
-

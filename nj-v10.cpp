@@ -28,9 +28,8 @@ Handle<Value> callback(HandleScope &scope,const Local<Function> &cb,int argc,Loc
    return scope.Close(Undefined());
 }
 
-Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive)
+Local<Value> buildPrimitiveResponse(HandleScope &scope,const nj::Primitive &primitive)
 {
-   HandleScope scope;
 
    switch(primitive.type()->getId())
    {
@@ -40,7 +39,7 @@ Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive)
       {
          Local<Value> dest = String::New(primitive.toString().c_str());
 
-         return scope.Close(dest);
+         return dest;
       }
       break;
       case nj::int64_type:
@@ -49,7 +48,7 @@ Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive)
       {
          Local<Value> dest = Number::New(primitive.toInt());
 
-         return scope.Close(dest);
+         return dest;
       }
       break;
       case nj::uint64_type:
@@ -59,7 +58,7 @@ Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive)
       {
          Local<Value> dest = Number::New(primitive.toUInt());
 
-         return scope.Close(dest);
+         return dest;
       }
       break;
       case nj::float64_type:
@@ -67,25 +66,24 @@ Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive)
       {
          Local<Value> dest = Number::New(primitive.toFloat());
 
-         return scope.Close(dest);
+         return dest;
       }
       break;
       case nj::string_type:
       {
          Local<Value> dest = String::New(primitive.toString().c_str());
 
-         return scope.Close(dest);
+         return dest;
       }
       break;
    }
 
-   return scope.Close(Array::New(0));
+   return Array::New(0);
 }
 
-template<typename V,typename E> Local<Array> buildArrayResponse(const shared_ptr<nj::Value> &value)
+template<typename V,typename E> Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &value)
 {
    const nj::Array<V,E> &array = static_cast<const nj::Array<V,E>&>(*value);
-   HandleScope scope;
 
    if(array.size() == 0) return Local<Array>();
    if(array.dims().size() == 1)
@@ -95,7 +93,7 @@ template<typename V,typename E> Local<Array> buildArrayResponse(const shared_ptr
       Local<Array> dest = Array::New(size0);
 
       for(size_t i = 0;i < size0;i++) dest->Set(i,Number::New(p[i]));
-      return scope.Close(dest);
+      return dest;
    }
    else if(array.dims().size() == 2)
    {
@@ -111,32 +109,54 @@ template<typename V,typename E> Local<Array> buildArrayResponse(const shared_ptr
          dest->Set(i,row);
          for(size_t j = 0;j < size1;j++) row->Set(j,Number::New(p[size0*j + i]));
       }
-      return scope.Close(dest);
+      return dest;
    }
-   return scope.Close(Array::New(0));
+   return Array::New(0);
 }
 
-Local<Array> buildArrayResponse(const shared_ptr<nj::Value> &value)
+Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &value)
 {
    const nj::Array_t *array_type = static_cast<const nj::Array_t*>(value->type());
    const nj::Type *element_type = array_type->etype();
-   HandleScope scope;
 
    switch(element_type->getId())
    {
-      case nj::float64_type: return scope.Close(buildArrayResponse<double,nj::Float64_t>(value)); break;
-      case nj::float32_type: return scope.Close(buildArrayResponse<float,nj::Float32_t>(value)); break;
-      case nj::int64_type: return scope.Close(buildArrayResponse<int64_t,nj::Int64_t>(value)); break;
-      case nj::int32_type: return scope.Close(buildArrayResponse<int,nj::Int32_t>(value)); break;
-      case nj::int16_type: return scope.Close(buildArrayResponse<short,nj::Int16_t>(value)); break;
-      case nj::uint64_type: return scope.Close(buildArrayResponse<uint64_t,nj::UInt64_t>(value)); break;
-      case nj::uint32_type: return scope.Close(buildArrayResponse<unsigned,nj::UInt32_t>(value)); break;
-      case nj::uint16_type: return scope.Close(buildArrayResponse<unsigned short,nj::UInt16_t>(value)); break;
-      case nj::char_type: return scope.Close(buildArrayResponse<char,nj::Char_t>(value)); break;
-      case nj::uchar_type: return scope.Close(buildArrayResponse<unsigned char,nj::UChar_t>(value)); break;
+      case nj::float64_type: return buildArrayResponse<double,nj::Float64_t>(scope,value); break;
+      case nj::float32_type: return buildArrayResponse<float,nj::Float32_t>(scope,value); break;
+      case nj::int64_type: return buildArrayResponse<int64_t,nj::Int64_t>(scope,value); break;
+      case nj::int32_type: return buildArrayResponse<int,nj::Int32_t>(scope,value); break;
+      case nj::int16_type: return buildArrayResponse<short,nj::Int16_t>(scope,value); break;
+      case nj::uint64_type: return buildArrayResponse<uint64_t,nj::UInt64_t>(scope,value); break;
+      case nj::uint32_type: return buildArrayResponse<unsigned,nj::UInt32_t>(scope,value); break;
+      case nj::uint16_type: return buildArrayResponse<unsigned short,nj::UInt16_t>(scope,value); break;
+      case nj::char_type: return buildArrayResponse<char,nj::Char_t>(scope,value); break;
+      case nj::uchar_type: return buildArrayResponse<unsigned char,nj::UChar_t>(scope,value); break;
    }
 
-   return scope.Close(Array::New(0));
+   return Array::New(0);
+}
+
+int buildResponse(HandleScope &scope,const shared_ptr<vector<shared_ptr<nj::Value>>> &res,int argc,Local<Value> *argv)
+{
+   int index = 0;
+
+   for(shared_ptr<nj::Value> value: *res)
+   {
+      if(value.get())
+      {
+         if(value->isPrimitive())
+         {
+            const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
+
+            argv[index++] = buildPrimitiveResponse(scope,primitive);
+         }
+         else
+         {
+            argv[index++] = buildArrayResponse(scope,value);
+         }
+      }
+   }
+   return index;
 }
 
 Handle<Value> doStart(const Arguments &args)
@@ -179,7 +199,7 @@ Handle<Value> doEval(const Arguments &args)
          int argc = res->size();
          Local<Value> *argv = new Local<Value>[argc];
 
-         argc = buildResponse(res,argc,argv);
+         argc = buildResponse(scope,res,argc,argv);
          return callback(scope,cb,argc,argv);
       }
       else return callback(scope,cb,0,0);
@@ -222,7 +242,7 @@ Handle<Value> doExec(const Arguments &args)
          int argc = res->size();
          Local<Value> *argv = new Local<Value>[argc];
 
-         argc = buildResponse(res,argc,argv);
+         argc = buildResponse(scope,res,argc,argv);
          return callback(scope,cb,argc,argv);
       }
       else return callback(scope,cb,0,0);
