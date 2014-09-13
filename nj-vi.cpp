@@ -29,7 +29,7 @@ static nj::Type *getPrimitiveType(const Local<Value> &prim)
    if(prim->IsBoolean()) return nj::Boolean_t::instance();
    //else if(prim->IsInt32()) return nj::Int32_t::instance();
    //else if(prim->IsUint32()) return nj::UInt32_t::instance();
-   else if(prim->IsInt32() || prim->IsUint32()) return nj::Int64_t::instance();
+   //else if(prim->IsInt32() || prim->IsUint32()) return nj::Int64_t::instance();
    else if(prim->IsNumber()) return nj::Float64_t::instance();
    return 0;
 }

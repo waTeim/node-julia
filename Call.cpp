@@ -1,6 +1,7 @@
 #include <iostream>
 #include <julia.h>
 #include "Call.h"
+#include "error.h"
 #include "rvalue.h"
 #include "lvalue.h"
 
@@ -13,10 +14,11 @@ vector<shared_ptr<nj::Value>> nj::Call::eval(vector<shared_ptr<nj::Value>> &args
    if(args.size() == 0 || !args[0]->isPrimitive()) return res;
 
    Primitive &funcName = static_cast<Primitive&>(*args[0]);
-   jl_function_t *func = jl_get_function(jl_base_module,funcName.toString().c_str());
    int numArgs = args.size() - 1;
    jl_value_t *jl_res = 0;
+   jl_function_t *func = jl_get_function(jl_core_module,funcName.toString().c_str());
 
+   if(!func) func = jl_get_function(jl_base_module,funcName.toString().c_str());
    if(!func) func = jl_get_function(jl_main_module,funcName.toString().c_str());
    if(!func) return res;
 
@@ -31,8 +33,20 @@ vector<shared_ptr<nj::Value>> nj::Call::eval(vector<shared_ptr<nj::Value>> &args
       }
    }
 
-   JL_GC_PUSH1(&jl_res);
-   res = lvalue(jl_res);
+   jl_value_t *ex = jl_exception_occurred();
+   
+   if(ex)
+   {
+     JL_GC_PUSH1(&ex);
+
+     string exText =  getErrorText(ex);
+   }
+   else
+   {
+      JL_GC_PUSH1(&jl_res);
+      res = lvalue(jl_res);
+   }
+
    JL_GC_POP();
    return res;
 }

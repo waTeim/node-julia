@@ -18,6 +18,8 @@
         "Type.cpp",
         "Value.cpp",
         "Values.cpp",
+        "debug.cpp",
+        "error.cpp",
         "lvalue.cpp",
         "rvalue.cpp",
         "nj-vi.cpp"
