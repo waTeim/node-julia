@@ -20,13 +20,6 @@ static jl_value_t *rPrimitive(const nj::Primitive &prim)
          else res = jl_false;
       }
       break;
-      case nj::char_type:
-      {
-         const nj::Char &v = static_cast<const nj::Char&>(prim);
-
-         res = jl_box_char(v.val());
-      }
-      break;
       case nj::int64_type:
       {
          const nj::Int64 &v = static_cast<const nj::Int64&>(prim);
@@ -45,6 +38,13 @@ static jl_value_t *rPrimitive(const nj::Primitive &prim)
          const nj::Int16 &v = static_cast<const nj::Int16&>(prim);
 
          res = jl_box_int16(v.val());
+      }
+      break;
+      case nj::int8_type:
+      {
+         const nj::Int8 &v = static_cast<const nj::Int8&>(prim);
+
+         res = jl_box_char(v.val());
       }
       break;
       case nj::uint64_type:
@@ -68,9 +68,9 @@ static jl_value_t *rPrimitive(const nj::Primitive &prim)
          res = jl_box_uint16(v.val());
       }
       break;
-      case nj::uchar_type:
+      case nj::uint8_type:
       {
-         const nj::UChar &v = static_cast<const nj::UChar&>(prim);
+         const nj::UInt8 &v = static_cast<const nj::UInt8&>(prim);
 
          res = jl_box_uint8(v.val());
       }
@@ -89,9 +89,16 @@ static jl_value_t *rPrimitive(const nj::Primitive &prim)
          res = jl_box_float32(v.val());
       }
       break;
-      case nj::string_type:
+      case nj::ascii_string_type:
       {
-         const nj::String &v = static_cast<const nj::String&>(prim);
+         const nj::ASCIIString &v = static_cast<const nj::ASCIIString&>(prim);
+
+         res = jl_cstr_to_string(v.val().c_str());
+      }
+      break;
+      case nj::utf8_string_type:
+      {
+         const nj::UTF8String &v = static_cast<const nj::UTF8String&>(prim);
 
          res = jl_cstr_to_string(v.val().c_str());
       }
@@ -129,8 +136,8 @@ static jl_array_t *rArray(const shared_ptr<nj::Value> &array)
       case nj::uint16_type: res = rArray<unsigned short,nj::UInt16_t>(array,jl_uint16_type); break;
       case nj::float64_type: res = rArray<double,nj::Float64_t>(array,jl_float64_type); break;
       case nj::float32_type: res = rArray<float,nj::Float32_t>(array,jl_float32_type); break;
-      case nj::char_type: res = rArray<char,nj::Char_t>(array,jl_int8_type); break;
-      case nj::uchar_type: res = rArray<unsigned char,nj::UChar_t>(array,jl_uint8_type); break;
+      case nj::int8_type: res = rArray<char,nj::Int8_t>(array,jl_int8_type); break;
+      case nj::uint8_type: res = rArray<unsigned char,nj::UInt8_t>(array,jl_uint8_type); break;
    }
    return res;
 }

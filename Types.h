@@ -6,17 +6,18 @@
 namespace nj
 {
    const int boolean_type = 3;
-   const int char_type = 4;
-   const int uchar_type = 5;
-   const int int64_type = 6;
-   const int uint64_type = 7;
-   const int int32_type = 8;
-   const int uint32_type = 9;
-   const int int16_type = 10;
-   const int uint16_type = 11;
+   const int int64_type = 4;
+   const int uint64_type = 5;
+   const int int32_type = 6;
+   const int uint32_type = 7;
+   const int int16_type = 8;
+   const int uint16_type = 9;
+   const int int8_type = 10;
+   const int uint8_type = 11;
    const int float64_type = 12;
    const int float32_type = 13;
-   const int string_type = 14;
+   const int ascii_string_type = 14;
+   const int utf8_string_type = 15;
 
    class Boolean_t:public Type
    {
@@ -81,22 +82,22 @@ namespace nj
          UInt16_t():Type(uint16_type) {}
    };
 
-   class Char_t:public Type
+   class Int8_t:public Type
    {
       public:
 
-         static Type *instance() {  return Type::instance<Char_t>();  }
+         static Type *instance() {  return Type::instance<Int8_t>();  }
 
-         Char_t():Type(char_type) {}
+         Int8_t():Type(int8_type) {}
    };
 
-   class UChar_t:public Type
+   class UInt8_t:public Type
    {
       public:
 
-         static Type *instance() {  return Type::instance<UChar_t>();  }
+         static Type *instance() {  return Type::instance<UInt8_t>();  }
 
-         UChar_t():Type(uchar_type) {}
+         UInt8_t():Type(uint8_type) {}
    };
 
    class Float64_t:public Type
@@ -117,13 +118,22 @@ namespace nj
          Float32_t():Type(float32_type) {}
    };
 
-   class String_t:public Type
+   class ASCIIString_t:public Type
    {
       public:
 
-         static Type *instance() {  return Type::instance<String_t>();  }
+         static Type *instance() {  return Type::instance<ASCIIString_t>();  }
 
-         String_t():Type(string_type) {}
+         ASCIIString_t():Type(ascii_string_type) {}
+   };
+
+   class UTF8String_t:public Type
+   {
+      public:
+
+         static Type *instance() {  return Type::instance<UTF8String_t>();  }
+
+         UTF8String_t():Type(utf8_string_type) {}
    };
 };
 

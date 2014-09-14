@@ -35,16 +35,10 @@ Local<Value> buildPrimitiveResponse(HandleScope &scope,const nj::Primitive &prim
    {
       case nj::null_type: returnNull(scope); break;
       case nj::boolean_type: returnBoolean(scope,primitive.toBoolean()); break;
-      case nj::char_type:
-      {
-         Local<Value> dest = String::New(primitive.toString().c_str());
-
-         return dest;
-      }
-      break;
       case nj::int64_type:
       case nj::int32_type:
       case nj::int16_type:
+      case nj::int8_type:
       {
          Local<Value> dest = Number::New(primitive.toInt());
 
@@ -54,7 +48,7 @@ Local<Value> buildPrimitiveResponse(HandleScope &scope,const nj::Primitive &prim
       case nj::uint64_type:
       case nj::uint32_type:
       case nj::uint16_type:
-      case nj::uchar_type:
+      case nj::uint8_type:
       {
          Local<Value> dest = Number::New(primitive.toUInt());
 
@@ -69,7 +63,8 @@ Local<Value> buildPrimitiveResponse(HandleScope &scope,const nj::Primitive &prim
          return dest;
       }
       break;
-      case nj::string_type:
+      case nj::ascii_string_type:
+      case nj::utf8_string_type:
       {
          Local<Value> dest = String::New(primitive.toString().c_str());
 
@@ -126,11 +121,11 @@ Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &
       case nj::int64_type: return buildArrayResponse<int64_t,nj::Int64_t>(scope,value); break;
       case nj::int32_type: return buildArrayResponse<int,nj::Int32_t>(scope,value); break;
       case nj::int16_type: return buildArrayResponse<short,nj::Int16_t>(scope,value); break;
+      case nj::int8_type: return buildArrayResponse<char,nj::Int8_t>(scope,value); break;
       case nj::uint64_type: return buildArrayResponse<uint64_t,nj::UInt64_t>(scope,value); break;
       case nj::uint32_type: return buildArrayResponse<unsigned,nj::UInt32_t>(scope,value); break;
       case nj::uint16_type: return buildArrayResponse<unsigned short,nj::UInt16_t>(scope,value); break;
-      case nj::char_type: return buildArrayResponse<char,nj::Char_t>(scope,value); break;
-      case nj::uchar_type: return buildArrayResponse<unsigned char,nj::UChar_t>(scope,value); break;
+      case nj::uint8_type: return buildArrayResponse<unsigned char,nj::UInt8_t>(scope,value); break;
    }
 
    return Array::New(0);
@@ -171,7 +166,7 @@ Handle<Value> doStart(const Arguments &args)
    }
 
    Local<String> arg0 = Local<String>::Cast(args[0]);
-   String::AsciiValue juliaDirectory(arg0);
+   String::Utf8Value juliaDirectory(arg0);
 
    if(!J) J = new JuliaExecEnv(*juliaDirectory);
    return returnString(scope,"Julia Started");
@@ -186,7 +181,7 @@ Handle<Value> doEval(const Arguments &args)
 
    Local<String> arg0 = Local<String>::Cast(args[0]);
    Local<Function> cb = Local<Function>::Cast(args[1]);
-   String::AsciiValue text(arg0);
+   String::Utf8Value text(arg0);
    JMain *engine;
 
    if(text.length() > 0 && (engine = J->getEngine()))
@@ -239,7 +234,7 @@ Handle<Value> doExec(const Arguments &args)
    if(numArgs < 2 || !J) return returnNull(scope);
 
    Local<String> arg0 = Local<String>::Cast(args[0]);
-   String::AsciiValue funcName(arg0);
+   String::Utf8Value funcName(arg0);
    Local<Function> cb = Local<Function>::Cast(args[args.Length() - 1]);
    JMain *engine;
 

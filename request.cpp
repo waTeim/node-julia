@@ -20,6 +20,13 @@ static shared_ptr<nj::Value> buildPrimitiveRequest(const Local<Value> &prim)
    //else if(prim->IsUint32()) v.reset(new nj::UInt32(prim->Uint32Value()));
    else if(prim->IsInt32() || prim->IsUint32()) v.reset(new nj::Int64(prim->IntegerValue()));
    else if(prim->IsNumber()) v.reset(new nj::Float64(prim->NumberValue()));
+   else if(prim->IsString())
+   {
+      Local<String> s = Local<String>::Cast(prim);
+      String::Utf8Value text(s);
+
+      v.reset(new nj::UTF8String(*text));
+   }
 
    return v;
 }

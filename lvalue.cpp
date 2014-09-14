@@ -30,12 +30,12 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlarray)
    if(elementType == (jl_value_t*)jl_float64_type) value = reboxArray<double,nj::Float64_t>(jlarray); 
    else if(elementType == (jl_value_t*)jl_int64_type) value = reboxArray<int64_t,nj::Int64_t>(jlarray);
    else if(elementType == (jl_value_t*)jl_int32_type) value = reboxArray<int,nj::Int32_t>(jlarray);
-   else if(elementType == (jl_value_t*)jl_int8_type) value = reboxArray<char,nj::Char_t>(jlarray);
+   else if(elementType == (jl_value_t*)jl_int8_type) value = reboxArray<char,nj::Int8_t>(jlarray);
    else if(elementType == (jl_value_t*)jl_float32_type) value = reboxArray<float,nj::Float32_t>(jlarray);
    else if(elementType == (jl_value_t*)jl_uint64_type) value = reboxArray<uint64_t,nj::UInt64_t>(jlarray); 
    else if(elementType == (jl_value_t*)jl_uint32_type) value = reboxArray<unsigned,nj::UInt32_t>(jlarray);
    else if(elementType == (jl_value_t*)jl_int16_type) value = reboxArray<short,nj::Int16_t>(jlarray);
-   else if(elementType == (jl_value_t*)jl_uint8_type) value = reboxArray<unsigned char,nj::UChar_t>(jlarray);
+   else if(elementType == (jl_value_t*)jl_uint8_type) value = reboxArray<unsigned char,nj::UInt8_t>(jlarray);
    else if(elementType == (jl_value_t*)jl_uint16_type) value = reboxArray<unsigned short,nj::UInt16_t>(jlarray);
 
    return value;
@@ -70,13 +70,14 @@ void addLValueElements(jl_value_t *jl_value,vector<shared_ptr<nj::Value>> &res)
       if(jl_is_float64(jl_value)) value.reset(new nj::Float64(jl_unbox_float64(jl_value)));
       else if(jl_is_int64(jl_value)) value.reset(new nj::Int64(jl_unbox_int64(jl_value)));
       else if(jl_is_int32(jl_value)) value.reset(new nj::Int32(jl_unbox_int32(jl_value)));
-      else if(jl_is_int8(jl_value)) value.reset(new nj::Char(jl_unbox_int8(jl_value)));
-      else if(jl_is_ascii_string(jl_value)) value.reset(new nj::String((char*)jl_unbox_voidpointer(jl_value)));
+      else if(jl_is_int8(jl_value)) value.reset(new nj::Int8(jl_unbox_int8(jl_value)));
+      else if(jl_is_utf8_string(jl_value)) value.reset(new nj::UTF8String((char*)jl_unbox_voidpointer(jl_value)));
+      else if(jl_is_ascii_string(jl_value)) value.reset(new nj::ASCIIString((char*)jl_unbox_voidpointer(jl_value)));
       else if(jl_is_float32(jl_value)) value.reset(new nj::Float32(jl_unbox_float32(jl_value)));
       else if(jl_is_uint64(jl_value)) value.reset(new nj::UInt64(jl_unbox_uint64(jl_value)));
       else if(jl_is_uint32(jl_value)) value.reset(new nj::UInt32(jl_unbox_uint32(jl_value)));
       else if(jl_is_int16(jl_value)) value.reset(new nj::Int16(jl_unbox_int16(jl_value)));
-      else if(jl_is_uint8(jl_value)) value.reset(new nj::UChar(jl_unbox_uint8(jl_value)));
+      else if(jl_is_uint8(jl_value)) value.reset(new nj::UInt8(jl_unbox_uint8(jl_value)));
       else if(jl_is_uint16(jl_value)) value.reset(new nj::UInt16(jl_unbox_uint16(jl_value)));
 
       if(value.get()) res.push_back(value);

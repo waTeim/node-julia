@@ -3,7 +3,7 @@
 
 using namespace std;
 
-bool nj::String::toBoolean() const throw(InvalidException)
+bool nj::ASCIIString::toBoolean() const throw(InvalidException)
 {
    istringstream ss(val());
    bool b;
@@ -11,7 +11,7 @@ bool nj::String::toBoolean() const throw(InvalidException)
    return b;
 }
 
-char nj::String::toChar() const throw(InvalidException)
+char nj::ASCIIString::toChar() const throw(InvalidException)
 {
    istringstream ss(val());
    char c;
@@ -19,7 +19,7 @@ char nj::String::toChar() const throw(InvalidException)
    return c;
 }
 
-int64_t nj::String::toInt() const throw(InvalidException)
+int64_t nj::ASCIIString::toInt() const throw(InvalidException)
 {
    istringstream ss(val());
    int64_t i;
@@ -27,7 +27,7 @@ int64_t nj::String::toInt() const throw(InvalidException)
    return  i;
 }
 
-uint64_t nj::String::toUInt() const throw(InvalidException)
+uint64_t nj::ASCIIString::toUInt() const throw(InvalidException)
 {
    istringstream ss(val());
    uint64_t i;
@@ -35,7 +35,47 @@ uint64_t nj::String::toUInt() const throw(InvalidException)
    return  i;
 }
 
-double nj::String::toFloat() const throw(InvalidException)
+double nj::ASCIIString::toFloat() const throw(InvalidException)
+{
+   istringstream ss(val());
+   double d;
+   ss >> d;
+   return d;
+}
+
+bool nj::UTF8String::toBoolean() const throw(InvalidException)
+{
+   istringstream ss(val());
+   bool b;
+   ss >> b;
+   return b;
+}
+
+char nj::UTF8String::toChar() const throw(InvalidException)
+{
+   istringstream ss(val());
+   char c;
+   ss >> c;
+   return c;
+}
+
+int64_t nj::UTF8String::toInt() const throw(InvalidException)
+{
+   istringstream ss(val());
+   int64_t i;
+   ss >> i;
+   return  i;
+}
+
+uint64_t nj::UTF8String::toUInt() const throw(InvalidException)
+{
+   istringstream ss(val());
+   uint64_t i;
+   ss >> i;
+   return  i;
+}
+
+double nj::UTF8String::toFloat() const throw(InvalidException)
 {
    istringstream ss(val());
    double d;
