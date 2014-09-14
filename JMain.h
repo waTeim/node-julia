@@ -24,9 +24,9 @@ class JMain
       std::mutex m_state;
       std::mutex m_evalq;
       std::mutex m_resultq;
-      std::list<std::shared_ptr<std::vector<std::shared_ptr<nj::Value>>>> result_queue;
+      std::list<std::shared_ptr<nj::Result>> result_queue;
 
-      std::shared_ptr<std::vector<std::shared_ptr<nj::Value>>> eval(const std::shared_ptr<nj::Expr> &expr);
+      std::shared_ptr<nj::Result> eval(const std::shared_ptr<nj::Expr> &expr);
 
       template <typename T> std::shared_ptr<T> dequeue(std::list<std::shared_ptr<T>> &queue,std::mutex &m_queue,std::condition_variable &c_queue)
       {
@@ -71,7 +71,7 @@ class JMain
       void operator()();
       void evalQueuePut(const std::string &expr);
       void evalQueuePut(const std::string &funcName,const std::vector<std::shared_ptr<nj::Value>> &argv);
-      std::shared_ptr<std::vector<std::shared_ptr<nj::Value>>> resultQueueGet();
+      std::shared_ptr<nj::Result> resultQueueGet();
       void stop();
       ~JMain();
 };

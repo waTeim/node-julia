@@ -136,11 +136,11 @@ Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &
    return Array::New(0);
 }
 
-int buildResponse(HandleScope &scope,const shared_ptr<vector<shared_ptr<nj::Value>>> &res,int argc,Local<Value> *argv)
+int buildResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc,Local<Value> *argv)
 {
    int index = 0;
 
-   for(shared_ptr<nj::Value> value: *res)
+   for(shared_ptr<nj::Value> value: res->results())
    {
       if(value.get())
       {
@@ -192,15 +192,34 @@ Handle<Value> doEval(const Arguments &args)
    if(text.length() > 0 && (engine = J->getEngine()))
    {
       engine->evalQueuePut(*text);
-      shared_ptr<vector<shared_ptr<nj::Value>>> res = engine->resultQueueGet();
+      shared_ptr<nj::Result> res = engine->resultQueueGet();
   
       if(res.get())
       {
-         int argc = res->size();
-         Local<Value> *argv = new Local<Value>[argc];
+         int exId = res->exId();
 
-         argc = buildResponse(scope,res,argc,argv);
-         return callback(scope,cb,argc,argv);
+         if(exId != nj::Exception::no_exception)
+         {
+            switch(exId)
+            {
+               case nj::Exception::julia_undef_var_error_exception:
+               case nj::Exception::julia_method_error_exception:
+                  ThrowException(Exception::ReferenceError(String::New(res->exText().c_str())));
+               break;
+               default:
+                  ThrowException(Exception::Error(String::New(res->exText().c_str())));
+               break;
+            }
+            return scope.Close(Undefined());
+         }
+         else
+         {
+            int argc = res->results().size();
+            Local<Value> *argv = new Local<Value>[argc];
+
+            argc = buildResponse(scope,res,argc,argv);
+            return callback(scope,cb,argc,argv);
+         }
       }
       else return callback(scope,cb,0,0);
    }
@@ -235,15 +254,34 @@ Handle<Value> doExec(const Arguments &args)
          if(reqElement.get()) req.push_back(reqElement);
       }
       engine->evalQueuePut(*funcName,req);
-      shared_ptr<vector<shared_ptr<nj::Value>>> res = engine->resultQueueGet();
+      shared_ptr<nj::Result> res = engine->resultQueueGet();
  
       if(res.get())
       {
-         int argc = res->size();
-         Local<Value> *argv = new Local<Value>[argc];
+         int exId = res->exId();
 
-         argc = buildResponse(scope,res,argc,argv);
-         return callback(scope,cb,argc,argv);
+         if(exId != nj::Exception::no_exception)
+         {
+            switch(exId)
+            {
+               case nj::Exception::julia_undef_var_error_exception:
+               case nj::Exception::julia_method_error_exception:
+                  ThrowException(Exception::ReferenceError(String::New(res->exText().c_str())));
+               break;
+               default:
+                  ThrowException(Exception::Error(String::New(res->exText().c_str())));
+               break;
+            }
+            return scope.Close(Undefined());
+         }
+         else
+         {
+            int argc = res->results().size();
+            Local<Value> *argv = new Local<Value>[argc];
+
+            argc = buildResponse(scope,res,argc,argv);
+            return callback(scope,cb,argc,argv);
+         }
       }
       else return callback(scope,cb,0,0);
    }

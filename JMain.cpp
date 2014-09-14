@@ -1,3 +1,4 @@
+#include <iostream>
 #include <julia.h>
 #include "JMain.h"
 #include "Call.h"
@@ -5,10 +6,10 @@
 
 using namespace std;
 
-shared_ptr<vector<shared_ptr<nj::Value>>> JMain::eval(const shared_ptr<nj::Expr> &expr)
+shared_ptr<nj::Result> JMain::eval(const shared_ptr<nj::Expr> &expr)
 {
-   if(expr.get()) return shared_ptr<vector<shared_ptr<nj::Value>>>(new vector<shared_ptr<nj::Value>>(expr->eval()));
-   return shared_ptr<vector<shared_ptr<nj::Value>>>(new vector<shared_ptr<nj::Value>>());
+   if(expr.get()) return shared_ptr<nj::Result>(new nj::Result(expr->eval()));
+   return shared_ptr<nj::Result>(new nj::Result());
 }
 
 JMain::JMain()
@@ -55,14 +56,14 @@ void JMain::operator()()
 
          if(expr.get())
          {
-            shared_ptr<vector<shared_ptr<nj::Value>>> result = eval(expr);
-            enqueue<vector<shared_ptr<nj::Value>>>(result,result_queue,m_resultq,c_resultq);
+            shared_ptr<nj::Result> result = eval(expr);
+            enqueue<nj::Result>(result,result_queue,m_resultq,c_resultq);
          }
          else
          {
-            shared_ptr<vector<shared_ptr<nj::Value>>> result;
+            shared_ptr<nj::Result> result;
             
-            enqueue<vector<shared_ptr<nj::Value>>>(result,result_queue,m_resultq,c_resultq);
+            enqueue<nj::Result>(result,result_queue,m_resultq,c_resultq);
          }
          {
             unique_lock<mutex> lock(m_state);
@@ -92,9 +93,9 @@ void JMain::evalQueuePut(const string &funcName,const vector<shared_ptr<nj::Valu
    enqueue(expr,eval_queue,m_evalq,c_evalq);
 }
 
-shared_ptr<vector<shared_ptr<nj::Value>>> JMain::resultQueueGet()
+shared_ptr<nj::Result> JMain::resultQueueGet()
 {
-   return dequeue<vector<shared_ptr<nj::Value>>>(result_queue,m_resultq,c_resultq); 
+   return dequeue<nj::Result>(result_queue,m_resultq,c_resultq); 
 }
 
 void JMain::stop()

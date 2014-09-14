@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "Values.h"
+#include "Result.h"
 
 namespace nj
 {
@@ -12,7 +13,7 @@ namespace nj
    {
       public:
 
-         virtual std::vector<std::shared_ptr<Value>> eval(std::vector<std::shared_ptr<Value>> &args) = 0;
+         virtual Result eval(std::vector<std::shared_ptr<Value>> &args) = 0;
    };
 
    struct Expr
@@ -20,10 +21,10 @@ namespace nj
       std::shared_ptr<EvalFunc> F;
       std::vector<std::shared_ptr<Value>> args;
 
-      std::vector<std::shared_ptr<Value>> eval()
+      Result eval()
       {
          if(F.get()) return F->eval(args);
-         return args;
+         return Result(args);
       }
    };
 };

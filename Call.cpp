@@ -7,7 +7,7 @@
 
 using namespace std;
 
-vector<shared_ptr<nj::Value>> nj::Call::eval(vector<shared_ptr<nj::Value>> &args)
+nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args)
 {
    vector<shared_ptr<nj::Value>> res;
 
@@ -33,20 +33,22 @@ vector<shared_ptr<nj::Value>> nj::Call::eval(vector<shared_ptr<nj::Value>> &args
       }
    }
 
-   jl_value_t *ex = jl_exception_occurred();
+   jl_value_t *jl_ex = jl_exception_occurred();
    
-   if(ex)
+   if(jl_ex)
    {
-     JL_GC_PUSH1(&ex);
+     JL_GC_PUSH1(&jl_ex);
 
-     string exText =  getErrorText(ex);
+     shared_ptr<Exception> ex = genJuliaError(jl_ex);
+
+     JL_GC_POP();
+     return Result(ex);
    }
    else
    {
       JL_GC_PUSH1(&jl_res);
       res = lvalue(jl_res);
+      JL_GC_POP();
+      return Result(res);
    }
-
-   JL_GC_POP();
-   return res;
 }

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-nj::SystemException::SystemException(const string &what):Exception(what)
+nj::SystemException::SystemException(const string &what):Exception(system_exception,what)
 {
    if(errno != 0)
    {

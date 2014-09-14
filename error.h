@@ -2,10 +2,11 @@
 #define __nj_error
 
 #include <string>
+#include "Exception.h"
 
 namespace nj
 {
-   std::string getErrorText(jl_value_t *ex);
+   std::shared_ptr<nj::Exception> genJuliaError(jl_value_t *jl_ex);
 };
 
 #endif
