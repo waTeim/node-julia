@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include "Types.h"
-#include "nj-vi.h"
+#include "request.h"
 
 using namespace std;
 using namespace v8;

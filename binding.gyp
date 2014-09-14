@@ -21,8 +21,8 @@
         "debug.cpp",
         "error.cpp",
         "lvalue.cpp",
-        "rvalue.cpp",
-        "nj-vi.cpp"
+        "request.cpp",
+        "rvalue.cpp"
       ],
       "cflags!":     [ "-fno-exceptions" ],
       "cflags":      [ "-std=c++11" , "-DJULIA_DIR=<(julia)" , "-I<(julia)/include/julia" ],
