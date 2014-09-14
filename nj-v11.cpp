@@ -43,16 +43,10 @@ Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive)
          return scope.Escape(dest);
       }
       break;
-      case nj::char_type:
-      {
-         Local<Value> dest = String::NewFromUtf8(I,primitive.toString().c_str());
-
-         return scope.Escape(dest);
-      }
-      break;
       case nj::int64_type:
       case nj::int32_type:
       case nj::int16_type:
+      case nj::int8_type:
       {
          Local<Value> dest = Number::New(I,primitive.toInt());
 
@@ -62,7 +56,7 @@ Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive)
       case nj::uint64_type:
       case nj::uint32_type:
       case nj::uint16_type:
-      case nj::uchar_type:
+      case nj::uint8_type:
       {
          Local<Value> dest = Number::New(I,primitive.toUInt());
 
@@ -77,7 +71,8 @@ Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive)
          return scope.Escape(dest);
       }
       break;
-      case nj::string_type:
+      case nj::ascii_string_type:
+      case nj::utf8_string_type:
       {
          Local<Value> dest = String::NewFromUtf8(I,primitive.toString().c_str());
 
@@ -138,21 +133,21 @@ Local<Array> buildArrayResponse(const shared_ptr<nj::Value> &value)
       case nj::int64_type: return scope.Escape(buildArrayResponse<int64_t,nj::Int64_t>(value)); break;
       case nj::int32_type: return scope.Escape(buildArrayResponse<int,nj::Int32_t>(value)); break;
       case nj::int16_type: return scope.Escape(buildArrayResponse<short,nj::Int16_t>(value)); break;
+      case nj::int8_type: return scope.Escape(buildArrayResponse<char,nj::Int8_t>(value)); break;
       case nj::uint64_type: return scope.Escape(buildArrayResponse<uint64_t,nj::UInt64_t>(value)); break;
       case nj::uint32_type: return scope.Escape(buildArrayResponse<unsigned,nj::UInt32_t>(value)); break;
       case nj::uint16_type: return scope.Escape(buildArrayResponse<unsigned short,nj::UInt16_t>(value)); break;
-      case nj::char_type: return scope.Escape(buildArrayResponse<char,nj::Char_t>(value)); break;
-      case nj::uchar_type: return scope.Escape(buildArrayResponse<unsigned char,nj::UChar_t>(value)); break;
+      case nj::uint8_type: return scope.Escape(buildArrayResponse<unsigned char,nj::UInt8_t>(value)); break;
    }
 
    return scope.Escape(Array::New(I,0));
 }
 
-int buildResponse(const shared_ptr<vector<shared_ptr<nj::Value>>> &res,int argc,Local<Value> *argv)
+int buildResponse(const shared_ptr<nj::Result> &res,int argc,Local<Value> *argv)
 {
    int index = 0;
 
-   for(shared_ptr<nj::Value> value: *res)
+   for(shared_ptr<nj::Value> value: res->results())
    {
       if(value.get())
       {
@@ -211,15 +206,33 @@ void doEval(const FunctionCallbackInfo<Value> &args)
    if(text.length() > 0 && (engine = J->getEngine()))
    {
       engine->evalQueuePut(*text);
-      shared_ptr<vector<shared_ptr<nj::Value>>> res = engine->resultQueueGet();
-  
+      shared_ptr<nj::Result> res = engine->resultQueueGet();
+
       if(res.get())
       {
-         int argc = res->size();
-         Local<Value> *argv = new Local<Value>[argc];
+         int exId = res->exId();
 
-         argc = buildResponse(res,argc,argv);
-         callback(I,args,cb,argc,argv);
+         if(exId != nj::Exception::no_exception)
+         {
+            switch(exId)
+            {
+               case nj::Exception::julia_undef_var_error_exception:
+               case nj::Exception::julia_method_error_exception:
+                  I->ThrowException(Exception::ReferenceError(String::NewFromUtf8(I,res->exText().c_str())));
+               break;
+               default:
+                  I->ThrowException(Exception::Error(String::NewFromUtf8(I,res->exText().c_str())));
+               break;
+            }
+         }
+         else
+         {
+            int argc = res->results().size();
+            Local<Value> *argv = new Local<Value>[argc];
+
+            argc = buildResponse(res,argc,argv);
+            callback(I,args,cb,argc,argv);
+         }
       }
    }
    else
@@ -258,15 +271,33 @@ void doExec(const FunctionCallbackInfo<Value> &args)
          if(reqElement.get()) req.push_back(reqElement);
       }
       engine->evalQueuePut(*funcName,req);
-      shared_ptr<vector<shared_ptr<nj::Value>>> res = engine->resultQueueGet();
+      shared_ptr<nj::Result> res = engine->resultQueueGet();
  
       if(res.get())
       {
-         int argc = res->size();
-         Local<Value> *argv = new Local<Value>[argc];
+         int exId = res->exId();
 
-         argc = buildResponse(res,argc,argv);
-         callback(I,args,cb,argc,argv);
+         if(exId != nj::Exception::no_exception)
+         {
+            switch(exId)
+            {
+               case nj::Exception::julia_undef_var_error_exception:
+               case nj::Exception::julia_method_error_exception:
+                  I->ThrowException(Exception::ReferenceError(String::NewFromUtf8(I,res->exText().c_str())));
+               break;
+               default:
+                  I->ThrowException(Exception::Error(String::NewFromUtf8(I,res->exText().c_str())));
+               break;
+            }
+         }
+         else
+         {
+            int argc = res->results().size();
+            Local<Value> *argv = new Local<Value>[argc];
+
+            argc = buildResponse(res,argc,argv);
+            callback(I,args,cb,argc,argv);
+         }
       }
    }
    else
