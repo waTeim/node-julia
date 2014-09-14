@@ -77,7 +77,7 @@ void JMain::operator()()
 void JMain::evalQueuePut(const string &text)
 {
    shared_ptr<nj::Expr> expr(new nj::Expr());
-   expr->args.push_back(shared_ptr<nj::Value>(new nj::String(text)));
+   expr->args.push_back(shared_ptr<nj::Value>(new nj::UTF8String(text)));
    expr->F = shared_ptr<nj::EvalFunc>(new nj::Immediate);
    
    enqueue(expr,eval_queue,m_evalq,c_evalq);
@@ -86,7 +86,7 @@ void JMain::evalQueuePut(const string &text)
 void JMain::evalQueuePut(const string &funcName,const vector<shared_ptr<nj::Value>> &argv)
 {
    shared_ptr<nj::Expr> expr(new nj::Expr());
-   expr->args.push_back(shared_ptr<nj::Value>(new nj::String(funcName)));
+   expr->args.push_back(shared_ptr<nj::Value>(new nj::UTF8String(funcName)));
    for(shared_ptr<nj::Value> arg: argv) expr->args.push_back(arg);
    expr->F = shared_ptr<nj::EvalFunc>(new nj::Call);
 
