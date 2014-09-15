@@ -24,18 +24,21 @@
         "request.cpp",
         "rvalue.cpp"
       ],
-      "libraries":
-      [
-         "-ljulia"
-      ],
       "cflags!":     [ "-fno-exceptions" ],
       "cflags":      [ "-std=c++11" , '-DJULIA_DIR="<(julia)"' , "-I<(julia)/include/julia" ],
       "cflags_cc!":  [ "-fno-exceptions" ],
-      "ldflags":
-      [
-         "-L<(julia)/lib/julia",
-         "-Wl,-rpath,<(julia)/lib/julia"
-      ],
+      "link_settings":
+      {
+         "ldflags":
+         [
+            "-L<(julia)/lib/julia",
+            "-Wl,-rpath,<(julia)/lib/julia"
+         ],
+         "libraries":
+         [
+            "-ljulia"
+         ]
+      },
       "conditions":
       [
         [ "OS=='mac'", 
