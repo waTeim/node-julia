@@ -37,7 +37,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args)
       jl_value_t **jl_args = new jl_value_t*[numArgs];
 
       for(int i = 0;i < numArgs;i++) jl_args[i] = rvalue(args[i + 1]);
-      jl_res = jl_call(func,jl_args,numArgs - 1);
+      jl_res = jl_call(func,jl_args,numArgs);
       delete jl_args;
    }
 
