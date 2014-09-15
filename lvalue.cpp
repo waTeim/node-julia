@@ -1,5 +1,6 @@
 #include <iostream>
 #include <julia.h>
+#include <memory.h>
 #include "Values.h"
 #include "lvalue.h"
 

@@ -1,6 +1,7 @@
 #ifndef __nj_error
 #define __nj_error
 
+#include <memory>
 #include <string>
 #include "Exception.h"
 

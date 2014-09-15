@@ -1,6 +1,7 @@
 #ifndef __nj_Value
 #define __nj_Value
 
+#include <memory>
 #include <vector>
 #include "Exception.h"
 #include "Type.h"
