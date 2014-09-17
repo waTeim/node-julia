@@ -85,3 +85,78 @@ From above, calculate the inverse of the matrix returned and print the result.
        });
     });
 
+# Exceptions
+
+Julia exceptions are caught and then re-thrown the in the node environment.  There
+is currently a somewhat simplistic mapping in place to relate similar type exceptions.
+If Julia exception is caught that does not have a translation, the catchall is a 
+generic Javascript error.
+
+## An unknown method
+
+    julia.exec('foo',1,2,3,function(res){});
+      ^
+    ReferenceError: Julia method foo is undefined
+        at ReferenceError (native)
+        at Object.<anonymous> (/Users/jeffw/src/nj-test3/test3.js:5:7)
+        at Module._compile (module.js:449:26)
+        at Object.Module._extensions..js (module.js:467:10)
+        at Module.load (module.js:349:32)
+        at Function.Module._load (module.js:305:12)
+        at Function.Module.runMain (module.js:490:10)
+        at startup (node.js:124:16)
+        at node.js:807:3
+
+## By comparison a known function, but invoked with the wrong arguments
+
+    julia.exec('inv',1,2,3,function(res){ console.log(res); });
+      ^
+    ReferenceError: Julia unmatched method inv(Int64,Int64,Int64)
+        at ReferenceError (native)
+
+## A general error
+
+    julia.eval("(*!@&$(*&@$*(!@&$(*&@",function(res){});
+      ^
+    Error: Julia syntax: missing separator in tuple
+        at Error (native)
+
+# Limitations
+
+The following are limitations of the current framework, and while all are planned to
+be supported in the future, the implementation is difficult enough that it was thought
+better to provide the limited form now rather than wait several weeks or more for the
+full version.  There are various workaround for most of these issues.
+
+* Currently only primitative types and arrays of primatives are supported.  Composites
+are planned.  As a workarond use Julia composites within a module or wrapping function
+and export the result to javascript as a tuple which will be mapped to seperate
+function callback variables.
+* Julia invocations are currently synchronous.  For although the underlying top and 
+bottom parts of the framework operate in separate threads, the top end simply blocks
+until the bottom half is finished.  Asynchronicity will be support by using libuv
+send event.  Since node is single-threaded, blocking within a long running evaluation
+is a real problem.  This is the #1 priority currently.
+
+## OS specific issues.
+
+### OS/X
+As far as is know, OS/X is fully supported, but requires at least version 0.3.0 of Julia.
+Any problems should be considered a bug.
+
+### Linux
+Linux support should probably be considered still experimental.  The engine is available
+in a limited way (see below), but because of lack of include support, only things
+available in **Base** and **Core** are possible.
+
+* There is a known problem with the library load order that affects symbol resolution.  
+The workaround is to define LD_PRELOAD to always load libjulia first for example
+
+    export LD_PRELOAD=/usr/local/lib/julia/lib/libjulia.so
+
+* File IO is generally unavailable currently, which unfortunately includes "include" 
+functionality.
+
+### Windows
+Work on Windows support is in progress.  For anyone that wishes to contribute here,
+a compiler supporting *c++11* semantics is needed.
