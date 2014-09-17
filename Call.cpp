@@ -20,7 +20,12 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args)
 
    if(!func) func = jl_get_function(jl_base_module,funcName.toString().c_str());
    if(!func) func = jl_get_function(jl_main_module,funcName.toString().c_str());
-   if(!func) return res;
+   if(!func)
+   {
+      shared_ptr<Exception> ex = shared_ptr<Exception>(new JuliaMethodError(string("Julia method ") + funcName.toString() + " is undefined"));
+
+     return Result(ex);
+   }
 
    if(numArgs <= 3)
    {
