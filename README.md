@@ -39,11 +39,11 @@ location of Julia that was detected when **node-julia** was installed.
 
 ### Example
 
-   julia.start();     // Uses default location
+    julia.start();     // Uses default location
 
 or alternately
 
-   julia.start('/usr/local/julia/');  // overrides standard location
+    julia.start("/usr/local/julia/");  // overrides standard location
 
 ## eval
 
@@ -52,18 +52,18 @@ in the *Julia* REPL and returns the result to a function callback.
 
 ### Examples
 
-   julia.eval('rand(10,10)',function(x) 
-   {
-      console.log(x);
-   });
+    julia.eval("rand(10,10)",function(x) 
+    {
+       console.log(x);
+    });
 
 This would invoke the function **rand**(10,10) and return a 10x10 2-dimentional
 matrix and print the results.  Matricies are converted to *Javascript* Arrays.
 
-   julia.eval('e^10',function(x)
-   {
-      console.log(x);
-   });
+    julia.eval("e^10",function(x)
+    {
+       console.log(x);
+    });
 
 This would compute exp(10) and print the result as a *Javascript* **Number**.
 
@@ -77,11 +77,11 @@ to the *Julia* function.  The final argument is a function callback.
 
 From above, calculate the inverse of the matrix returned and print the result.
 
-   julia.eval('rand(10,10)',function(x)   
-   {
-      julia.exec('inv',x,function(xInverse)
-      {
-         console.log(xInverse);
-      });
-   });
+    julia.eval("rand(10,10)",function(x)   
+    {
+       julia.exec('inv',x,function(xInverse)
+       {
+          console.log(xInverse);
+       });
+    });
 
