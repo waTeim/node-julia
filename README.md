@@ -3,7 +3,7 @@ node-julia
 
 A module linking node.js and Julia.
 
-#Installation#
+# Installation
 
 Rather than installing Julia along with this module, it is assumed that
 the Julia install has already occured.  This is appropriate since Julia
@@ -22,13 +22,13 @@ located in a standard location relative to the *bin* directory where the
 **julia** executable is located. It is this lib driectory that contains the
 necessary embedding API that comes with the language.
 
-#Use and Syntax#
+# Use and Syntax
 
     julia = require('node-julia');
 
 Currently, there are 3 exported functions; **start**, **eval**, and **exec**.  
 
-##start##
+## start
 
 This function starts the embedded julia engine.  It need be called only once,
 but can be called multiple times, but will have no effect after the first time.
@@ -37,7 +37,7 @@ in the future and called implicitly.  It takes a single optional argument,
 the location of the *Julia* installation which will otherwise be assumed to be
 location of Julia that was detected when **node-julia** was installed.
 
-###Example###
+### Example
 
    julia.start();     // Uses default location
 
@@ -45,12 +45,12 @@ or alternately
 
    julia.start('/usr/local/julia/');  // overrides standard location
 
-##eval##
+## eval
 
 This function takes a single string argument and evaluates it like it was typed
 in the *Julia* REPL and returns the result to a function callback.
 
-###Examples###
+### Examples
 
    julia.eval('rand(10,10)',function(x) 
    {
@@ -67,13 +67,13 @@ matrix and print the results.  Matricies are converted to *Javascript* Arrays.
 
 This would compute exp(10) and print the result as a *Javascript* **Number**.
 
-##exec##
+## exec
 
 This function takes a **String** as the first argument indicating the name of
 the *Julia* function to call followed by any number of arguments to be used as arguments
 to the *Julia* function.  The final argument is a function callback.
 
-###Example##
+### Example
 
 From above, calculate the inverse of the matrix returned and print the result.
 
