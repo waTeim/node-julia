@@ -1,7 +1,7 @@
 node-julia
 ==========
 
-A module linking node.js and Julia.
+Connecting node.js and Julia.
 
 # Installation
 
