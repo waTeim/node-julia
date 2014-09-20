@@ -72,8 +72,8 @@ void addLValueElements(jl_value_t *jl_value,vector<shared_ptr<nj::Value>> &res)
       else if(jl_is_int64(jl_value)) value.reset(new nj::Int64(jl_unbox_int64(jl_value)));
       else if(jl_is_int32(jl_value)) value.reset(new nj::Int32(jl_unbox_int32(jl_value)));
       else if(jl_is_int8(jl_value)) value.reset(new nj::Int8(jl_unbox_int8(jl_value)));
-      else if(jl_is_utf8_string(jl_value)) value.reset(new nj::UTF8String((char*)jl_unbox_voidpointer(jl_value)));
-      else if(jl_is_ascii_string(jl_value)) value.reset(new nj::ASCIIString((char*)jl_unbox_voidpointer(jl_value)));
+      else if(jl_is_utf8_string(jl_value)) value.reset(new nj::UTF8String(jl_string_data(jl_value)));
+      else if(jl_is_ascii_string(jl_value)) value.reset(new nj::ASCIIString(jl_string_data(jl_value)));
       else if(jl_is_float32(jl_value)) value.reset(new nj::Float32(jl_unbox_float32(jl_value)));
       else if(jl_is_uint64(jl_value)) value.reset(new nj::UInt64(jl_unbox_uint64(jl_value)));
       else if(jl_is_uint32(jl_value)) value.reset(new nj::UInt32(jl_unbox_uint32(jl_value)));
