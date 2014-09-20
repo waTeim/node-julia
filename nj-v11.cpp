@@ -22,10 +22,9 @@ void callback(Isolate *I,const FunctionCallbackInfo<Value>& args,const Local<Fun
   cb->Call(I->GetCurrentContext()->Global(),argc,argv);
 }
 
-Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive)
+Local<Value> buildPrimitiveResponse(HandleScope &scope,const nj::Primitive &primitive)
 {
    Isolate *I = Isolate::GetCurrent();
-   EscapableHandleScope scope(I);
 
    switch(primitive.type()->getId())
    {
@@ -33,14 +32,14 @@ Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive)
       {
          Local<Value> dest = Null(I);
 
-         return scope.Escape(dest);
+         return dest;
       }
       break;
       case nj::boolean_type:
       {
          Local<Value> dest = Boolean::New(I,primitive.toBoolean());
 
-         return scope.Escape(dest);
+         return dest;
       }
       break;
       case nj::int64_type:
@@ -50,7 +49,7 @@ Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive)
       {
          Local<Value> dest = Number::New(I,primitive.toInt());
 
-         return scope.Escape(dest);
+         return dest;
       }
       break;
       case nj::uint64_type:
@@ -60,7 +59,7 @@ Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive)
       {
          Local<Value> dest = Number::New(I,primitive.toUInt());
 
-         return scope.Escape(dest);
+         return dest;
       }
       break;
       case nj::float64_type:
@@ -68,7 +67,7 @@ Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive)
       {
          Local<Value> dest = Number::New(I,primitive.toFloat());
 
-         return scope.Escape(dest);
+         return dest;
       }
       break;
       case nj::ascii_string_type:
@@ -76,18 +75,17 @@ Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive)
       {
          Local<Value> dest = String::NewFromUtf8(I,primitive.toString().c_str());
 
-         return scope.Escape(dest);
+         return dest;
       }
       break;
    }
 
-   return scope.Escape(Array::New(I,0));
+   return Array::New(I,0);
 }
 
-template<typename V,typename E> Local<Array> buildArrayResponse(const shared_ptr<nj::Value> &value)
+template<typename V,typename E> Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &value)
 {
    Isolate *I = Isolate::GetCurrent();
-   EscapableHandleScope scope(I);
    const nj::Array<V,E> &array = static_cast<const nj::Array<V,E>&>(*value);
 
    if(array.size() == 0) return Local<Array>();
@@ -98,7 +96,7 @@ template<typename V,typename E> Local<Array> buildArrayResponse(const shared_ptr
       Local<Array> dest = Array::New(I,size0);
 
       for(size_t i = 0;i < size0;i++) dest->Set(i,Number::New(I,p[i]));
-      return scope.Escape(dest);
+      return dest;
    }
    else if(array.dims().size() == 2)
    {
@@ -114,36 +112,36 @@ template<typename V,typename E> Local<Array> buildArrayResponse(const shared_ptr
          dest->Set(i,row);
          for(size_t j = 0;j < size1;j++) row->Set(j,Number::New(I,p[size0*j + i]));
       }
-      return scope.Escape(dest);
+      return dest;
    }
-   return scope.Escape(Array::New(I,0));
+   return Array::New(I,0);
 }
 
-Local<Array> buildArrayResponse(const shared_ptr<nj::Value> &value)
+Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &value)
 {
    const nj::Array_t *array_type = static_cast<const nj::Array_t*>(value->type());
    const nj::Type *element_type = array_type->etype();
-   Isolate *I = Isolate::GetCurrent();
-   EscapableHandleScope scope(I);
 
    switch(element_type->getId())
    {
-      case nj::float64_type: return scope.Escape(buildArrayResponse<double,nj::Float64_t>(value)); break;
-      case nj::float32_type: return scope.Escape(buildArrayResponse<float,nj::Float32_t>(value)); break;
-      case nj::int64_type: return scope.Escape(buildArrayResponse<int64_t,nj::Int64_t>(value)); break;
-      case nj::int32_type: return scope.Escape(buildArrayResponse<int,nj::Int32_t>(value)); break;
-      case nj::int16_type: return scope.Escape(buildArrayResponse<short,nj::Int16_t>(value)); break;
-      case nj::int8_type: return scope.Escape(buildArrayResponse<char,nj::Int8_t>(value)); break;
-      case nj::uint64_type: return scope.Escape(buildArrayResponse<uint64_t,nj::UInt64_t>(value)); break;
-      case nj::uint32_type: return scope.Escape(buildArrayResponse<unsigned,nj::UInt32_t>(value)); break;
-      case nj::uint16_type: return scope.Escape(buildArrayResponse<unsigned short,nj::UInt16_t>(value)); break;
-      case nj::uint8_type: return scope.Escape(buildArrayResponse<unsigned char,nj::UInt8_t>(value)); break;
+      case nj::float64_type: return buildArrayResponse<double,nj::Float64_t>(scope,value); break;
+      case nj::float32_type: return buildArrayResponse<float,nj::Float32_t>(scope,value); break;
+      case nj::int64_type: return buildArrayResponse<int64_t,nj::Int64_t>(scope,value); break;
+      case nj::int32_type: return buildArrayResponse<int,nj::Int32_t>(scope,value); break;
+      case nj::int16_type: return buildArrayResponse<short,nj::Int16_t>(scope,value); break;
+      case nj::int8_type: return buildArrayResponse<char,nj::Int8_t>(scope,value); break;
+      case nj::uint64_type: return buildArrayResponse<uint64_t,nj::UInt64_t>(scope,value); break;
+      case nj::uint32_type: return buildArrayResponse<unsigned,nj::UInt32_t>(scope,value); break;
+      case nj::uint16_type: return buildArrayResponse<unsigned short,nj::UInt16_t>(scope,value); break;
+      case nj::uint8_type: return buildArrayResponse<unsigned char,nj::UInt8_t>(scope,value); break;
    }
 
-   return scope.Escape(Array::New(I,0));
+   Isolate *I = Isolate::GetCurrent();
+
+   return Array::New(I,0);
 }
 
-int buildResponse(const shared_ptr<nj::Result> &res,int argc,Local<Value> *argv)
+int buildResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc,Local<Value> *argv)
 {
    int index = 0;
 
@@ -155,11 +153,11 @@ int buildResponse(const shared_ptr<nj::Result> &res,int argc,Local<Value> *argv)
          {
             const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
 
-            argv[index++] = buildPrimitiveResponse(primitive);
+            argv[index++] = buildPrimitiveResponse(scope,primitive);
          }
          else
          {
-            argv[index++] = buildArrayResponse(value);
+            argv[index++] = buildArrayResponse(scope,value);
          }
       }
    }
@@ -230,7 +228,7 @@ void doEval(const FunctionCallbackInfo<Value> &args)
             int argc = res->results().size();
             Local<Value> *argv = new Local<Value>[argc];
 
-            argc = buildResponse(res,argc,argv);
+            argc = buildResponse(scope,res,argc,argv);
             callback(I,args,cb,argc,argv);
          }
       }
@@ -295,7 +293,7 @@ void doExec(const FunctionCallbackInfo<Value> &args)
             int argc = res->results().size();
             Local<Value> *argv = new Local<Value>[argc];
 
-            argc = buildResponse(res,argc,argv);
+            argc = buildResponse(scope,res,argc,argv);
             callback(I,args,cb,argc,argv);
          }
       }
