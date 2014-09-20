@@ -8,18 +8,18 @@ Connecting node.js and Julia.
 Rather than installing Julia along with this module, it is assumed that
 the Julia install has already occured.  This is appropriate since Julia
 has it's own package management system as well as other tools that it
-interacts with; having it install as a package subordinate to *node-julia*
+interacts with; having it install as a package subordinate to node-julia
 was thought too restrictive for the minor ease of installation that 
-would provide.
+it would provide.
 
 So, install Julia first.
 
 When this module is built, the script *tools/find_julia.py* is invoked which
-searches for *Julia* in several standard locations starting with **julia**
-located on the command path.  Is is assumed that the *Julia* install directory
-structure is the standard one with (importantly) the Julia *lib* directory
-located in a standard location relative to the *bin* directory where the
-**julia** executable is located. It is this lib driectory that contains the
+searches for Julia in several standard locations starting with *julia*
+located on the command path.  Is is assumed that the Julia install directory
+structure is the standard one with (importantly) the Julia lib directory
+located in a standard location relative to the bin directory where the
+julia executable is located. It is this lib directory that contains the
 necessary embedding API that comes with the language.
 
 # Use and Syntax
@@ -30,12 +30,13 @@ Currently, there are 3 exported functions; **start**, **eval**, and **exec**.
 
 ## start
 
-This function starts the embedded julia engine.  It need be called only once,
+This function starts the embedded Julia engine.  It need be called only once,
 but can be called multiple times, but will have no effect after the first time.
 It must be called before **eval** or **exec** is called.  It may be removed
-in the future and called implicitly.  It takes a single optional argument,
-the location of the *Julia* installation which will otherwise be assumed to be
-location of Julia that was detected when **node-julia** was installed.
+in the future and called implicitly.  It takes a single optional argument;
+which is the location of the Julia installation directory which will otherwise
+be assumed to be location of *julia* that was detected when node-julia was
+installed.
 
 ### Example
 
@@ -48,30 +49,30 @@ or alternately
 ## eval
 
 This function takes a single string argument and evaluates it like it was typed
-in the *Julia* REPL and returns the result to a function callback.
+in the Julia *REPL* and returns the result to a function callback.
 
 ### Examples
 
-    julia.eval("rand(10,10)",function(x) 
+    julia.eval('rand(10,10)',function(x) 
     {
        console.log(x);
     });
 
-This would invoke the function **rand**(10,10) and return a 10x10 2-dimentional
-matrix and print the results.  Matricies are converted to *Javascript* Arrays.
+This would invoke the function **rand(10,10)** and return a 10x10 2-dimentional
+matrix and print the results.  Matricies are converted to Javascript arrays.
 
     julia.eval("e^10",function(x)
     {
        console.log(x);
     });
 
-This would compute exp(10) and print the result as a *Javascript* **Number**.
+This would compute **exp(10)** and print the result as a Javascript *Number*.
 
 ## exec
 
-This function takes a **String** as the first argument indicating the name of
-the *Julia* function to call followed by any number of arguments to be used as arguments
-to the *Julia* function.  The final argument is a function callback.
+This function takes a *string* as the first argument which is the name of
+the Julia function to call followed by any number of arguments to be used as arguments
+to the Julia function.  The final argument is a function callback.
 
 ### Example
 
@@ -89,7 +90,7 @@ From above, calculate the inverse of the matrix returned and print the result.
 
 Julia exceptions are caught and then re-thrown the in the node environment.  There
 is currently a somewhat simplistic mapping in place to relate similar type exceptions.
-If Julia exception is caught that does not have a translation, the catchall is a 
+If a Julia exception is caught that does not have a translation, the catchall is a 
 generic Javascript error.
 
 ## An unknown method
@@ -130,12 +131,12 @@ full version.  There are various workaround for most of these issues.
 
 * Currently only primitative types and arrays of primatives are supported.  Composites
 are planned.  As a workarond use Julia composites within a module or wrapping function
-and export the result to javascript as a tuple which will be mapped to seperate
+and export the result to node as a tuple which will be mapped to seperate
 function callback variables.
 * Julia invocations are currently synchronous.  For although the underlying top and 
-bottom parts of the framework operate in separate threads, the top end simply blocks
-until the bottom half is finished.  Asynchronicity will be support by using libuv
-send event.  Since node is single-threaded, blocking within a long running evaluation
+bottom parts of the framework operate in separate threads, the top half simply blocks
+until the bottom half is finished.  Asynchronicity will be supported by using **libuv**
+and send event.  Since node.js is single-threaded, blocking within a long running evaluation
 is a real problem.  This is the #1 priority currently.
 
 ## OS specific issues.
@@ -145,17 +146,9 @@ As far as is know, OS/X is fully supported, but requires at least version 0.3.0 
 Any problems should be considered a bug.
 
 ### Linux
-Linux support should probably be considered still experimental.  The engine is available
-in a limited way (see below), but because of lack of include support, only things
-available in **Base** and **Core** are possible.
-
-* There is a known problem with the library load order that affects symbol resolution.  
-The workaround is to define LD_PRELOAD to always load libjulia first for example
-
-    export LD_PRELOAD=/usr/local/lib/julia/lib/libjulia.so
-
-* File IO is generally unavailable currently, which unfortunately includes "include" 
-functionality.
+* There is a suspected problem with the library load order that affects symbol resolution
+and/or a **libuv** compability problem.  However, this problem can be avoided by using
+node 11 insead of node 10.  Previous general errors are fixed.
 
 ### Windows
 Work on Windows support is in progress.  For anyone that wishes to contribute here,
