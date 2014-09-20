@@ -1,9 +1,20 @@
+#include <dlfcn.h>
 #include "JuliaExecEnv.h"
 
 using namespace std;
 
 JuliaExecEnv::JuliaExecEnv(const std::string &installDir)
 {
+
+// The workaround for sys.so needing all those libjulia symbols.  On OS/X
+// this is not an issue as the dynamic linker resolves differently.  Call
+// dlopen explicitly and cause resolution immediately.  Force all symbols
+// to global scope.
+
+#if OS == linux
+   (void)dlopen(JULIA_DIR "/lib/julia/libjulia.so",RTLD_GLOBAL|RTLD_NOW);
+#endif
+
    const char *argv[1];
 
    engine = new JMain();
