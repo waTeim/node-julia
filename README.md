@@ -44,7 +44,7 @@ installed.
 
 or alternately
 
-    julia.start("/usr/local/julia/");  // overrides standard location
+    julia.start('/usr/local/julia/');  // overrides standard location
 
 ## eval
 
@@ -61,7 +61,7 @@ in the Julia *REPL* and returns the result to a function callback.
 This would invoke the function **rand(10,10)** and return a 10x10 2-dimentional
 matrix and print the results.  Matricies are converted to Javascript arrays.
 
-    julia.eval("e^10",function(x)
+    julia.eval('e^10',function(x)
     {
        console.log(x);
     });
@@ -78,7 +78,7 @@ to the Julia function.  The final argument is a function callback.
 
 From above, calculate the inverse of the matrix returned and print the result.
 
-    julia.eval("rand(10,10)",function(x)   
+    julia.eval('rand(10,10)',function(x)   
     {
        julia.exec('inv',x,function(xInverse)
        {
@@ -117,7 +117,7 @@ generic Javascript error.
 
 ## A general error
 
-    julia.eval("(*!@&$(*&@$*(!@&$(*&@",function(res){});
+    julia.eval('(*!@&$(*&@$*(!@&$(*&@',function(res){});
       ^
     Error: Julia syntax: missing separator in tuple
         at Error (native)
@@ -125,7 +125,7 @@ generic Javascript error.
 # Limitations
 
 The following are limitations of the current framework, and while all are planned to
-be supported in the future, the implementation is difficult enough that it was thought
+be addressed in the future, the implementation is difficult enough that it was thought
 better to provide the limited form now rather than wait several weeks or more for the
 full version.  There are various workaround for most of these issues.
 
@@ -136,19 +136,20 @@ function callback variables.
 * Julia invocations are currently synchronous.  For although the underlying top and 
 bottom parts of the framework operate in separate threads, the top half simply blocks
 until the bottom half is finished.  Asynchronicity will be supported by using **libuv**
-and send event.  Since node.js is single-threaded, blocking within a long running evaluation
-is a real problem.  This is the #1 priority currently.
+and send event.  Since the node.js event loop is single-threaded, blocking within a
+long running evaluation is a real problem.  This is the #1 priority currently.
 
 ## OS specific issues.
 
 ### OS/X
-As far as is know, OS/X is fully supported, but requires at least version 0.3.0 of Julia.
+As far as is known, OS/X is fully supported, but requires at least version 0.3.0 of Julia.
 Any problems should be considered a bug.
 
 ### Linux
 * There is a suspected problem with the library load order that affects symbol resolution
 and/or a **libuv** compability problem.  However, this problem can be avoided by using
-node 11 insead of node 10.  Previous general errors are fixed.
+node 11 insead of node 10.  Previous general errors are fixed.  As above, Julia version 0.3.0
+or higher should be used.
 
 ### Windows
 Work on Windows support is in progress.  For anyone that wishes to contribute here,
