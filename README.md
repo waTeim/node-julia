@@ -146,7 +146,7 @@ As far as is known, OS/X is fully supported, but requires at least version 0.3.0
 Any problems should be considered a bug.
 
 ### Linux
-* There is a suspected problem with the library load order that affects symbol resolution
+There is a suspected problem with the library load order that affects symbol resolution
 and/or a **libuv** compability problem.  However, this problem can be avoided by using
 node 11 insead of node 10.  Previous general errors are fixed.  As above, Julia version 0.3.0
 or higher should be used.
