@@ -122,6 +122,11 @@ generic Javascript error.
     Error: Julia syntax: missing separator in tuple
         at Error (native)
 
+# Tests
+Tests have been added to the directory test, and can be run using npm
+
+    npm test
+
 # Limitations
 
 The following are limitations of the current framework, and while all are planned to
