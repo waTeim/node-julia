@@ -80,6 +80,7 @@ void addLValueElements(jl_value_t *jl_value,vector<shared_ptr<nj::Value>> &res)
       else if(jl_is_int16(jl_value)) value.reset(new nj::Int16(jl_unbox_int16(jl_value)));
       else if(jl_is_uint8(jl_value)) value.reset(new nj::UInt8(jl_unbox_uint8(jl_value)));
       else if(jl_is_uint16(jl_value)) value.reset(new nj::UInt16(jl_unbox_uint16(jl_value)));
+      else if(jl_is_bool(jl_value)) value.reset(new nj::Boolean(jl_unbox_bool(jl_value)));
 
       if(value.get()) res.push_back(value);
    }

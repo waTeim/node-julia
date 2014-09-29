@@ -7,16 +7,6 @@
 using namespace std;
 using namespace v8;
 
-Handle<Value> returnNull(HandleScope &scope)
-{
-   return scope.Close(Null());
-}
-
-Handle<Value> returnBoolean(HandleScope &scope,bool b)
-{
-   return scope.Close(Boolean::New(b));
-}
-
 Handle<Value> returnString(HandleScope &scope,const string &s)
 {
    return scope.Close(String::New(s.c_str()));
@@ -33,8 +23,20 @@ Local<Value> buildPrimitiveResponse(HandleScope &scope,const nj::Primitive &prim
 
    switch(primitive.type()->getId())
    {
-      case nj::null_type: returnNull(scope); break;
-      case nj::boolean_type: returnBoolean(scope,primitive.toBoolean()); break;
+      case nj::null_type:
+      {
+         Local<Value> dest = Local<Value>::New(Null());
+
+         return dest;
+      }
+      break;
+      case nj::boolean_type:
+      {
+         Local<Value> dest = Boolean::New(primitive.toBoolean())->ToBoolean();
+
+         return dest;
+      }
+      break;
       case nj::int64_type:
       case nj::int32_type:
       case nj::int16_type:
@@ -73,7 +75,7 @@ Local<Value> buildPrimitiveResponse(HandleScope &scope,const nj::Primitive &prim
       break;
    }
 
-   return Array::New(0);
+   return Local<Value>::New(Null());
 }
 
 template<typename V,typename E> Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &value)
@@ -177,7 +179,7 @@ Handle<Value> doEval(const Arguments &args)
    HandleScope scope;
    int numArgs = args.Length();
 
-   if(numArgs < 2 || !J) return returnNull(scope);
+   if(numArgs < 2 || !J) return scope.Close(Null());
 
    Local<String> arg0 = Local<String>::Cast(args[0]);
    Local<Function> cb = Local<Function>::Cast(args[1]);
@@ -231,7 +233,7 @@ Handle<Value> doExec(const Arguments &args)
    HandleScope scope;
    int numArgs = args.Length();
 
-   if(numArgs < 2 || !J) return returnNull(scope);
+   if(numArgs < 2 || !J) return scope.Close(Null());
 
    Local<String> arg0 = Local<String>::Cast(args[0]);
    String::Utf8Value funcName(arg0);
