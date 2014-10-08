@@ -5,7 +5,8 @@
       "variables":
       {
          "version":"<!(node --version | sed -e 's/^v\([0-9]*\.[0-9]*\).*$/\\1.x/')",
-         "julia":"<!(python tools/find_julia.py <(OS))"
+         "julia":"<!(python tools/find_julia.py <(OS))",
+         "libDir":"<!(python -c 'import os; print(os.path.abspath(\"\"))')/lib"
       },
       "target_name": "nj",
       "sources":     
@@ -15,6 +16,8 @@
         "Immediate.cpp",
         "JMain.cpp",
         "JuliaExecEnv.cpp",
+        "JuliaHandle.cpp",
+        "Script.cpp",
         "Type.cpp",
         "Value.cpp",
         "Values.cpp",
@@ -30,6 +33,7 @@
          "-DOS=<(OS)",
          "-std=c++11",
          '-DJULIA_DIR="<(julia)"',
+         '-DLIB_DIR="<(libDir)"',
          "-I<(julia)/include/julia"
       ],
       "cflags_cc!":  [ "-fno-exceptions" ],
@@ -59,6 +63,7 @@
                  "-std=c++11",
                  "-stdlib=libc++",
                  '-DJULIA_DIR="<(julia)"',
+                 '-DLIB_DIR="<(libDir)"',
                  "-I<(julia)/include/julia"
               ],
               "OTHER_LDFLAGS":
@@ -73,7 +78,11 @@
         ],
         [ "version=='0.10.x'",
           {
-             "sources": [ "nj-v10.cpp" ]
+             "sources":
+            [ 
+               "ScriptEncapsulated-v10.cpp",
+               "nj-v10.cpp"
+            ]
           }
         ],
         [ "version=='0.11.x'",

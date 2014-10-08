@@ -33,6 +33,7 @@ namespace nj
    const int null_type = 0;
    const int any_type = 1;
    const int array_type = 2;
+   const int julia_handle_type = 3;
 
    class Null_t:public Type
    {
@@ -74,6 +75,15 @@ namespace nj
          Array_t(Type *elementType):Type(array_type) {  element_type = elementType;  }
  
          Type const *etype() const {  return element_type;  }
+   };
+
+   class JuliaHandle_t:public Type
+   {
+      public:
+
+         static Type *instance() {  return Type::instance<JuliaHandle_t>();  }
+
+         JuliaHandle_t():Type(julia_handle_type) {}
    };
 };
 

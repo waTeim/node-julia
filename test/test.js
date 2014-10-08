@@ -38,7 +38,7 @@ function execInclude(julia,filename)
    return res;
 }
 
-function exec1(julia)
+function execA(julia)
 {
    var args = [];
    var res;
@@ -47,6 +47,19 @@ function exec1(julia)
    args.push(function(juliaResult) { res = juliaResult; });
 
    julia.exec.apply(null,args);
+
+   return res;
+}
+
+function execB(script)
+{
+   var args = [];
+   var res;
+
+   for(var i = 1;i < arguments.length;i++) args.push(arguments[i]);
+   args.push(function(juliaResult) { res = juliaResult; });
+
+   script.exec.apply(script,args);
 
    return res;
 }
@@ -158,7 +171,7 @@ describe('Regression Tests',function()
 
    it('user defined functions via exec',function()
    {
-      expect(exec1(julia,'f',100)).to.equal(exec1(julia,'g',100));
+      expect(execA(julia,'f',100)).to.equal(execA(julia,'g',100));
    });
 
    it('macros via eval',function()
@@ -173,7 +186,28 @@ describe('Regression Tests',function()
 
    it('arrays via exec',function()
    {
-      expect(verifyIdentity(exec1(julia,'eye',1000),1000)).to.equal(true);
+      expect(verifyIdentity(execA(julia,'eye',1000),1000)).to.equal(true);
+   });
+
+   it('construction of Script using new',function()
+   {
+      var script = new julia.Script("test/inc1.jl");
+
+      expect(script.getPath()).to.equal('test/inc1.jl');
+   });
+
+   it('construction of Script using function call like syntax',function()
+   {
+      var script = julia.Script("test/inc2.jl");
+
+      expect(script.getModuleName()).to.equal('njIsoMod1');
+   });
+
+   it('script creation (via factory)',function()
+   {
+      var script = julia.newScript("test/inc3.jl");
+
+      expect(verifyIdentity(execB(script,10),10)).to.equal(true);
    });
 });
 

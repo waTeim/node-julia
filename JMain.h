@@ -69,8 +69,10 @@ class JMain
 
       void initialize(int argc,const char *argv[]) throw(nj::InitializationException);
       void operator()();
-      void evalQueuePut(const std::string &expr);
-      void evalQueuePut(const std::string &funcName,const std::vector<std::shared_ptr<nj::Value>> &argv);
+      void eval(const std::string &expr);
+      void exec(const std::string &funcName,const std::vector<std::shared_ptr<nj::Value>> &argv);
+      void exec(const std::shared_ptr<nj::Value> &module,const std::string &funcName,const std::vector<std::shared_ptr<nj::Value>> &argv);
+      void compileScript(const std::string &filename);
       std::shared_ptr<nj::Result> resultQueueGet();
       void stop();
       ~JMain();

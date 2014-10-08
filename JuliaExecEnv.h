@@ -19,4 +19,6 @@ class JuliaExecEnv
       JMain *getEngine() {  return engine;  }
 };
 
+extern JuliaExecEnv *J;
+
 #endif

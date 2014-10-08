@@ -9,8 +9,6 @@ using namespace v8;
 Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive);
 Local<Array> buildArrayResponse(const shared_ptr<nj::Value> &value);
 
-JuliaExecEnv *J = 0;
-
 static shared_ptr<nj::Value> buildPrimitiveRequest(const Local<Value> &prim)
 {
    shared_ptr<nj::Value> v;

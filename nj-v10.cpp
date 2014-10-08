@@ -3,6 +3,7 @@
 #include <string>
 #include "Types.h"
 #include "request.h"
+#include "ScriptEncapsulated-v10.h"
 
 using namespace std;
 using namespace v8;
@@ -174,6 +175,39 @@ Handle<Value> doStart(const Arguments &args)
    return returnString(scope,"Julia Started");
 }
 
+Handle<Value> callbackWithResult(HandleScope &scope,Local<Function> &cb,shared_ptr<nj::Result> &res)
+{
+   if(res.get())
+   {
+      int exId = res->exId();
+
+      if(exId != nj::Exception::no_exception)
+      {
+         switch(exId)
+         {
+            case nj::Exception::julia_undef_var_error_exception:
+            case nj::Exception::julia_method_error_exception:
+               ThrowException(Exception::ReferenceError(String::New(res->exText().c_str())));
+            break;
+            default:
+               ThrowException(Exception::Error(String::New(res->exText().c_str())));
+            break;
+         }
+         return scope.Close(Undefined());
+      }
+      else
+      {
+         int argc = res->results().size();
+         Local<Value> *argv = new Local<Value>[argc];
+
+         argc = buildResponse(scope,res,argc,argv);
+         return callback(scope,cb,argc,argv);
+      }
+   }
+   else return callback(scope,cb,0,0);
+}
+
+
 Handle<Value> doEval(const Arguments &args)
 {
    HandleScope scope;
@@ -188,37 +222,10 @@ Handle<Value> doEval(const Arguments &args)
 
    if(text.length() > 0 && (engine = J->getEngine()))
    {
-      engine->evalQueuePut(*text);
+      engine->eval(*text);
       shared_ptr<nj::Result> res = engine->resultQueueGet();
-  
-      if(res.get())
-      {
-         int exId = res->exId();
-
-         if(exId != nj::Exception::no_exception)
-         {
-            switch(exId)
-            {
-               case nj::Exception::julia_undef_var_error_exception:
-               case nj::Exception::julia_method_error_exception:
-                  ThrowException(Exception::ReferenceError(String::New(res->exText().c_str())));
-               break;
-               default:
-                  ThrowException(Exception::Error(String::New(res->exText().c_str())));
-               break;
-            }
-            return scope.Close(Undefined());
-         }
-         else
-         {
-            int argc = res->results().size();
-            Local<Value> *argv = new Local<Value>[argc];
-
-            argc = buildResponse(scope,res,argc,argv);
-            return callback(scope,cb,argc,argv);
-         }
-      }
-      else return callback(scope,cb,0,0);
+ 
+      return callbackWithResult(scope,cb,res);
    }
    else
    {
@@ -250,37 +257,10 @@ Handle<Value> doExec(const Arguments &args)
 
          if(reqElement.get()) req.push_back(reqElement);
       }
-      engine->evalQueuePut(*funcName,req);
+      engine->exec(*funcName,req);
       shared_ptr<nj::Result> res = engine->resultQueueGet();
- 
-      if(res.get())
-      {
-         int exId = res->exId();
 
-         if(exId != nj::Exception::no_exception)
-         {
-            switch(exId)
-            {
-               case nj::Exception::julia_undef_var_error_exception:
-               case nj::Exception::julia_method_error_exception:
-                  ThrowException(Exception::ReferenceError(String::New(res->exText().c_str())));
-               break;
-               default:
-                  ThrowException(Exception::Error(String::New(res->exText().c_str())));
-               break;
-            }
-            return scope.Close(Undefined());
-         }
-         else
-         {
-            int argc = res->results().size();
-            Local<Value> *argv = new Local<Value>[argc];
-
-            argc = buildResponse(scope,res,argc,argv);
-            return callback(scope,cb,argc,argv);
-         }
-      }
-      else return callback(scope,cb,0,0);
+      return callbackWithResult(scope,cb,res);
    }
    else
    {
@@ -291,11 +271,21 @@ Handle<Value> doExec(const Arguments &args)
    }
 }
 
+Handle<Value> newScript(const Arguments& args)
+{
+  HandleScope scope;
+
+  return scope.Close(nj::ScriptEncapsulated::NewInstance(args));
+}
+
 void init(Handle<Object> exports)
 {
-  NODE_SET_METHOD(exports,"start",doStart);
-  NODE_SET_METHOD(exports,"eval",doEval);
-  NODE_SET_METHOD(exports,"exec",doExec);
+   nj::ScriptEncapsulated::Init(exports);
+
+   NODE_SET_METHOD(exports,"start",doStart);
+   NODE_SET_METHOD(exports,"eval",doEval);
+   NODE_SET_METHOD(exports,"exec",doExec);
+   NODE_SET_METHOD(exports,"newScript",newScript);
 }
 
 NODE_MODULE(nj,init)

@@ -5,19 +5,19 @@
 
 namespace nj
 {
-   const int boolean_type = 3;
-   const int int64_type = 4;
-   const int uint64_type = 5;
-   const int int32_type = 6;
-   const int uint32_type = 7;
-   const int int16_type = 8;
-   const int uint16_type = 9;
-   const int int8_type = 10;
-   const int uint8_type = 11;
-   const int float64_type = 12;
-   const int float32_type = 13;
-   const int ascii_string_type = 14;
-   const int utf8_string_type = 15;
+   const int boolean_type = 64;
+   const int int64_type = 65;
+   const int uint64_type = 66;
+   const int int32_type = 67;
+   const int uint32_type = 68;
+   const int int16_type = 69;
+   const int uint16_type = 70;
+   const int int8_type = 71;
+   const int uint8_type = 72;
+   const int float64_type = 73;
+   const int float32_type = 74;
+   const int ascii_string_type = 75;
+   const int utf8_string_type = 76;
 
    class Boolean_t:public Type
    {

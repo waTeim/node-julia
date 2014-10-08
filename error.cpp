@@ -1,3 +1,4 @@
+#include <map>
 #include <iostream>
 #include <julia.h>
 #include <sstream>
@@ -6,7 +7,17 @@
 
 using namespace std;
 
+static const int SystemError_t = 0;
+
+static map<string,jl_value_t*> etypes;
+static bool initialized = false;
+
 static string errorMsg(jl_value_t *ex);
+
+static jl_value_t *baseSymbol(const string &name)
+{
+   return jl_get_global(jl_base_module,jl_symbol(name.c_str()));
+}
 
 static string errorExceptionMsg(jl_value_t *ex)
 {
@@ -95,6 +106,22 @@ static shared_ptr<nj::Exception> genJuliaLoadError(jl_value_t *ex)
    return shared_ptr<nj::Exception>(new nj::JuliaLoadError(loadErrorMsg(ex)));
 }
 
+static string systemErrorMsg(jl_value_t *ex)
+{
+   jl_value_t *f0 = jl_get_nth_field(ex,0);
+   jl_value_t *f1 = jl_get_nth_field(ex,1);
+   stringstream ss;
+
+   ss << jl_iostr_data(f0) << " errno = " << jl_unbox_int64(f1);
+
+   return ss.str();
+}
+
+static shared_ptr<nj::Exception> genJuliaSystemError(jl_value_t *ex)
+{
+   return shared_ptr<nj::Exception>(new nj::JuliaErrorException(systemErrorMsg(ex)));
+}
+
 static string errorMsg(jl_value_t *ex)
 {
    if(jl_typeis(ex,jl_errorexception_type)) return errorExceptionMsg(ex);
@@ -104,17 +131,27 @@ static string errorMsg(jl_value_t *ex)
    else return "unknown error";
 }
 
+static void initializeETypes()
+{
+   etypes["SystemError"] = baseSymbol("SystemError");
+   initialized = true;
+}
+
 shared_ptr<nj::Exception> nj::genJuliaError(jl_value_t *ex)
 {
    stringstream ss;
+
+   if(!initialized) initializeETypes();
 
    if(jl_typeis(ex,jl_errorexception_type)) return genJuliaErrorException(ex);
    else if(jl_typeis(ex,jl_methoderror_type)) return genJuliaMethodError(ex);
    else if(jl_typeis(ex,jl_undefvarerror_type)) return genJuliaUndefVarError(ex);
    else if(jl_typeis(ex,jl_loaderror_type)) return genJuliaLoadError(ex);
+   else if(jl_typeis(ex,etypes["SystemError"])) return genJuliaSystemError(ex);
    else
    {
       if(jl_typeis(ex,jl_typeerror_type)) ss << "ex is jl_typeerror_type";
+      else if(jl_is_ascii_string(ex) || jl_is_utf8_string(ex)) ss << jl_string_data(ex);
       else ss << "Julia unknown error";
  
       return shared_ptr<Exception>(new InvalidException(ss.str()));

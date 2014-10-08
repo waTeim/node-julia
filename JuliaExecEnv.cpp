@@ -3,6 +3,8 @@
 
 using namespace std;
 
+JuliaExecEnv *J = 0;
+
 JuliaExecEnv::JuliaExecEnv(const std::string &installDir)
 {
 

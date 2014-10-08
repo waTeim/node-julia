@@ -6,8 +6,6 @@
 #include "Types.h"
 #include "JuliaExecEnv.h"
 
-extern JuliaExecEnv *J;
-
 std::shared_ptr<nj::Value> buildRequest(const v8::Local<v8::Value> &value);
 
 #endif
