@@ -184,6 +184,40 @@ void doStart(const FunctionCallbackInfo<Value> &args)
    returnString(I,args,"Julia Started");
 }
 
+void callbackWithResult(const FunctionCallbackInfo<Value> &args,HandleScope &scope,Local<Function> &cb,shared_ptr<nj::Result> &res)
+{
+   Isolate *I = Isolate::GetCurrent();
+
+   if(res.get())
+   {
+      int exId = res->exId();
+
+      if(exId != nj::Exception::no_exception)
+      {
+         switch(exId)
+         {
+            case nj::Exception::julia_undef_var_error_exception:
+            case nj::Exception::julia_method_error_exception:
+               I->ThrowException(Exception::ReferenceError(String::NewFromUtf8(I,res->exText().c_str())));
+            break;
+            default:
+               I->ThrowException(Exception::Error(String::NewFromUtf8(I,res->exText().c_str())));
+            break;
+         }
+      }
+      else
+      {
+         int argc = res->results().size();
+         Local<Value> *argv = new Local<Value>[argc];
+
+         argc = buildResponse(scope,res,argc,argv);
+         callback(I,args,cb,argc,argv);
+      }
+   }
+   else callback(I,args,cb,0,0);
+}
+
+
 void doEval(const FunctionCallbackInfo<Value> &args)
 {
    Isolate *I = Isolate::GetCurrent();
@@ -203,35 +237,10 @@ void doEval(const FunctionCallbackInfo<Value> &args)
 
    if(text.length() > 0 && (engine = J->getEngine()))
    {
-      engine->evalQueuePut(*text);
+      engine->eval(*text);
       shared_ptr<nj::Result> res = engine->resultQueueGet();
 
-      if(res.get())
-      {
-         int exId = res->exId();
-
-         if(exId != nj::Exception::no_exception)
-         {
-            switch(exId)
-            {
-               case nj::Exception::julia_undef_var_error_exception:
-               case nj::Exception::julia_method_error_exception:
-                  I->ThrowException(Exception::ReferenceError(String::NewFromUtf8(I,res->exText().c_str())));
-               break;
-               default:
-                  I->ThrowException(Exception::Error(String::NewFromUtf8(I,res->exText().c_str())));
-               break;
-            }
-         }
-         else
-         {
-            int argc = res->results().size();
-            Local<Value> *argv = new Local<Value>[argc];
-
-            argc = buildResponse(scope,res,argc,argv);
-            callback(I,args,cb,argc,argv);
-         }
-      }
+      callbackWithResult(args,scope,cb,res);
    }
    else
    {
@@ -268,35 +277,10 @@ void doExec(const FunctionCallbackInfo<Value> &args)
 
          if(reqElement.get()) req.push_back(reqElement);
       }
-      engine->evalQueuePut(*funcName,req);
+      engine->exec(*funcName,req);
       shared_ptr<nj::Result> res = engine->resultQueueGet();
  
-      if(res.get())
-      {
-         int exId = res->exId();
-
-         if(exId != nj::Exception::no_exception)
-         {
-            switch(exId)
-            {
-               case nj::Exception::julia_undef_var_error_exception:
-               case nj::Exception::julia_method_error_exception:
-                  I->ThrowException(Exception::ReferenceError(String::NewFromUtf8(I,res->exText().c_str())));
-               break;
-               default:
-                  I->ThrowException(Exception::Error(String::NewFromUtf8(I,res->exText().c_str())));
-               break;
-            }
-         }
-         else
-         {
-            int argc = res->results().size();
-            Local<Value> *argv = new Local<Value>[argc];
-
-            argc = buildResponse(scope,res,argc,argv);
-            callback(I,args,cb,argc,argv);
-         }
-      }
+      callbackWithResult(args,scope,cb,res);
    }
    else
    {
