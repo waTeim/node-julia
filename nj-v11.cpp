@@ -3,6 +3,7 @@
 #include <string>
 #include "Types.h"
 #include "request.h"
+#include "ScriptEncapsulated-v11.h"
 
 using namespace std;
 using namespace v8;
@@ -291,11 +292,22 @@ void doExec(const FunctionCallbackInfo<Value> &args)
    }
 }
 
+void newScript(const FunctionCallbackInfo<Value> &args)
+{
+   Isolate *I = Isolate::GetCurrent();
+   HandleScope scope(I);
+
+   nj::ScriptEncapsulated::NewInstance(args);
+}
+
 void init(Handle<Object> exports)
 {
+  nj::ScriptEncapsulated::Init(exports);
+
   NODE_SET_METHOD(exports,"start",doStart);
   NODE_SET_METHOD(exports,"eval",doEval);
   NODE_SET_METHOD(exports,"exec",doExec);
+  NODE_SET_METHOD(exports,"newScript",newScript);
 }
 
 NODE_MODULE(nj,init)

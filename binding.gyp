@@ -80,14 +80,18 @@
           {
              "sources":
             [ 
-               "ScriptEncapsulated-v10.cpp",
-               "nj-v10.cpp"
+              "ScriptEncapsulated-v10.cpp",
+              "nj-v10.cpp"
             ]
           }
         ],
         [ "version=='0.11.x'",
           {
-             "sources": [ "nj-v11.cpp" ]
+             "sources":
+             [ 
+               "ScriptEncapsulated-v11.cpp",
+               "nj-v11.cpp"
+             ]
           }
         ]
       ]
