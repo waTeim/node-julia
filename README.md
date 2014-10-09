@@ -1,42 +1,31 @@
 node-julia
 ==========
 
-Connecting node.js and Julia.
+A Julia engine embedded in node.
 
 # Installation
 
-Rather than installing Julia along with this module, it is assumed that
-the Julia install has already occured.  This is appropriate since Julia
-has it's own package management system as well as other tools that it
-interacts with; having it install as a package subordinate to node-julia
-was thought too restrictive for the minor ease of installation that 
-it would provide.
+First install Julia, then
 
-So, install Julia first.
+    npm install node-julia
 
-When this module is built, the script *tools/find_julia.py* is invoked which
-searches for Julia in several standard locations starting with *julia*
-located on the command path.  Is is assumed that the Julia install directory
-structure is the standard one with (importantly) the Julia lib directory
-located in a standard location relative to the bin directory where the
-julia executable is located. It is this lib directory that contains the
-necessary embedding API that comes with the language.
+When this module is built, the installer searches for Julia in several
+standard locations starting with *julia* located on the command path. 
+Is is assumed that the Julia lib directory is located in a standard location
+relative to where the julia executable is located.
 
 # Use and Syntax
 
     julia = require('node-julia');
 
-Currently, there are 3 exported functions; **start**, **eval**, and **exec**.  
+There are 4 functions; **start**, **eval** **exec** and **script**.
 
 ## start
 
-This function starts the embedded Julia engine.  It need be called only once,
-but can be called multiple times, but will have no effect after the first time.
-It must be called before **eval** or **exec** is called.  It may be removed
-in the future and called implicitly.  It takes a single optional argument;
-which is the location of the Julia installation directory which will otherwise
-be assumed to be location of *julia* that was detected when node-julia was
-installed.
+This function starts the embedded Julia engine.  It need be called only once.
+It takes a single optional argument which is the location of the Julia
+installation directory and defaults to the location that was detected 
+during installation.
 
 ### Example
 
@@ -86,7 +75,7 @@ From above, calculate the inverse of the matrix returned and print the result.
        });
     });
 
-# Exceptions
+# Error conditions
 
 Julia exceptions are caught and then re-thrown the in the node environment.  There
 is currently a somewhat simplistic mapping in place to relate similar type exceptions.
