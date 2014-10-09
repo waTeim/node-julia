@@ -11,21 +11,21 @@
       "target_name": "nj",
       "sources":     
       [ 
-        "Call.cpp",
-        "Exception.cpp",
-        "Immediate.cpp",
-        "JMain.cpp",
-        "JuliaExecEnv.cpp",
-        "JuliaHandle.cpp",
-        "Script.cpp",
-        "Type.cpp",
-        "Value.cpp",
-        "Values.cpp",
-        "debug.cpp",
-        "error.cpp",
-        "lvalue.cpp",
-        "request.cpp",
-        "rvalue.cpp"
+        "src/Call.cpp",
+        "src/Exception.cpp",
+        "src/Immediate.cpp",
+        "src/JMain.cpp",
+        "src/JuliaExecEnv.cpp",
+        "src/JuliaHandle.cpp",
+        "src/Script.cpp",
+        "src/Type.cpp",
+        "src/Value.cpp",
+        "src/Values.cpp",
+        "src/debug.cpp",
+        "src/error.cpp",
+        "src/lvalue.cpp",
+        "src/request.cpp",
+        "src/rvalue.cpp"
       ],
       "cflags!":     [ "-fno-exceptions" ],
       "cflags":
@@ -34,6 +34,7 @@
          "-std=c++11",
          '-DJULIA_DIR="<(julia)"',
          '-DLIB_DIR="<(libDir)"',
+         "-Isrc",
          "-I<(julia)/include/julia"
       ],
       "cflags_cc!":  [ "-fno-exceptions" ],
@@ -64,6 +65,7 @@
                  "-stdlib=libc++",
                  '-DJULIA_DIR="<(julia)"',
                  '-DLIB_DIR="<(libDir)"',
+                 "-Isrc",
                  "-I<(julia)/include/julia"
               ],
               "OTHER_LDFLAGS":
@@ -80,8 +82,8 @@
           {
              "sources":
             [ 
-              "ScriptEncapsulated-v10.cpp",
-              "nj-v10.cpp"
+              "src/ScriptEncapsulated-v10.cpp",
+              "src/nj-v10.cpp"
             ]
           }
         ],
@@ -89,8 +91,8 @@
           {
              "sources":
              [ 
-               "ScriptEncapsulated-v11.cpp",
-               "nj-v11.cpp"
+               "src/ScriptEncapsulated-v11.cpp",
+               "src/nj-v11.cpp"
              ]
           }
         ]
