@@ -1,8 +1,8 @@
 node-julia
 ==========
-[![Build Status](https://travis-ci.org/waTeim/node-julia.svg?branch=master)](https://travis-ci.org/waTeim/node-julia)
-
 Fast and simple access to Julia embedded in node.
+
+[![Build Status](https://travis-ci.org/waTeim/node-julia.svg?branch=master)](https://travis-ci.org/waTeim/node-julia)
 
 # Installation
 
