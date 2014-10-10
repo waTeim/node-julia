@@ -1,7 +1,7 @@
 node-julia
 ==========
 
-A Julia engine embedded in node.
+Fast and simple access to Julia embedded in node.
 
 # Installation
 
@@ -9,9 +9,9 @@ First install Julia, then
 
     npm install node-julia
 
-When this module is built, the installer searches for Julia in several
+When the module is built, the installer searches for Julia in several
 standard locations starting with *julia* located on the command path. 
-Is is assumed that the Julia lib directory is located in a standard location
+Is is assumed that the julia lib directory is located in a standard location
 relative to where the julia executable is located.
 
 # Use and Syntax

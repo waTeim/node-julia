@@ -4,9 +4,20 @@
     {
       "variables":
       {
+         "variables":
+         {
+            "conditions":
+            [
+               [ "OS=='linux'", { "gcc":"<!(gcc --version 2>&1 | head -1 | sed -e 's/^.*(.*) \(.*\)\..*$/\\1/')" } , { "gcc":"" } ]
+            ]
+         },
          "version":"<!(node --version | sed -e 's/^v\([0-9]*\.[0-9]*\).*$/\\1.x/')",
          "julia":"<!(python tools/find_julia.py <(OS))",
-         "libDir":"<!(python -c 'import os; print(os.path.abspath(\"\"))')/lib"
+         "libDir":"<!(python -c 'import os; print(os.path.abspath(\"\"))')/lib",
+         "conditions":
+         [
+            [ "gcc=='4.6'", { "std":"c++10" } , { "std":"c++11" } ]
+         ]
       },
       "target_name": "nj",
       "sources":     
@@ -31,11 +42,10 @@
       "cflags":
       [ 
          "-DOS=<(OS)",
-         "-std=c++11",
+         "-std=<(std)",
          '-DJULIA_DIR="<(julia)"',
          '-DLIB_DIR="<(libDir)"',
-         "-Isrc",
-         "-I<(julia)/include/julia"
+         "-I<(julia)/include/julia",
       ],
       "cflags_cc!":  [ "-fno-exceptions" ],
       "link_settings":
@@ -65,7 +75,6 @@
                  "-stdlib=libc++",
                  '-DJULIA_DIR="<(julia)"',
                  '-DLIB_DIR="<(libDir)"',
-                 "-Isrc",
                  "-I<(julia)/include/julia"
               ],
               "OTHER_LDFLAGS":
