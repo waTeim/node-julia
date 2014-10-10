@@ -7,7 +7,7 @@
 
 using namespace std;
 
-static const string libDir(LIB_DIR);
+static const string libDir(NJ_LIB);
 
 bool nj::Script::util_loaded = false;
 

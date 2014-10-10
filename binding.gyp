@@ -9,14 +9,18 @@
             "conditions":
             [
                [ "OS=='linux'", { "gcc":"<!(gcc --version 2>&1 | head -1 | sed -e 's/^.*(.*) \(.*\)\..*$/\\1/')" } , { "gcc":"" } ]
-            ]
+            ],
+            "juliaBase":"<!(python tools/find_julia.py <(OS))",
          },
          "version":"<!(node --version | sed -e 's/^v\([0-9]*\.[0-9]*\).*$/\\1.x/')",
-         "julia":"<!(python tools/find_julia.py <(OS))",
-         "libDir":"<!(python -c 'import os; print(os.path.abspath(\"\"))')/lib",
+         "njLib":"<!(python -c 'import os; print(os.path.abspath(\"\"))')/lib",
          "conditions":
          [
-            [ "gcc=='4.6'", { "std":"c++0x" } , { "std":"c++11" } ]
+            [ "gcc=='4.6'", { "std":"c++0x" } , { "std":"c++11" } ],
+            [ "OS=='linux' and juliaBase=='/usr'", 
+               { "juliaLib":"<(juliaBase)/lib/x86_64-linux-gnu/julia" , "juliaInclude":"<(juliaBase)/include/julia" },
+               { "juliaLib":"<(juliaBase)/lib/julia" , "juliaInclude":"<(juliaBase)/include/julia" }
+            ]
          ]
       },
       "target_name": "nj",
@@ -43,17 +47,17 @@
       [ 
          "-DOS=<(OS)",
          "-std=<(std)",
-         '-DJULIA_DIR="<(julia)"',
-         '-DLIB_DIR="<(libDir)"',
-         "-I<(julia)/include/julia",
+         '-DNJ_LIB="<(njLib)"',
+         '-DJULIA_LIB="<(juliaLib)"',
+         "-I<(juliaInclude)",
       ],
       "cflags_cc!":  [ "-fno-exceptions" ],
       "link_settings":
       {
          "ldflags":
          [
-            "-L<(julia)/lib/julia",
-            "-Wl,-rpath,<(julia)/lib/julia",
+            "-L<(juliaLib)",
+            "-Wl,-rpath,<(juliaLib)",
          ],
          "libraries":
          [
@@ -73,15 +77,15 @@
                  "-DOS=<(OS)",
                  "-std=c++11",
                  "-stdlib=libc++",
-                 '-DJULIA_DIR="<(julia)"',
-                 '-DLIB_DIR="<(libDir)"',
-                 "-I<(julia)/include/julia"
+                 '-DNJ_LIB="<(njLib)"',
+                 '-DJULIA_LIB="<(juliaLib)"',
+                 "-I<(juliaInclude)"
               ],
               "OTHER_LDFLAGS":
               [
                 "-stdlib=libc++",
-                "-L<(julia)/lib/julia",
-                "-Wl,-rpath,<(julia)/lib/julia",
+                "-L<(juliaLib)",
+                "-Wl,-rpath,<(juliaLib)",
                 "-ljulia"
               ]
             }
