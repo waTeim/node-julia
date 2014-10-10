@@ -16,7 +16,7 @@
          "libDir":"<!(python -c 'import os; print(os.path.abspath(\"\"))')/lib",
          "conditions":
          [
-            [ "gcc=='4.6'", { "std":"c++10" } , { "std":"c++11" } ]
+            [ "gcc=='4.6'", { "std":"c++0x" } , { "std":"c++11" } ]
          ]
       },
       "target_name": "nj",
