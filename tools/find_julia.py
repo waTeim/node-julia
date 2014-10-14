@@ -24,7 +24,7 @@ def julia_from_applications():
    if os.path.isdir(julia_dir): return julia_dir
    return ""
 
-path = julia_from_which_julia()
+if sys.argv[1] == "mac" or sys.argv[1] == "linux": path = julia_from_which_julia()
 if path == "": path = julia_from_home_directory()
 if path == "" and len(sys.argv) > 1 and sys.argv[1] == "mac": path = julia_from_applications()
 

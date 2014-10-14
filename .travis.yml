@@ -1,12 +1,26 @@
 language: node_js
 node_js:
   - "0.11"
+os:
+  - linux
+  - osx  
 env:
-    - JULIAVERSION="juliareleases" 
-    - JULIAVERSION="julianightlies"
+  - JULIAVERSION="juliareleases" 
+  - JULIAVERSION="julianightlies"
 compiler: clang
 before_install:
-    - sudo add-apt-repository ppa:staticfloat/julia-deps -y
-    - sudo add-apt-repository ppa:staticfloat/${JULIAVERSION} -y
-    - sudo apt-get update -qq -y
-    - sudo apt-get install libpcre3-dev julia -y
+  - if [ `uname` = "Linux" ]; then
+      sudo add-apt-repository ppa:staticfloat/julia-deps -y
+      sudo add-apt-repository ppa:staticfloat/${JULIAVERSION} -y
+      sudo apt-get update -qq -y
+      sudo apt-get install libpcre3-dev julia -y
+    elif [ `uname` = "Darwin" ]; then
+       if [ "$JULIAVERSION" = "julianightlies" ]; then
+         wget -O julia.dmg "http://status.julialang.org/download/osx10.7+";
+       else
+         wget -O julia.dmg "http://status.julialang.org/stable/osx10.7+";
+       fi;
+       hdiutil mount julia.dmg;
+       cp -Ra /Volumea/Julia/*.app/julia ~;
+       export PATH=$PATH:~/julia/bin;
+    fi
