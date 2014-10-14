@@ -10,10 +10,10 @@ env:
 compiler: clang
 before_install:
   - if [ `uname` = "Linux" ]; then
-      sudo add-apt-repository ppa:staticfloat/julia-deps -y
-      sudo add-apt-repository ppa:staticfloat/${JULIAVERSION} -y
-      sudo apt-get update -qq -y
-      sudo apt-get install libpcre3-dev julia -y
+      sudo add-apt-repository ppa:staticfloat/julia-deps -y;
+      sudo add-apt-repository ppa:staticfloat/${JULIAVERSION} -y;
+      sudo apt-get update -qq -y;
+      sudo apt-get install libpcre3-dev julia -y;
     elif [ `uname` = "Darwin" ]; then
        if [ "$JULIAVERSION" = "julianightlies" ]; then
          wget -O julia.dmg "http://status.julialang.org/download/osx10.7+";
