@@ -1,13 +1,19 @@
 language: node_js
 node_js:
-  - "0.11"
+  - 0.10
+  - 0.11
 os:
   - linux
   - osx  
+matrix:
+  exclude:
+     - node_js: 0.10
+       os: linux
+     - node_js: 0.11
+       os: osx
 env:
   - JULIAVERSION="juliareleases" 
   - JULIAVERSION="julianightlies"
-compiler: clang
 before_install:
   - if [ `uname` = "Linux" ]; then
       sudo add-apt-repository ppa:staticfloat/julia-deps -y;
@@ -15,8 +21,6 @@ before_install:
       sudo apt-get update -qq -y;
       sudo apt-get install libpcre3-dev julia -y;
     elif [ `uname` = "Darwin" ]; then
-       git clone https://github.com/creationix/nvm.git ../.nvm;
-       source ../.nvm/nvm.sh;
        if [ "$JULIAVERSION" = "julianightlies" ]; then
          wget -O julia.dmg "http://status.julialang.org/download/osx10.7+";
        else
