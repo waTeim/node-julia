@@ -14,13 +14,13 @@ before_install:
       sudo apt-get update -qq -y;
       sudo apt-get install libpcre3-dev julia -y;
       nvm install $NODE_VERSION;
-      node --version
+      node --version;
       npm install -g mocha;
     elif [ `uname` = "Darwin" ]; then
        brew update;
        brew install nvm;
        nvm install $NODE_VERSION;
-       node --version
+       node --version;
        npm install -g mocha;
        if [ "$JULIAVERSION" = "julianightlies" ]; then
          wget -O julia.dmg "http://status.julialang.org/download/osx10.7+";
