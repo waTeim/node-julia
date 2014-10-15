@@ -15,13 +15,17 @@ before_install:
       sudo apt-get install libpcre3-dev julia -y;
       nvm install $NODE_VERSION;
       node --version;
-      npm install -g mocha chai sinon;
+      npm install;
+      npm install -g mocha;
+      npm install -g node-gyp;
     elif [ `uname` = "Darwin" ]; then
        brew update;
        brew install nvm;
        nvm install $NODE_VERSION;
        node --version;
        npm install -g mocha chai sinon;
+       npm install -g mocha;
+       npm install -g node-gyp;
        if [ "$JULIAVERSION" = "julianightlies" ]; then
          wget -O julia.dmg "http://status.julialang.org/download/osx10.7+";
        else
@@ -32,4 +36,5 @@ before_install:
        export PATH=$PATH:~/julia/bin;
     fi
 script:
+  - node-gyp rebuild
   - npm test
