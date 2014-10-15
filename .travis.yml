@@ -14,16 +14,15 @@ before_install:
       sudo apt-get update -qq -y;
       sudo apt-get install libpcre3-dev julia -y;
       nvm install $NODE_VERSION;
-      node --version;
       npm install;
       npm install -g mocha;
       npm install -g node-gyp;
     elif [ `uname` = "Darwin" ]; then
        brew update;
        brew install nvm;
+       . ~/.nvm/nvm.sh;
        nvm install $NODE_VERSION;
-       node --version;
-       npm install -g mocha chai sinon;
+       npm install;
        npm install -g mocha;
        npm install -g node-gyp;
        if [ "$JULIA_VERSION" = "julianightlies" ]; then
@@ -32,9 +31,10 @@ before_install:
          wget -O julia.dmg "http://status.julialang.org/stable/osx10.7+";
        fi;
        hdiutil mount julia.dmg;
-       cp -Ra /Volumea/Julia/*.app/julia ~;
+       cp -Ra /Volumea/Julia/*.app/Contents/Resources/julia ~;
        export PATH=$PATH:~/julia/bin;
     fi
+  - node --version
 script:
   - node-gyp rebuild
   - npm test
