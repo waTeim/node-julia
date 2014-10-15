@@ -1,24 +1,23 @@
-language: node_js
-node_js:
-  - "0.10.32"
-  - "0.11"
+language: cpp
 os:
   - osx  
   - linux
-matrix:
-  exclude:
-     - node_js: "0.11"
-       os: osx
 env:
-  - JULIAVERSION="juliareleases" 
-  - JULIAVERSION="julianightlies"
+  - JULIA_VERSION="juliareleases" 
+  - JULIA_VERSION="julianightlies"
+  - NODE_VERSION="0.10"
+  - NODE_VERSION="0.11"
 before_install:
   - if [ `uname` = "Linux" ]; then
       sudo add-apt-repository ppa:staticfloat/julia-deps -y;
       sudo add-apt-repository ppa:staticfloat/${JULIAVERSION} -y;
       sudo apt-get update -qq -y;
       sudo apt-get install libpcre3-dev julia -y;
+      nvm install $NODE_VERSION;
     elif [ `uname` = "Darwin" ]; then
+       brew update
+       brew install nvm
+       nvm install $NODE_VERSION;
        if [ "$JULIAVERSION" = "julianightlies" ]; then
          wget -O julia.dmg "http://status.julialang.org/download/osx10.7+";
        else
@@ -28,3 +27,4 @@ before_install:
        cp -Ra /Volumea/Julia/*.app/julia ~;
        export PATH=$PATH:~/julia/bin;
     fi
+  - npm test
