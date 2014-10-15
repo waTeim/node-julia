@@ -10,7 +10,7 @@ env:
 before_install:
   - if [ `uname` = "Linux" ]; then
       sudo add-apt-repository ppa:staticfloat/julia-deps -y;
-      sudo add-apt-repository ppa:staticfloat/${JULIAVERSION} -y;
+      sudo add-apt-repository ppa:staticfloat/${JULIA_VERSION} -y;
       sudo apt-get update -qq -y;
       sudo apt-get install libpcre3-dev julia -y;
       nvm install $NODE_VERSION;
@@ -26,7 +26,7 @@ before_install:
        npm install -g mocha chai sinon;
        npm install -g mocha;
        npm install -g node-gyp;
-       if [ "$JULIAVERSION" = "julianightlies" ]; then
+       if [ "$JULIA_VERSION" = "julianightlies" ]; then
          wget -O julia.dmg "http://status.julialang.org/download/osx10.7+";
        else
          wget -O julia.dmg "http://status.julialang.org/stable/osx10.7+";
