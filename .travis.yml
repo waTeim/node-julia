@@ -3,10 +3,10 @@ os:
   - osx  
   - linux
 env:
-  - JULIA_VERSION="juliareleases" 
-  - JULIA_VERSION="julianightlies"
   - NODE_VERSION="0.10"
-  - NODE_VERSION="0.11"
+    JULIA_VERSION="juliareleases" 
+  - NODE_VERSION="0.10"
+    JULIA_VERSION="julianightlies"
 before_install:
   - if [ `uname` = "Linux" ]; then
       sudo add-apt-repository ppa:staticfloat/julia-deps -y;
@@ -14,10 +14,14 @@ before_install:
       sudo apt-get update -qq -y;
       sudo apt-get install libpcre3-dev julia -y;
       nvm install $NODE_VERSION;
+      node --version
+      npm install -g mocha;
     elif [ `uname` = "Darwin" ]; then
-       brew update
-       brew install nvm
+       brew update;
+       brew install nvm;
        nvm install $NODE_VERSION;
+       node --version
+       npm install -g mocha;
        if [ "$JULIAVERSION" = "julianightlies" ]; then
          wget -O julia.dmg "http://status.julialang.org/download/osx10.7+";
        else
@@ -27,4 +31,5 @@ before_install:
        cp -Ra /Volumea/Julia/*.app/julia ~;
        export PATH=$PATH:~/julia/bin;
     fi
+script:
   - npm test
