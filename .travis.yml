@@ -20,7 +20,7 @@ before_install:
     elif [ `uname` = "Darwin" ]; then
        brew update;
        brew install nvm;
-       . ~/.nvm/nvm.sh;
+       source $(brew --prefix nvm)/nvm.sh;
        nvm install $NODE_VERSION;
        npm install;
        npm install -g mocha;
@@ -31,7 +31,7 @@ before_install:
          wget -O julia.dmg "http://status.julialang.org/stable/osx10.7+";
        fi;
        hdiutil mount julia.dmg;
-       cp -Ra /Volumea/Julia/*.app/Contents/Resources/julia ~;
+       cp -Ra /Volumes/Julia/*.app/Contents/Resources/julia ~;
        export PATH=$PATH:~/julia/bin;
     fi
   - node --version
