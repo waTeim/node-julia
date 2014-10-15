@@ -7,8 +7,6 @@
 
 using namespace std;
 
-static const int SystemError_t = 0;
-
 static map<string,jl_value_t*> etypes;
 static bool initialized = false;
 
