@@ -1,11 +1,11 @@
-language: node_js
-node_js:
-   - "0.10"
+language: cpp
 os:
   - osx  
   - linux
 env:
+  - NODE_VERSION="0.10"
     JULIA_VERSION="juliareleases" 
+  - NODE_VERSION="0.10"
     JULIA_VERSION="julianightlies"
 before_install:
   - if [ `uname` = "Linux" ]; then
@@ -13,17 +13,25 @@ before_install:
       sudo add-apt-repository ppa:staticfloat/${JULIA_VERSION} -y;
       sudo apt-get update -qq -y;
       sudo apt-get install libpcre3-dev julia -y;
+      nvm install $NODE_VERSION;
+      npm install -g mocha chai sinon bindings node-gyp;
     elif [ `uname` = "Darwin" ]; then
-       brew update;
-       brew install nvm;
-       source $(brew --prefix nvm)/nvm.sh;
-       nvm install 0.10
-       if [ "$JULIA_VERSION" = "julianightlies" ]; then
-         wget -O julia.dmg "http://status.julialang.org/download/osx10.7+";
-       else
-         wget -O julia.dmg "http://status.julialang.org/stable/osx10.7+";
-       fi;
-       hdiutil mount julia.dmg;
-       cp -Ra /Volumes/Julia/*.app/Contents/Resources/julia ~;
-       export PATH=$PATH:~/julia/bin;
+      brew update;
+      brew install nvm;
+      source $(brew --prefix nvm)/nvm.sh;
+      nvm install $NODE_VERSION;
+      npm install;
+      npm install -g mocha chai sinon bindings node-gyp;
+      if [ "$JULIA_VERSION" = "julianightlies" ]; then
+        wget -O julia.dmg "http://status.julialang.org/download/osx10.7+";
+      else
+        wget -O julia.dmg "http://status.julialang.org/stable/osx10.7+";
+      fi;
+      hdiutil mount julia.dmg;
+      cp -Ra /Volumes/Julia/*.app/Contents/Resources/julia ~;
+      export PATH=$PATH:~/julia/bin;
     fi
+  - node --version
+script:
+  - node-gyp rebuild
+  - npm test
