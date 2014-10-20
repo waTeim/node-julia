@@ -135,6 +135,8 @@ namespace nj
 
          UTF8String_t():Type(utf8_string_type) {}
    };
+
+   bool operator<(const nj::Type &t1,const nj::Type &t2);
 };
 
 #endif

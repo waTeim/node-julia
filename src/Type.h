@@ -28,6 +28,7 @@ namespace nj
          }
 
          virtual int getId() const {  return id;  }
+
    };
 
    const int null_type = 0;

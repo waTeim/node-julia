@@ -34,6 +34,7 @@
         "src/JuliaHandle.cpp",
         "src/Script.cpp",
         "src/Type.cpp",
+        "src/Types.cpp",
         "src/Value.cpp",
         "src/Values.cpp",
         "src/debug.cpp",

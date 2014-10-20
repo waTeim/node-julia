@@ -102,6 +102,67 @@ template <typename V,typename E> static void fillArrayRequest(shared_ptr<nj::Val
    }
 }
 
+/*
+static void examineArray(Local<Array> &a,int level,vector<size_t> &dims,nj::Type *&etype,bool &determineDimensions) throw(nj::InvalidException)
+{
+   size_t len = a->Length();
+
+   for(size_t i = 0;i < len;i++)
+   {
+      Local<Value> el = a->Get(i);
+
+      if(determineDimensions)
+      {
+         dims.push_back(len);
+
+         if(el->IsArray())
+         {
+            Local<Array> sub = Local<Array>::Cast(el);
+  
+            examineArray(sub,level + 1,dims,etype,determineDimensions);
+         }
+         else
+         {
+            determineDimensions = false;
+
+            nj::Type *etypeNarrow = getPrimitiveType(el);
+         }
+      }
+   }
+
+-------
+   bool elementsAreArrays = false;
+
+   if(level == dims.size()) dims.push_back(len);
+   else
+   {
+      if(len != dims[level]) throw(nj::InvalidException("malformed array"));
+      if(dims.size() > level) elementsAreArrays = true;
+   }
+
+   for(size_t i = 0;i < len;i++)
+   {
+      Local<Value> el = a->Get(i);
+
+      if(i == 0 dims.size() == level)
+      {  
+         if(el->IsArray()) elementsAreArrays = true;
+      }
+      else
+      {
+         if(!el->IsArray() && elementsAreArrays) throw(nj::InvalidException("malformed array"));
+         else if(el->IsArray() && !elementsAreArrays) throw(nj::InvalidException("malformed array"));
+      }
+      if(elementsAreArrays) 
+      {
+         Local<Array> sub = Local<Array>::Cast(el);
+
+         examineArray(sub,level + 1,dims,etype);
+      }
+   }
+}
+*/
+
 static shared_ptr<nj::Value> buildArrayRequest(const Local<Value> &from)
 {
    shared_ptr<nj::Value> to;
