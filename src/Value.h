@@ -41,7 +41,7 @@ namespace nj
       protected:
 
          std::vector<size_t> dimensions;
-         std::shared_ptr<V> data;
+         std::shared_ptr<std::vector<V>> data;
          size_t num_elements;
 
       public:
@@ -54,14 +54,14 @@ namespace nj
             {
                num_elements = 1;
                for(int dimension: dimensions) num_elements *= dimension;
-               if(num_elements) data = std::shared_ptr<V>(new V[num_elements]);
+               if(num_elements) data = std::shared_ptr<std::vector<V>>(new std::vector<V>(num_elements));
             }
          }
 
          virtual bool isPrimitive() const {  return false;  }
          virtual const std::vector<size_t> &dims() const {  return dimensions;  }
          virtual const Type *type() const {  return Array_t::instance(E::instance());  }
-         virtual V *ptr() const {  return data.get();  }
+         virtual V *ptr() const {  return data.get()->data();  }
          virtual size_t size() const {  return num_elements;  }
    };
 };

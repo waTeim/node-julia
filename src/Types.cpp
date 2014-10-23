@@ -4,7 +4,8 @@ bool nj::operator<(const nj::Type &t1,const nj::Type &t2)
 {
    bool res = false;
 
-   if(t1.getId() == nj::any_type) res = true;
+   if(t1.getId() == nj::null_type) res = true;
+   else if(t1.getId() == nj::boolean_type && t2.getId() != nj::boolean_type) res = true;
    else
    {
       switch(t1.getId())
@@ -86,6 +87,26 @@ bool nj::operator<(const nj::Type &t1,const nj::Type &t2)
                case int64_type:
                case uint64_type:
                case float64_type:
+                  res = true;
+               break;
+            }
+         }
+         break;
+         case float32_type:
+         {
+            switch(t2.getId())
+            {
+               case float64_type:
+                  res = true;
+               break;
+            }
+         }
+         break;
+         case ascii_string_type:
+         {
+            switch(t2.getId())
+            {
+               case utf8_string_type:
                   res = true;
                break;
             }

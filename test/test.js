@@ -209,5 +209,35 @@ describe('Regression Tests',function()
 
       expect(verifyIdentity(execB(script,10),10)).to.equal(true);
    });
+
+   it('loading array type tests',function()
+   {
+      expect(execInclude(julia,'test/inc4.jl')).to.equal(true);
+   });
+
+   it('Typecheck boolean array elements',function()
+   {
+      expect(execA(julia,'typecheckArray',[true,false,true])).to.equal('boolean');
+   });
+
+   it('Typecheck int array elements',function()
+   {
+      expect(execA(julia,'typecheckArray',[true,0,1.0])).to.equal('int');
+   });
+
+   it('Typecheck float array elements',function()
+   {
+      expect(execA(julia,'typecheckArray',[true,0,1.1])).to.equal('float');
+   });
+
+   it('Typecheck string array elements',function()
+   {
+      expect(execA(julia,'typecheckArray',[""])).to.equal('string');
+   });
+
+   it('Prevent widening from Array{Number} to Array{String}',function()
+   {
+      expect(execA(julia,'typecheckArray',[true,"x",1,1.1])).to.equal('none');
+   });
 });
 

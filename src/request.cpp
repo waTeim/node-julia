@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <iostream>
 #include <string>
@@ -6,18 +7,32 @@
 using namespace std;
 using namespace v8;
 
-Local<Value> buildPrimitiveResponse(const nj::Primitive &primitive);
-Local<Array> buildArrayResponse(const shared_ptr<nj::Value> &value);
+static nj::Type *getPrimitiveType(const Local<Value> &prim)
+{   
+   if(prim->IsBoolean()) return nj::Boolean_t::instance();
+   else if(prim->IsNumber())
+   {
+      double v_d = prim->NumberValue();
 
-static shared_ptr<nj::Value> buildPrimitiveRequest(const Local<Value> &prim)
+      if(trunc(v_d) == v_d) return nj::Int64_t::instance();
+      return nj::Float64_t::instance();
+   }
+   else if(prim->IsString()) return nj::UTF8String_t::instance();
+   return 0;
+}
+
+static shared_ptr<nj::Value> buildPrimitive(const Local<Value> &prim)
 {
    shared_ptr<nj::Value> v;
 
    if(prim->IsBoolean()) v.reset(new nj::Boolean(prim->BooleanValue()));
-   //else if(prim->IsInt32()) v.reset(new nj::Int32(prim->Int32Value()));
-   //else if(prim->IsUint32()) v.reset(new nj::UInt32(prim->Uint32Value()));
-   else if(prim->IsInt32() || prim->IsUint32()) v.reset(new nj::Int64(prim->IntegerValue()));
-   else if(prim->IsNumber()) v.reset(new nj::Float64(prim->NumberValue()));
+   else if(prim->IsNumber())
+   {
+      double v_d = prim->NumberValue();
+ 
+      if(trunc(v_d) == v_d) v.reset(new nj::Int64(prim->IntegerValue()));
+      else v.reset(new nj::Float64(v_d));
+   }
    else if(prim->IsString())
    {
       Local<String> s = Local<String>::Cast(prim);
@@ -29,81 +44,7 @@ static shared_ptr<nj::Value> buildPrimitiveRequest(const Local<Value> &prim)
    return v;
 }
 
-static nj::Type *getPrimitiveType(const Local<Value> &prim)
-{   
-   if(prim->IsBoolean()) return nj::Boolean_t::instance();
-   //else if(prim->IsInt32()) return nj::Int32_t::instance();
-   //else if(prim->IsUint32()) return nj::UInt32_t::instance();
-   //else if(prim->IsInt32() || prim->IsUint32()) return nj::Int64_t::instance();
-   else if(prim->IsNumber()) return nj::Float64_t::instance();
-   return 0;
-}
-
-template <typename V,typename E> static void fillArrayRequest(shared_ptr<nj::Value> &to,const Local<Array> &from)
-{
-    nj::Array<V,E> &a = static_cast<nj::Array<V,E>&>(*to);
-    const nj::Array_t *atype = static_cast<const nj::Array_t*>(a.type());
-    V *p = a.ptr();
-
-   if(a.dims().size() == 1)
-   {
-      size_t length = a.dims()[0];
-
-      for(size_t index = 0;index < length;index++)
-      {
-         switch(atype->etype()->getId())
-         {
-            case nj::boolean_type: *p++ = from->Get(index)->BooleanValue(); break;
-            case nj::int32_type: *p++ = from->Get(index)->Int32Value(); break;
-            case nj::uint32_type: *p++ = from->Get(index)->Uint32Value(); break;
-            case nj::int64_type: *p++ = from->Get(index)->IntegerValue(); break;
-            case nj::float64_type: *p++ = from->Get(index)->NumberValue(); break;
-         }
-      }
-   }
-   else if(a.dims().size() == 2)
-   {
-      size_t rows = a.dims()[0];
-      size_t cols = a.dims()[1];
-
-      for(size_t row = 0;row < rows;row++)
-      {
-         Local<Array> rowVector = Local<Array>::Cast(from->Get(row));
-
-         for(size_t col = 0;col < cols;col++)
-         {
-            switch(atype->etype()->getId())
-            {
-               case nj::boolean_type:
-                  p[col*rows + row] = rowVector->Get(col)->BooleanValue();
-               break;
-               case nj::int32_type:
-               {
-                  Local<Value> el = rowVector->Get(col);   
-          
-                  if(el->IsInt32())
-                  {
-                     p[col*rows + row] = el->Int32Value();
-                  }
-               }
-               break;
-               case nj::uint32_type:
-                  p[col*rows + row] = rowVector->Get(col)->Uint32Value();
-               break;
-               case nj::int64_type:
-                  p[col*rows + row] = rowVector->Get(col)->IntegerValue();
-               break;
-               case nj::float64_type:
-                  p[col*rows + row] = rowVector->Get(col)->NumberValue();
-               break;
-            }
-         }
-      }
-   }
-}
-
-/*
-static void examineArray(Local<Array> &a,int level,vector<size_t> &dims,nj::Type *&etype,bool &determineDimensions) throw(nj::InvalidException)
+static void examineArray(Local<Array> &a,size_t level,vector<size_t> &dims,nj::Type *&etype,bool &determineDimensions) throw(nj::InvalidException)
 {
    size_t len = a->Length();
 
@@ -115,55 +56,91 @@ static void examineArray(Local<Array> &a,int level,vector<size_t> &dims,nj::Type
       {
          dims.push_back(len);
 
-         if(el->IsArray())
-         {
-            Local<Array> sub = Local<Array>::Cast(el);
-  
-            examineArray(sub,level + 1,dims,etype,determineDimensions);
-         }
-         else
-         {
-            determineDimensions = false;
-
-            nj::Type *etypeNarrow = getPrimitiveType(el);
-         }
-      }
-   }
-
--------
-   bool elementsAreArrays = false;
-
-   if(level == dims.size()) dims.push_back(len);
-   else
-   {
-      if(len != dims[level]) throw(nj::InvalidException("malformed array"));
-      if(dims.size() > level) elementsAreArrays = true;
-   }
-
-   for(size_t i = 0;i < len;i++)
-   {
-      Local<Value> el = a->Get(i);
-
-      if(i == 0 dims.size() == level)
-      {  
-         if(el->IsArray()) elementsAreArrays = true;
+         if(!el->IsArray()) determineDimensions = false;
       }
       else
       {
-         if(!el->IsArray() && elementsAreArrays) throw(nj::InvalidException("malformed array"));
-         else if(el->IsArray() && !elementsAreArrays) throw(nj::InvalidException("malformed array"));
+         if(level == dims.size() || len != dims[level]) throw(nj::InvalidException("malformed array"));
+         if(!el->IsArray() && level != dims.size() - 1) throw(nj::InvalidException("malformed array"));
+         if(el->IsArray() && level == dims.size() - 1) throw(nj::InvalidException("malformed array"));
       }
-      if(elementsAreArrays) 
+      if(el->IsArray())
       {
          Local<Array> sub = Local<Array>::Cast(el);
 
-         examineArray(sub,level + 1,dims,etype);
+         examineArray(sub,level + 1,dims,etype,determineDimensions);
+      }
+      else
+      {
+         nj::Type *etypeNarrow = getPrimitiveType(el);
+
+         if(!etypeNarrow) throw(nj::InvalidException("unknown array element type"));
+         if(!etype || *etype < *etypeNarrow) etype = etypeNarrow;
+         if((etype->getId() == nj::int64_type || etype->getId() == nj::uint64_type) && etypeNarrow->getId() == nj::float64_type) etype = etypeNarrow;
+         if(etype != etypeNarrow && !(*etype < *etypeNarrow)) etype = nj::Any_t::instance();
       }
    }
 }
-*/
 
-static shared_ptr<nj::Value> buildArrayRequest(const Local<Value> &from)
+
+unsigned char getBooleanValue(const Local<Value> &val)
+{
+   return val->BooleanValue();
+}
+
+int getInt32Value(const Local<Value> &val)
+{
+   return val->Int32Value();
+}
+
+unsigned int getUInt32Value(const Local<Value> &val)
+{
+   return val->Uint32Value();
+}
+
+int64_t getInt64Value(const Local<Value> &val)
+{
+   return val->IntegerValue();
+}
+
+double getFloat64Value(const Local<Value> &val)
+{
+   return val->NumberValue();
+}
+
+string getStringValue(const Local<Value> &val)
+{
+   String::Utf8Value s(val);
+
+   return string("");
+}
+
+template <typename V,typename E,V (&accessor)(const Local<Value>&)> static void fillArray(shared_ptr<nj::Value> &to,const Local<Array> &from)
+{
+   nj::Array<V,E> &a = static_cast<nj::Array<V,E>&>(*to);
+   V *p = a.ptr();
+
+   if(a.dims().size() == 1)
+   {
+      size_t length = a.dims()[0];
+
+      for(size_t index = 0;index < length;index++) *p++ = accessor(from->Get(index));
+   }
+   else if(a.dims().size() == 2)
+   {
+      size_t rows = a.dims()[0];
+      size_t cols = a.dims()[1];
+
+      for(size_t row = 0;row < rows;row++)
+      {
+         Local<Array> rowVector = Local<Array>::Cast(from->Get(row));
+
+         for(size_t col = 0;col < cols;col++) p[col*rows + row] = accessor(rowVector->Get(col));
+      }
+   }
+}
+
+static shared_ptr<nj::Value> buildArray(const Local<Value> &from)
 {
    shared_ptr<nj::Value> to;
 
@@ -171,60 +148,58 @@ static shared_ptr<nj::Value> buildArrayRequest(const Local<Value> &from)
    {
       Local<Array> a = Local<Array>::Cast(from);
       vector<size_t> dims;
+      bool determineDimensions = true;
+      nj::Type *etype = 0;
 
-      dims.push_back(a->Length());
-      if(dims[0] == 0)
+      try
       {
-         to.reset(new nj::Array<char,nj::Any_t>(dims));
-         return to;
-      }
+         examineArray(a,0,dims,etype,determineDimensions);
 
-      Local<Value> el = a->Get(0);
-
-      while(el->IsArray())
-      {
-         Local<Array> sub = Local<Array>::Cast(el);
-         dims.push_back(sub->Length());
-         if(dims[0] == 0) return to;
-         el = sub->Get(0);
-      }
-      if(!el->IsObject())
-      {
-         nj::Type *etype = getPrimitiveType(el);
+         if(dims[0] == 0)
+         {
+            to.reset(new nj::Array<char,nj::Any_t>(dims));
+            return to;
+         }
 
          if(etype)
          {
             switch(etype->getId())
             {
                case nj::boolean_type:
-                  to.reset(new nj::Array<bool,nj::Boolean_t>(dims));
-                  fillArrayRequest<bool,nj::Boolean_t>(to,a);
+                  to.reset(new nj::Array<unsigned char,nj::Boolean_t>(dims));
+                  fillArray<unsigned char,nj::Boolean_t,getBooleanValue>(to,a);
                break;
                case nj::int32_type:
                   to.reset(new nj::Array<int,nj::Int32_t>(dims));
-                  fillArrayRequest<int,nj::Int32_t>(to,a);
+                  fillArray<int,nj::Int32_t,getInt32Value>(to,a);
                break;
                case nj::uint32_type:
                   to.reset(new nj::Array<unsigned int,nj::UInt32_t>(dims));
-                  fillArrayRequest<unsigned int,nj::UInt32_t>(to,a);
+                  fillArray<unsigned int,nj::UInt32_t,getUInt32Value>(to,a);
                break;
                case nj::int64_type:
                   to.reset(new nj::Array<int64_t,nj::Int64_t>(dims));
-                  fillArrayRequest<int64_t,nj::Int64_t>(to,a);
+                  fillArray<int64_t,nj::Int64_t,getInt64Value>(to,a);
                break;
                case nj::float64_type:
                   to.reset(new nj::Array<double,nj::Float64_t>(dims));
-                  fillArrayRequest<double,nj::Float64_t>(to,a);
+                  fillArray<double,nj::Float64_t,getFloat64Value>(to,a);
+               break;
+               case nj::ascii_string_type:
+               case nj::utf8_string_type:
+                  to.reset(new nj::Array<string,nj::UTF8String_t>(dims));
+                  fillArray<string,nj::UTF8String_t,getStringValue>(to,a);
                break;
             }
          }
       }
+      catch(nj::InvalidException e) {}
    }
    return to;
 }
 
 shared_ptr<nj::Value> buildRequest(const Local<Value> &value)
 {
-   if(value->IsArray()) return buildArrayRequest(value);
-   return buildPrimitiveRequest(value);
+   if(value->IsArray()) return buildArray(value);
+   return buildPrimitive(value);
 }
