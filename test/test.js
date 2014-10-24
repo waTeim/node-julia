@@ -239,5 +239,15 @@ describe('Regression Tests',function()
    {
       expect(execA(julia,'typecheckArray',[true,"x",1,1.1])).to.equal('none');
    });
+
+   it('Simple int array operation',function()
+   {
+      expect(execA(julia,'sum',[1,2,3])).to.equal(6);
+   });
+
+   it('Simple float array operation',function()
+   {
+      expect(execA(julia,'sum',[1.5,2.6,3.7])).to.equal(7.8);
+   });
 });
 

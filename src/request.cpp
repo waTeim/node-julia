@@ -110,9 +110,9 @@ double getFloat64Value(const Local<Value> &val)
 
 string getStringValue(const Local<Value> &val)
 {
-   String::Utf8Value s(val);
-
-   return string("");
+   String::Utf8Value text(val);
+   
+   return string(*text);
 }
 
 template <typename V,typename E,V (&accessor)(const Local<Value>&)> static void fillArray(shared_ptr<nj::Value> &to,const Local<Array> &from)

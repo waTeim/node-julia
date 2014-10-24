@@ -134,9 +134,10 @@ template <typename V,typename E,jl_value_t *(&createInstance)(const V&)> static 
    for(size_t dim: A.dims()) jl_tupleset(dims,i++,jl_box_long(dim));
 
    jl_array_t *A_jl = jl_new_array(atype,dims);
-   jl_value_t **Ajl_p = (jl_value_t**)A_jl->data;
    V *A_p = A.ptr();
+   jl_value_t **Ajl_p = (jl_value_t**)A_jl->data;
     
+   //for(size_t elNum = 0;elNum < A.size();elNum++) jl_arrayset(A_jl,createInstance(*A_p++),elNum);
    for(size_t elNum = 0;elNum < A.size();elNum++) *Ajl_p++ = createInstance(*A_p++);
 
    return A_jl;
