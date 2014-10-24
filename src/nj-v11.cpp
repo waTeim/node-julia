@@ -165,26 +165,6 @@ int buildResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc,
    return index;
 }
 
-void doStart(const FunctionCallbackInfo<Value> &args)
-{
-   Isolate *I = Isolate::GetCurrent();
-   HandleScope scope(I);
-   int numArgs = args.Length();
-
-   if(numArgs == 0)
-   {
-      if(!J) J = new JuliaExecEnv();
-      returnString(I,args,"Julia Started");
-      return;
-   }
-
-   Local<String> arg0 = args[0]->ToString();
-   String::Utf8Value juliaDirectory(arg0);
-
-   if(!J) J = new JuliaExecEnv(*juliaDirectory);
-   returnString(I,args,"Julia Started");
-}
-
 void callbackWithResult(const FunctionCallbackInfo<Value> &args,HandleScope &scope,Local<Function> &cb,shared_ptr<nj::Result> &res)
 {
    Isolate *I = Isolate::GetCurrent();
@@ -225,11 +205,13 @@ void doEval(const FunctionCallbackInfo<Value> &args)
    HandleScope scope(I);
    int numArgs = args.Length();
 
-   if(numArgs < 2 || !J)
+   if(numArgs < 2)
    {
       returnNull(I,args);
       return;
    }
+
+   if(!J) J = new JuliaExecEnv();
 
    Local<String> arg0 = args[0]->ToString();
    Local<Function> cb = Local<Function>::Cast(args[1]);
@@ -257,11 +239,13 @@ void doExec(const FunctionCallbackInfo<Value> &args)
    HandleScope scope(I);
    int numArgs = args.Length();
 
-   if(numArgs < 2 || !J)
+   if(numArgs < 2)
    {
       returnNull(I,args);
       return;
    }
+
+   if(!J) J = new JuliaExecEnv();
 
    Local<String> arg0 = Local<String>::Cast(args[0]);
    String::Utf8Value funcName(arg0);
@@ -304,7 +288,6 @@ void init(Handle<Object> exports)
 {
   nj::ScriptEncapsulated::Init(exports);
 
-  NODE_SET_METHOD(exports,"start",doStart);
   NODE_SET_METHOD(exports,"eval",doEval);
   NODE_SET_METHOD(exports,"exec",doExec);
   NODE_SET_METHOD(exports,"newScript",newScript);

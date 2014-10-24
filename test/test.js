@@ -99,11 +99,6 @@ function verifyIdentity(X,expectedLength)
 
 describe('Regression Tests',function()
 {
-   it('start() must return "Julia Started"',function()
-   {
-      expect(julia.start()).to.equal('Julia Started');
-   });
-
    it('eval Null return',function()
    {
       expect(eval(julia,"()")).to.equal(null);
@@ -248,6 +243,11 @@ describe('Regression Tests',function()
    it('Simple float array operation',function()
    {
       expect(execA(julia,'sum',[1.5,2.6,3.7])).to.equal(7.8);
+   });
+
+   it('Simple string array operation',function()
+   {
+      expect(execA(julia,'concat',["a","b","c"])).to.equal('abc');
    });
 });
 

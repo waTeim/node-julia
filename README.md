@@ -20,22 +20,7 @@ relative to where the julia executable is located.
 
     julia = require('node-julia');
 
-There are 4 functions; **start**, **eval** **exec** and **script**.
-
-## start
-
-This function starts the embedded Julia engine.  It need be called only once.
-It takes a single optional argument which is the location of the Julia
-installation directory and defaults to the location that was detected 
-during installation.
-
-### Example
-
-    julia.start();     // Uses default location
-
-or alternately
-
-    julia.start('/usr/local/julia/');  // overrides standard location
+There are 3 functions; **eval** **exec** and **script**.
 
 ## eval
 
@@ -129,24 +114,19 @@ full version.  There are various workaround for most of these issues.
 are planned.  As a workarond use Julia composites within a module or wrapping function
 and export the result to node as a tuple which will be mapped to seperate
 function callback variables.
+
 * Julia invocations are currently synchronous.  For although the underlying top and 
 bottom parts of the framework operate in separate threads, the top half simply blocks
-until the bottom half is finished.  Asynchronicity will be supported by using **libuv**
-and send event.  Since the node.js event loop is single-threaded, blocking within a
-long running evaluation is a real problem.  This is the #1 priority currently.
+until the bottom half is finished.  Asynchronicity will be supported in a upcoming 
+release.
 
 ## OS specific issues.
 
-### OS/X
-As far as is known, OS/X is fully supported, but requires at least version 0.3.0 of Julia.
-Any problems should be considered a bug.
-
 ### Linux
-There is a suspected problem with the library load order that affects symbol resolution
-and/or a **libuv** compability problem.  However, this problem can be avoided by using
-node 11 instead of node 10.  Previous general errors are fixed.  As above, Julia version
-0.3.0 or higher should be used.
+Currently, supported linux installations include any version that uses the binary
+distribution of Julia (e.g. ubuntu PPA), or if Julia is compiled from source, then
+the nodejs version 11.13 is compatible since both Julia and node use the same version
+of libuv.
 
 ### Windows
-Work on Windows support is in progress.  For anyone that wishes to contribute here,
-a compiler supporting *c++11* semantics is needed.
+Work on Windows support is in progress.

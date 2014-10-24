@@ -157,24 +157,6 @@ int buildResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc,
    return index;
 }
 
-Handle<Value> doStart(const Arguments &args)
-{
-   HandleScope scope;
-   int numArgs = args.Length();
-
-   if(numArgs == 0)
-   {
-      if(!J) J = new JuliaExecEnv();
-      return returnString(scope,"Julia Started");
-   }
-
-   Local<String> arg0 = Local<String>::Cast(args[0]);
-   String::Utf8Value juliaDirectory(arg0);
-
-   if(!J) J = new JuliaExecEnv(*juliaDirectory);
-   return returnString(scope,"Julia Started");
-}
-
 Handle<Value> callbackWithResult(HandleScope &scope,Local<Function> &cb,shared_ptr<nj::Result> &res)
 {
    if(res.get())
@@ -213,7 +195,8 @@ Handle<Value> doEval(const Arguments &args)
    HandleScope scope;
    int numArgs = args.Length();
 
-   if(numArgs < 2 || !J) return scope.Close(Null());
+   if(numArgs < 2) return scope.Close(Null());
+   if(!J) J = new JuliaExecEnv();
 
    Local<String> arg0 = Local<String>::Cast(args[0]);
    Local<Function> cb = Local<Function>::Cast(args[1]);
@@ -240,7 +223,8 @@ Handle<Value> doExec(const Arguments &args)
    HandleScope scope;
    int numArgs = args.Length();
 
-   if(numArgs < 2 || !J) return scope.Close(Null());
+   if(numArgs < 2) return scope.Close(Null());
+   if(!J) J = new JuliaExecEnv();
 
    Local<String> arg0 = Local<String>::Cast(args[0]);
    String::Utf8Value funcName(arg0);
@@ -282,7 +266,6 @@ void init(Handle<Object> exports)
 {
    nj::ScriptEncapsulated::Init(exports);
 
-   NODE_SET_METHOD(exports,"start",doStart);
    NODE_SET_METHOD(exports,"eval",doEval);
    NODE_SET_METHOD(exports,"exec",doExec);
    NODE_SET_METHOD(exports,"newScript",newScript);
