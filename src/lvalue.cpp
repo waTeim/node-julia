@@ -24,7 +24,7 @@ template <typename V,typename E> static shared_ptr<nj::Value> arrayFromBuffer(jl
    return value;
 }
 
-static string getString(jl_value_t *val)
+string getSTDStringFromJuliaString(jl_value_t *val)
 {
    string res = string(jl_string_data(val));
 
@@ -87,8 +87,8 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlA)
    else if(elementType == (jl_value_t*)jl_int16_type) value = arrayFromBuffer<short,nj::Int16_t>(jlA);
    else if(elementType == (jl_value_t*)jl_uint8_type) value = arrayFromBuffer<unsigned char,nj::UInt8_t>(jlA);
    else if(elementType == (jl_value_t*)jl_uint16_type) value = arrayFromBuffer<unsigned short,nj::UInt16_t>(jlA);
-   else if(elementType == (jl_value_t*)jl_ascii_string_type) value = arrayFromElements<string,nj::ASCIIString_t,getString>(jlA);
-   else if(elementType == (jl_value_t*)jl_utf8_string_type) value = arrayFromElements<string,nj::UTF8String_t,getString>(jlA);
+   else if(elementType == (jl_value_t*)jl_ascii_string_type) value = arrayFromElements<string,nj::ASCIIString_t,getSTDStringFromJuliaString>(jlA);
+   else if(elementType == (jl_value_t*)jl_utf8_string_type) value = arrayFromElements<string,nj::UTF8String_t,getSTDStringFromJuliaString>(jlA);
    else
    { 
       const char *juliaTypename = jl_typename_str(elementType);
@@ -97,7 +97,7 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlA)
       {
          jl_value_t *utfArray = convertArray(jlA,jl_utf8_string_type);
 
-         if(utfArray) value = arrayFromElements<string,nj::UTF8String_t,getString>(utfArray);
+         if(utfArray) value = arrayFromElements<string,nj::UTF8String_t,getSTDStringFromJuliaString>(utfArray);
       }
    }
 

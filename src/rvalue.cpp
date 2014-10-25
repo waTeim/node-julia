@@ -119,7 +119,7 @@ template<typename V,typename E> static jl_array_t *arrayFromBuffer(const shared_
    return jl_ptr_to_array(atype,A.ptr(),dims,0);
 }
 
-static jl_value_t *getString(const string &s)
+jl_value_t *getJuliaStringFromSTDString(const string &s)
 {
    return jl_cstr_to_string(s.c_str());
 }
@@ -160,8 +160,8 @@ static jl_array_t *rArray(const shared_ptr<nj::Value> &array)
       case nj::float32_type: res = arrayFromBuffer<float,nj::Float32_t>(array,jl_float32_type); break;
       case nj::int8_type: res = arrayFromBuffer<char,nj::Int8_t>(array,jl_int8_type); break;
       case nj::uint8_type: res = arrayFromBuffer<unsigned char,nj::UInt8_t>(array,jl_uint8_type); break;
-      case nj::ascii_string_type: res = arrayFromElements<string,nj::ASCIIString_t,getString>(array,jl_ascii_string_type); break;
-      case nj::utf8_string_type: res = arrayFromElements<string,nj::UTF8String_t,getString>(array,jl_utf8_string_type); break;
+      case nj::ascii_string_type: res = arrayFromElements<string,nj::ASCIIString_t,getJuliaStringFromSTDString>(array,jl_ascii_string_type); break;
+      case nj::utf8_string_type: res = arrayFromElements<string,nj::UTF8String_t,getJuliaStringFromSTDString>(array,jl_utf8_string_type); break;
    }
    return res;
 }

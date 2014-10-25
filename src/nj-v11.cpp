@@ -84,12 +84,12 @@ Local<Value> buildPrimitiveResponse(HandleScope &scope,const nj::Primitive &prim
    return Array::New(I,0);
 }
 
-template <typename V> Local<Value> getNumber(Isolate *I,const V &val)
+template <typename V> Local<Value> getNumberFromValue(Isolate *I,const V &val)
 {
    return Number::New(I,val);
 }
 
-template Local<Value> getString(Isolate *I,const string &val)
+template Local<Value> getStringFromValue(Isolate *I,const string &val)
 {
    return String::NewFromUtf8(I,val.c_str());
 }
@@ -135,18 +135,18 @@ Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &
 
    switch(element_type->getId())
    {
-      case nj::float64_type: return buildArrayResponse<double,nj::Float64_t,getNumber<double>>(scope,value); break;
-      case nj::float32_type: return buildArrayResponse<float,nj::Float32_t,getNumber<float>>(scope,value); break;
-      case nj::int64_type: return buildArrayResponse<int64_t,nj::Int64_t,getNumber<int64_t>>(scope,value); break;
-      case nj::int32_type: return buildArrayResponse<int,nj::Int32_t,getNumber<int>>(scope,value); break;
-      case nj::int16_type: return buildArrayResponse<short,nj::Int16_t,getNumber<short>>(scope,value); break;
-      case nj::int8_type: return buildArrayResponse<char,nj::Int8_t,getNumber<char>>(scope,value); break;
-      case nj::uint64_type: return buildArrayResponse<uint64_t,nj::UInt64_t,getNumber<uint64_t>>(scope,value); break;
-      case nj::uint32_type: return buildArrayResponse<unsigned,nj::UInt32_t,getNumber<unsigned>>(scope,value); break;
-      case nj::uint16_type: return buildArrayResponse<unsigned short,nj::UInt16_t,getNumber<unsigned short>>(scope,value); break;
-      case nj::uint8_type: return buildArrayResponse<unsigned char,nj::UInt8_t,getNumber<unsigned char>>(scope,value); break;
-      case nj::ascii_string_type: return buildArrayResponse<string,nj::ASCIIString_t,getString>(scope,value); break;
-      case nj::utf8_string_type: return buildArrayResponse<string,nj::UTF8String_t,getString>(scope,value); break;
+      case nj::float64_type: return buildArrayResponse<double,nj::Float64_t,getNumberFromValue<double>>(scope,value); break;
+      case nj::float32_type: return buildArrayResponse<float,nj::Float32_t,getNumberFromValue<float>>(scope,value); break;
+      case nj::int64_type: return buildArrayResponse<int64_t,nj::Int64_t,getNumberFromValue<int64_t>>(scope,value); break;
+      case nj::int32_type: return buildArrayResponse<int,nj::Int32_t,getNumberFromValue<int>>(scope,value); break;
+      case nj::int16_type: return buildArrayResponse<short,nj::Int16_t,getNumberFromValue<short>>(scope,value); break;
+      case nj::int8_type: return buildArrayResponse<char,nj::Int8_t,getNumberFromValue<char>>(scope,value); break;
+      case nj::uint64_type: return buildArrayResponse<uint64_t,nj::UInt64_t,getNumberFromValue<uint64_t>>(scope,value); break;
+      case nj::uint32_type: return buildArrayResponse<unsigned,nj::UInt32_t,getNumberFromValue<unsigned>>(scope,value); break;
+      case nj::uint16_type: return buildArrayResponse<unsigned short,nj::UInt16_t,getNumberFromValue<unsigned short>>(scope,value); break;
+      case nj::uint8_type: return buildArrayResponse<unsigned char,nj::UInt8_t,getNumberFromValue<unsigned char>>(scope,value); break;
+      case nj::ascii_string_type: return buildArrayResponse<string,nj::ASCIIString_t,getStringFromValue>(scope,value); break;
+      case nj::utf8_string_type: return buildArrayResponse<string,nj::UTF8String_t,getStringFromValue>(scope,value); break;
    }
 
    Isolate *I = Isolate::GetCurrent();
