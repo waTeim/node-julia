@@ -1,5 +1,6 @@
 #include <iostream>
 #include <julia.h>
+#include "juliav.h"
 #include <memory.h>
 #include "Values.h"
 #include "lvalue.h"
@@ -122,7 +123,7 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlA)
    else if(elementType == (jl_value_t*)jl_uint16_type) value = arrayFromBuffer<unsigned short,nj::UInt16_t>(jlA);
    else if(elementType == (jl_value_t*)jl_ascii_string_type) value = arrayFromElements<string,nj::ASCIIString_t,getSTDStringFromJuliaString>(jlA);
    else if(elementType == (jl_value_t*)jl_utf8_string_type) value = arrayFromElements<string,nj::UTF8String_t,getSTDStringFromJuliaString>(jlA);
-   else if(elementType == (jl_value_t*)jl_void_type) value = arrayOfNull(jlA);
+   else if(elementType == (jl_value_t*)JVOID_T) value = arrayOfNull(jlA);
    else
    { 
       const char *juliaTypename = jl_typename_str(elementType);
