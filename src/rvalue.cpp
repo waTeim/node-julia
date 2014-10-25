@@ -107,7 +107,7 @@ static jl_value_t *rPrimitive(const nj::Primitive &prim)
    return res;
 }
 
-template<typename V,typename E> static jl_array_t *arrayFromPtr(const shared_ptr<nj::Value> &val,jl_datatype_t *jl_element_type)
+template<typename V,typename E> static jl_array_t *arrayFromBuffer(const shared_ptr<nj::Value> &val,jl_datatype_t *jl_element_type)
 {
    const nj::Array<V,E> &A = static_cast<nj::Array<V,E>&>(*val);
    jl_value_t *atype = jl_apply_array_type(jl_element_type,A.dims().size());
@@ -119,12 +119,12 @@ template<typename V,typename E> static jl_array_t *arrayFromPtr(const shared_ptr
    return jl_ptr_to_array(atype,A.ptr(),dims,0);
 }
 
-jl_value_t *createString(const string &s)
+static jl_value_t *getString(const string &s)
 {
    return jl_cstr_to_string(s.c_str());
 }
 
-template <typename V,typename E,jl_value_t *(&createInstance)(const V&)> static jl_array_t *arrayFromElements(const shared_ptr<nj::Value> &val,jl_datatype_t *jl_element_type)
+template <typename V,typename E,jl_value_t *(&getElement)(const V&)> static jl_array_t *arrayFromElements(const shared_ptr<nj::Value> &val,jl_datatype_t *jl_element_type)
 {
    const nj::Array<V,E> &A = static_cast<nj::Array<V,E>&>(*val);
    jl_value_t *atype = jl_apply_array_type(jl_element_type,A.dims().size());
@@ -137,8 +137,7 @@ template <typename V,typename E,jl_value_t *(&createInstance)(const V&)> static 
    V *A_p = A.ptr();
    jl_value_t **Ajl_p = (jl_value_t**)A_jl->data;
     
-   //for(size_t elNum = 0;elNum < A.size();elNum++) jl_arrayset(A_jl,createInstance(*A_p++),elNum);
-   for(size_t elNum = 0;elNum < A.size();elNum++) *Ajl_p++ = createInstance(*A_p++);
+   for(size_t elNum = 0;elNum < A.size();elNum++) *Ajl_p++ = getElement(*A_p++);
 
    return A_jl;
 }
@@ -150,19 +149,19 @@ static jl_array_t *rArray(const shared_ptr<nj::Value> &array)
 
    switch(atype->etype()->getId())
    {  
-      case nj::boolean_type: res = arrayFromPtr<unsigned char,nj::Boolean_t>(array,jl_bool_type); break;
-      case nj::int64_type: res = arrayFromPtr<int64_t,nj::Int64_t>(array,jl_int64_type); break;
-      case nj::int32_type: res = arrayFromPtr<int,nj::Int32_t>(array,jl_int32_type); break;
-      case nj::int16_type: res = arrayFromPtr<short,nj::Int16_t>(array,jl_int16_type); break;
-      case nj::uint64_type: res = arrayFromPtr<uint64_t,nj::UInt64_t>(array,jl_uint64_type); break;
-      case nj::uint32_type: res = arrayFromPtr<unsigned int,nj::UInt32_t>(array,jl_uint32_type); break;
-      case nj::uint16_type: res = arrayFromPtr<unsigned short,nj::UInt16_t>(array,jl_uint16_type); break;
-      case nj::float64_type: res = arrayFromPtr<double,nj::Float64_t>(array,jl_float64_type); break;
-      case nj::float32_type: res = arrayFromPtr<float,nj::Float32_t>(array,jl_float32_type); break;
-      case nj::int8_type: res = arrayFromPtr<char,nj::Int8_t>(array,jl_int8_type); break;
-      case nj::uint8_type: res = arrayFromPtr<unsigned char,nj::UInt8_t>(array,jl_uint8_type); break;
-      case nj::ascii_string_type: res = arrayFromElements<string,nj::ASCIIString_t,createString>(array,jl_ascii_string_type); break;
-      case nj::utf8_string_type: res = arrayFromElements<string,nj::UTF8String_t,createString>(array,jl_utf8_string_type); break;
+      case nj::boolean_type: res = arrayFromBuffer<unsigned char,nj::Boolean_t>(array,jl_bool_type); break;
+      case nj::int64_type: res = arrayFromBuffer<int64_t,nj::Int64_t>(array,jl_int64_type); break;
+      case nj::int32_type: res = arrayFromBuffer<int,nj::Int32_t>(array,jl_int32_type); break;
+      case nj::int16_type: res = arrayFromBuffer<short,nj::Int16_t>(array,jl_int16_type); break;
+      case nj::uint64_type: res = arrayFromBuffer<uint64_t,nj::UInt64_t>(array,jl_uint64_type); break;
+      case nj::uint32_type: res = arrayFromBuffer<unsigned int,nj::UInt32_t>(array,jl_uint32_type); break;
+      case nj::uint16_type: res = arrayFromBuffer<unsigned short,nj::UInt16_t>(array,jl_uint16_type); break;
+      case nj::float64_type: res = arrayFromBuffer<double,nj::Float64_t>(array,jl_float64_type); break;
+      case nj::float32_type: res = arrayFromBuffer<float,nj::Float32_t>(array,jl_float32_type); break;
+      case nj::int8_type: res = arrayFromBuffer<char,nj::Int8_t>(array,jl_int8_type); break;
+      case nj::uint8_type: res = arrayFromBuffer<unsigned char,nj::UInt8_t>(array,jl_uint8_type); break;
+      case nj::ascii_string_type: res = arrayFromElements<string,nj::ASCIIString_t,getString>(array,jl_ascii_string_type); break;
+      case nj::utf8_string_type: res = arrayFromElements<string,nj::UTF8String_t,getString>(array,jl_utf8_string_type); break;
    }
    return res;
 }

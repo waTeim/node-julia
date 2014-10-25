@@ -79,7 +79,17 @@ Local<Value> buildPrimitiveResponse(HandleScope &scope,const nj::Primitive &prim
    return Local<Value>::New(Null());
 }
 
-template<typename V,typename E> Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &value)
+template <typename V> Local<Value> getNumber(const V &val)
+{
+   return Number::New(val);
+}
+
+template Local<Value> getString(const string &val)
+{
+   return String::New(val.c_str());
+}
+
+template<typename V,typename E,Local<Value> getElement(const V &val)> Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &value)
 {
    const nj::Array<V,E> &array = static_cast<const nj::Array<V,E>&>(*value);
 
@@ -90,7 +100,7 @@ template<typename V,typename E> Local<Array> buildArrayResponse(HandleScope &sco
       V *p = array.ptr();
       Local<Array> dest = Array::New(size0);
 
-      for(size_t i = 0;i < size0;i++) dest->Set(i,Number::New(p[i]));
+      for(size_t i = 0;i < size0;i++) dest->Set(i,getElement(p[i]));
       return dest;
    }
    else if(array.dims().size() == 2)
@@ -105,7 +115,7 @@ template<typename V,typename E> Local<Array> buildArrayResponse(HandleScope &sco
          Local<Array> row  = Array::New(size1);
 
          dest->Set(i,row);
-         for(size_t j = 0;j < size1;j++) row->Set(j,Number::New(p[size0*j + i]));
+         for(size_t j = 0;j < size1;j++) row->Set(j,getElement(p[size0*j + i]));
       }
       return dest;
    }
@@ -119,16 +129,18 @@ Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &
 
    switch(element_type->getId())
    {
-      case nj::float64_type: return buildArrayResponse<double,nj::Float64_t>(scope,value); break;
-      case nj::float32_type: return buildArrayResponse<float,nj::Float32_t>(scope,value); break;
-      case nj::int64_type: return buildArrayResponse<int64_t,nj::Int64_t>(scope,value); break;
-      case nj::int32_type: return buildArrayResponse<int,nj::Int32_t>(scope,value); break;
-      case nj::int16_type: return buildArrayResponse<short,nj::Int16_t>(scope,value); break;
-      case nj::int8_type: return buildArrayResponse<char,nj::Int8_t>(scope,value); break;
-      case nj::uint64_type: return buildArrayResponse<uint64_t,nj::UInt64_t>(scope,value); break;
-      case nj::uint32_type: return buildArrayResponse<unsigned,nj::UInt32_t>(scope,value); break;
-      case nj::uint16_type: return buildArrayResponse<unsigned short,nj::UInt16_t>(scope,value); break;
-      case nj::uint8_type: return buildArrayResponse<unsigned char,nj::UInt8_t>(scope,value); break;
+      case nj::float64_type: return buildArrayResponse<double,nj::Float64_t,getNumber<double>>(scope,value); break;
+      case nj::float32_type: return buildArrayResponse<float,nj::Float32_t,getNumber<float>>(scope,value); break;
+      case nj::int64_type: return buildArrayResponse<int64_t,nj::Int64_t,getNumber<int64_t>>(scope,value); break;
+      case nj::int32_type: return buildArrayResponse<int,nj::Int32_t,getNumber<int>>(scope,value); break;
+      case nj::int16_type: return buildArrayResponse<short,nj::Int16_t,getNumber<short>>(scope,value); break;
+      case nj::int8_type: return buildArrayResponse<char,nj::Int8_t,getNumber<char>>(scope,value); break;
+      case nj::uint64_type: return buildArrayResponse<uint64_t,nj::UInt64_t,getNumber<uint64_t>>(scope,value); break;
+      case nj::uint32_type: return buildArrayResponse<unsigned,nj::UInt32_t,getNumber<unsigned>>(scope,value); break;
+      case nj::uint16_type: return buildArrayResponse<unsigned short,nj::UInt16_t,getNumber<unsigned short>>(scope,value); break;
+      case nj::uint8_type: return buildArrayResponse<unsigned char,nj::UInt8_t,getNumber<unsigned char>>(scope,value); break;
+      case nj::ascii_string_type: return buildArrayResponse<string,nj::ASCIIString_t,getString>(scope,value); break;
+      case nj::utf8_string_type: return buildArrayResponse<string,nj::UTF8String_t,getString>(scope,value); break;
    }
 
    return Array::New(0);

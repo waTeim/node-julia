@@ -235,19 +235,24 @@ describe('Regression Tests',function()
       expect(execA(julia,'typecheckArray',[true,"x",1,1.1])).to.equal('none');
    });
 
-   it('Simple int array operation',function()
+   it('Simple int array input',function()
    {
       expect(execA(julia,'sum',[1,2,3])).to.equal(6);
    });
 
-   it('Simple float array operation',function()
+   it('Simple float array input',function()
    {
       expect(execA(julia,'sum',[1.5,2.6,3.7])).to.equal(7.8);
    });
 
-   it('Simple string array operation',function()
+   it('Simple string array input',function()
    {
-      expect(execA(julia,'concat',["a","b","c"])).to.equal('abc');
+      expect(execA(julia,'concat',['a','b','c'])).to.equal('abc');
+   });
+
+   it('Simple string array result',function()
+   {
+      expect(execA(julia,'split','a b c',' ')).to.eql(['a','b','c']);
    });
 });
 

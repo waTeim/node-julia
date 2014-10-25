@@ -6,14 +6,16 @@
 
 using namespace std;
 
-template <typename V,typename E> static shared_ptr<nj::Value> reboxArray(jl_value_t *jlarray)
+static const string SubString("SubString");
+
+template <typename V,typename E> static shared_ptr<nj::Value> arrayFromBuffer(jl_value_t *jlA)
 {
    shared_ptr<nj::Value> value;
-   V *p = (V*)jl_array_data(jlarray);
-   int ndims = jl_array_ndims(jlarray);
+   V *p = (V*)jl_array_data(jlA);
+   int ndims = jl_array_ndims(jlA);
    vector<size_t> dims;
 
-   for(int dim = 0;dim < ndims;dim++) dims.push_back(jl_array_dim(jlarray,dim));
+   for(int dim = 0;dim < ndims;dim++) dims.push_back(jl_array_dim(jlA,dim));
 
    nj::Array<V,E> *array = new nj::Array<V,E>(dims);
    
@@ -22,22 +24,82 @@ template <typename V,typename E> static shared_ptr<nj::Value> reboxArray(jl_valu
    return value;
 }
 
-static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlarray)
+static string getString(jl_value_t *val)
+{
+   string res = string(jl_string_data(val));
+
+   return res;
+}
+
+template <typename V,typename E,V (&getElement)(jl_value_t*)> static shared_ptr<nj::Value> arrayFromElements(jl_value_t *jlA)
+{
+   shared_ptr<nj::Value> value;
+   jl_value_t **jlA_p = (jl_value_t**)jl_array_data(jlA);
+   int ndims = jl_array_ndims(jlA);
+   vector<size_t> dims;
+
+   for(int dim = 0;dim < ndims;dim++) dims.push_back(jl_array_dim(jlA,dim));
+
+   nj::Array<V,E> *A = new nj::Array<V,E>(dims);
+   V *A_p = A->ptr();
+
+   value.reset(A);
+
+   for(size_t elNum = 0;elNum < A->size();elNum++) *A_p++ = getElement(*jlA_p++);
+
+   return value;
+}
+
+static jl_value_t *convertArray(jl_value_t *from,jl_datatype_t *destElementType)
+{
+   static jl_function_t *juliaConvert = 0;
+
+   if(!juliaConvert) juliaConvert = jl_get_function(jl_base_module,"convert");
+   if(juliaConvert)
+   {
+      jl_value_t *atype = jl_apply_array_type(destElementType,jl_array_ndims(from));
+
+      JL_GC_PUSH2(&from,&destElementType);
+   
+      jl_value_t *to = jl_call2(juliaConvert,atype,from);
+
+      JL_GC_POP();
+
+      return to;
+   }
+   return 0;
+}
+
+
+static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlA)
 {
    shared_ptr<nj::Value> value;
 
-   jl_value_t *elementType = jl_tparam0(jl_typeof(jlarray));
+   jl_value_t *elementType = jl_tparam0(jl_typeof(jlA));
 
-   if(elementType == (jl_value_t*)jl_float64_type) value = reboxArray<double,nj::Float64_t>(jlarray); 
-   else if(elementType == (jl_value_t*)jl_int64_type) value = reboxArray<int64_t,nj::Int64_t>(jlarray);
-   else if(elementType == (jl_value_t*)jl_int32_type) value = reboxArray<int,nj::Int32_t>(jlarray);
-   else if(elementType == (jl_value_t*)jl_int8_type) value = reboxArray<char,nj::Int8_t>(jlarray);
-   else if(elementType == (jl_value_t*)jl_float32_type) value = reboxArray<float,nj::Float32_t>(jlarray);
-   else if(elementType == (jl_value_t*)jl_uint64_type) value = reboxArray<uint64_t,nj::UInt64_t>(jlarray); 
-   else if(elementType == (jl_value_t*)jl_uint32_type) value = reboxArray<unsigned,nj::UInt32_t>(jlarray);
-   else if(elementType == (jl_value_t*)jl_int16_type) value = reboxArray<short,nj::Int16_t>(jlarray);
-   else if(elementType == (jl_value_t*)jl_uint8_type) value = reboxArray<unsigned char,nj::UInt8_t>(jlarray);
-   else if(elementType == (jl_value_t*)jl_uint16_type) value = reboxArray<unsigned short,nj::UInt16_t>(jlarray);
+   if(elementType == (jl_value_t*)jl_float64_type) value = arrayFromBuffer<double,nj::Float64_t>(jlA); 
+   else if(elementType == (jl_value_t*)jl_int64_type) value = arrayFromBuffer<int64_t,nj::Int64_t>(jlA);
+   else if(elementType == (jl_value_t*)jl_int32_type) value = arrayFromBuffer<int,nj::Int32_t>(jlA);
+   else if(elementType == (jl_value_t*)jl_int8_type) value = arrayFromBuffer<char,nj::Int8_t>(jlA);
+   else if(elementType == (jl_value_t*)jl_float32_type) value = arrayFromBuffer<float,nj::Float32_t>(jlA);
+   else if(elementType == (jl_value_t*)jl_uint64_type) value = arrayFromBuffer<uint64_t,nj::UInt64_t>(jlA); 
+   else if(elementType == (jl_value_t*)jl_uint32_type) value = arrayFromBuffer<unsigned,nj::UInt32_t>(jlA);
+   else if(elementType == (jl_value_t*)jl_int16_type) value = arrayFromBuffer<short,nj::Int16_t>(jlA);
+   else if(elementType == (jl_value_t*)jl_uint8_type) value = arrayFromBuffer<unsigned char,nj::UInt8_t>(jlA);
+   else if(elementType == (jl_value_t*)jl_uint16_type) value = arrayFromBuffer<unsigned short,nj::UInt16_t>(jlA);
+   else if(elementType == (jl_value_t*)jl_ascii_string_type) value = arrayFromElements<string,nj::ASCIIString_t,getString>(jlA);
+   else if(elementType == (jl_value_t*)jl_utf8_string_type) value = arrayFromElements<string,nj::UTF8String_t,getString>(jlA);
+   else
+   { 
+      const char *juliaTypename = jl_typename_str(elementType);
+
+      if(SubString == juliaTypename)
+      {
+         jl_value_t *utfArray = convertArray(jlA,jl_utf8_string_type);
+
+         if(utfArray) value = arrayFromElements<string,nj::UTF8String_t,getString>(utfArray);
+      }
+   }
 
    return value;
 }
