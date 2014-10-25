@@ -89,7 +89,7 @@ template <typename V> Local<Value> getNumberFromValue(Isolate *I,const V &val)
    return Number::New(I,val);
 }
 
-template Local<Value> getStringFromValue(Isolate *I,const string &val)
+Local<Value> getStringFromValue(Isolate *I,const string &val)
 {
    return String::NewFromUtf8(I,val.c_str());
 }

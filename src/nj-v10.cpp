@@ -84,7 +84,7 @@ template <typename V> Local<Value> getNumberFromValue(const V &val)
    return Number::New(val);
 }
 
-template Local<Value> getStringFromValue(const string &val)
+Local<Value> getStringFromValue(const string &val)
 {
    return String::New(val.c_str());
 }
