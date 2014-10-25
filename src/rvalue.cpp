@@ -119,6 +119,11 @@ template<typename V,typename E> static jl_array_t *arrayFromBuffer(const shared_
    return jl_ptr_to_array(atype,A.ptr(),dims,0);
 }
 
+jl_value_t *getJuliaNullElement(const unsigned char &c)
+{
+   return 0;
+}
+
 jl_value_t *getJuliaStringFromSTDString(const string &s)
 {
    return jl_cstr_to_string(s.c_str());
@@ -149,6 +154,7 @@ static jl_array_t *rArray(const shared_ptr<nj::Value> &array)
 
    switch(atype->etype()->getId())
    {  
+      case nj::null_type: res = arrayFromElements<unsigned char,nj::Null_t,getJuliaNullElement>(array,jl_void_type); break;
       case nj::boolean_type: res = arrayFromBuffer<unsigned char,nj::Boolean_t>(array,jl_bool_type); break;
       case nj::int64_type: res = arrayFromBuffer<int64_t,nj::Int64_t>(array,jl_int64_type); break;
       case nj::int32_type: res = arrayFromBuffer<int,nj::Int32_t>(array,jl_int32_type); break;

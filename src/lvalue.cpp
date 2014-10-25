@@ -51,6 +51,24 @@ template <typename V,typename E,V (&getElement)(jl_value_t*)> static shared_ptr<
    return value;
 }
 
+static shared_ptr<nj::Value> arrayOfNull(jl_value_t *jlA)
+{
+   shared_ptr<nj::Value> value;
+   int ndims = jl_array_ndims(jlA);
+   vector<size_t> dims;
+
+   for(int dim = 0;dim < ndims;dim++) dims.push_back(jl_array_dim(jlA,dim));
+
+   nj::Array<unsigned char,nj::Null_t> *A = new nj::Array<unsigned char,nj::Null_t>(dims);
+   unsigned char *A_p = A->ptr();
+
+   value.reset(A);
+
+   for(size_t elNum = 0;elNum < A->size();elNum++) *A_p++ = 0;
+
+   return value;
+}
+
 static jl_value_t *convertValue(jl_value_t *from,jl_datatype_t *destType)
 {
    if(!juliaConvert) juliaConvert = jl_get_function(jl_base_module,"convert");
@@ -104,6 +122,7 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlA)
    else if(elementType == (jl_value_t*)jl_uint16_type) value = arrayFromBuffer<unsigned short,nj::UInt16_t>(jlA);
    else if(elementType == (jl_value_t*)jl_ascii_string_type) value = arrayFromElements<string,nj::ASCIIString_t,getSTDStringFromJuliaString>(jlA);
    else if(elementType == (jl_value_t*)jl_utf8_string_type) value = arrayFromElements<string,nj::UTF8String_t,getSTDStringFromJuliaString>(jlA);
+   else if(elementType == (jl_value_t*)jl_void_type) value = arrayOfNull(jlA);
    else
    { 
       const char *juliaTypename = jl_typename_str(elementType);
@@ -125,7 +144,8 @@ void addLValueElements(jl_value_t *jlVal,vector<shared_ptr<nj::Value>> &res)
 
    if(jl_is_null(jlVal))
    {
-      shared_ptr<nj::Value>  value(new nj::Null);
+      shared_ptr<nj::Value> value(new nj::Null);
+
       res.push_back(value);
    }
    else if(jl_is_array(jlVal)) res.push_back(getArrayValue(jlVal));

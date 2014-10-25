@@ -134,6 +134,11 @@ describe('Regression Tests',function()
       expect(eval(julia,Number.MAX_VALUE)).to.equal(Number.MAX_VALUE);
    });
 
+   it('exec identity Null',function()
+   {
+      expect(execIdentity(julia,null)).to.equal(null);
+   });
+
    it('exec identity Boolean',function()
    {
       expect(execIdentity(julia,true)).to.equal(true);
@@ -215,47 +220,82 @@ describe('Regression Tests',function()
       expect(execInclude(julia,'test/inc4.jl')).to.equal(true);
    });
 
-   it('Typecheck boolean array elements',function()
+   it('Typecheck Null array elements',function()
+   {
+      expect(execA(julia,'typecheckArray',[null])).to.equal('void');
+   });
+
+   it('Typecheck Boolean array elements',function()
    {
       expect(execA(julia,'typecheckArray',[true,false,true])).to.equal('boolean');
    });
 
-   it('Typecheck int array elements',function()
+   it('Typecheck Integer array elements',function()
    {
-      expect(execA(julia,'typecheckArray',[true,0,1.0])).to.equal('int');
+      expect(execA(julia,'typecheckArray',[1.0])).to.equal('int');
    });
 
-   it('Typecheck float array elements',function()
+   it('Typecheck Float array elements',function()
    {
-      expect(execA(julia,'typecheckArray',[true,0,1.1])).to.equal('float');
+      expect(execA(julia,'typecheckArray',[1.1])).to.equal('float');
    });
 
-   it('Typecheck string array elements',function()
+   it('Typecheck String array elements',function()
    {
       expect(execA(julia,'typecheckArray',[""])).to.equal('string');
    });
 
-   it('Prevent widening from Array{Number} to Array{String}',function()
+   it('Typecheck [Boolean,Integer] -> [Integer]',function()
+   {
+      expect(execA(julia,'typecheckArray',[true,1])).to.equal('int');
+   });
+
+   it('Typecheck [Boolean,Float] -> [Float]',function()
+   {
+      expect(execA(julia,'typecheckArray',[true,1.1])).to.equal('float');
+   });
+
+   it('Typecheck [Boolean,String] -> [String]',function()
+   {
+      expect(execA(julia,'typecheckArray',[""])).to.equal('string');
+   });
+
+   it('Typecheck [Integer,Float] -> [Float]',function()
+   {
+      expect(execA(julia,'typecheckArray',[1,1.1])).to.equal('float');
+   });
+
+   it('Prevent widening String elements',function()
    {
       expect(execA(julia,'typecheckArray',[true,"x",1,1.1])).to.equal('none');
    });
 
-   it('Simple int array input',function()
+   it('Prevent widening Null elements',function()
+   {
+      expect(execA(julia,'typecheckArray',[true,null,1,1.1])).to.equal('none');
+   });
+
+   it('Simple Integer array input',function()
    {
       expect(execA(julia,'sum',[1,2,3])).to.equal(6);
    });
 
-   it('Simple float array input',function()
+   it('Simple Float array input',function()
    {
       expect(execA(julia,'sum',[1.5,2.6,3.7])).to.equal(7.8);
    });
 
-   it('Simple string array input',function()
+   it('Simple String array input',function()
    {
       expect(execA(julia,'concat',['a','b','c'])).to.equal('abc');
    });
 
-   it('Array from elementwise conversion of SubString to String',function()
+   it('Array of null',function()
+   {
+      expect(eval(julia,'Array(Void,2,2)')).to.eql([[null,null],[null,null]]);
+   });
+
+   it('Array of elementwise conversion from SubString to String',function()
    {
       expect(execA(julia,'split','a b c',' ')).to.eql(['a','b','c']);
    });

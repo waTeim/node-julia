@@ -89,6 +89,12 @@ Local<Value> getStringFromValue(const string &val)
    return String::New(val.c_str());
 }
 
+Local<Value> getNullValue(const unsigned char &val)
+{
+   return Local<Value>::New(Null());
+}
+
+
 template<typename V,typename E,Local<Value> getElement(const V &val)> Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &value)
 {
    const nj::Array<V,E> &array = static_cast<const nj::Array<V,E>&>(*value);
@@ -129,6 +135,7 @@ Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &
 
    switch(element_type->getId())
    {
+      case nj::null_type: return buildArrayResponse<unsigned char,nj::Null_t,getNullValue>(scope,value); break;
       case nj::float64_type: return buildArrayResponse<double,nj::Float64_t,getNumberFromValue<double>>(scope,value); break;
       case nj::float32_type: return buildArrayResponse<float,nj::Float32_t,getNumberFromValue<float>>(scope,value); break;
       case nj::int64_type: return buildArrayResponse<int64_t,nj::Int64_t,getNumberFromValue<int64_t>>(scope,value); break;

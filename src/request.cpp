@@ -9,7 +9,8 @@ using namespace v8;
 
 static nj::Type *getPrimitiveType(const Local<Value> &prim)
 {   
-   if(prim->IsBoolean()) return nj::Boolean_t::instance();
+   if(prim->IsNull()) return nj::Null_t::instance();
+   else if(prim->IsBoolean()) return nj::Boolean_t::instance();
    else if(prim->IsNumber())
    {
       double v_d = prim->NumberValue();
@@ -25,7 +26,8 @@ static shared_ptr<nj::Value> buildPrimitive(const Local<Value> &prim)
 {
    shared_ptr<nj::Value> v;
 
-   if(prim->IsBoolean()) v.reset(new nj::Boolean(prim->BooleanValue()));
+   if(prim->IsNull()) v.reset(new nj::Null());
+   else if(prim->IsBoolean()) v.reset(new nj::Boolean(prim->BooleanValue()));
    else if(prim->IsNumber())
    {
       double v_d = prim->NumberValue();
@@ -82,6 +84,10 @@ static void examineArray(Local<Array> &a,size_t level,vector<size_t> &dims,nj::T
    }
 }
 
+unsigned char getNullValue(const Local<Value> &val)
+{
+   return 0;
+}
 
 unsigned char getBooleanValue(const Local<Value> &val)
 {
@@ -165,6 +171,10 @@ static shared_ptr<nj::Value> buildArray(const Local<Value> &from)
          {
             switch(etype->getId())
             {
+               case nj::null_type:
+                  to.reset(new nj::Array<unsigned char,nj::Null_t>(dims));
+                  fillArray<unsigned char,nj::Null_t,getNullValue>(to,a);
+               break;
                case nj::boolean_type:
                   to.reset(new nj::Array<unsigned char,nj::Boolean_t>(dims));
                   fillArray<unsigned char,nj::Boolean_t,getBooleanValue>(to,a);

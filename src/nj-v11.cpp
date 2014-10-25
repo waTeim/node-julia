@@ -94,6 +94,11 @@ Local<Value> getStringFromValue(Isolate *I,const string &val)
    return String::NewFromUtf8(I,val.c_str());
 }
 
+Local<Value> getNullValue(Isolate *I,const unsigned char &val)
+{
+   return Null(I);
+}
+
 template<typename V,typename E,Local<Value> getElement(Isolate *I,const V &val)> Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &value)
 {
    Isolate *I = Isolate::GetCurrent();
@@ -135,6 +140,7 @@ Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &
 
    switch(element_type->getId())
    {
+      case nj::null_type: return buildArrayResponse<unsigned char,nj::Null_t,getNullValue>(scope,value); break;
       case nj::float64_type: return buildArrayResponse<double,nj::Float64_t,getNumberFromValue<double>>(scope,value); break;
       case nj::float32_type: return buildArrayResponse<float,nj::Float32_t,getNumberFromValue<float>>(scope,value); break;
       case nj::int64_type: return buildArrayResponse<int64_t,nj::Int64_t,getNumberFromValue<int64_t>>(scope,value); break;

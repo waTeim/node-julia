@@ -4,8 +4,7 @@ bool nj::operator<(const nj::Type &t1,const nj::Type &t2)
 {
    bool res = false;
 
-   if(t1.getId() == nj::null_type) res = true;
-   else if(t1.getId() == nj::boolean_type && t2.getId() != nj::boolean_type) res = true;
+   if(t1.getId() == nj::boolean_type && t2.getId() != nj::boolean_type) res = true;
    else
    {
       switch(t1.getId())
