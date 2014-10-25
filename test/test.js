@@ -154,6 +154,11 @@ describe('Regression Tests',function()
       expect(execIdentity(julia,'x')).to.equal('x');
    });
 
+   it('implicit conversion from SubString to String',function()
+   {
+      expect(eval(julia,'match(r"(a)","a").match')).to.equal("a");
+   });
+
    it('eval include',function()
    {
       expect(eval(julia,'Core.include("test/inc1.jl")')).to.equal(true);
@@ -250,7 +255,7 @@ describe('Regression Tests',function()
       expect(execA(julia,'concat',['a','b','c'])).to.equal('abc');
    });
 
-   it('Simple string array result',function()
+   it('Array from elementwise conversion of SubString to String',function()
    {
       expect(execA(julia,'split','a b c',' ')).to.eql(['a','b','c']);
    });

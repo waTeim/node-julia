@@ -6,6 +6,7 @@
 
 using namespace std;
 
+static jl_function_t *juliaConvert = 0;
 static const string SubString("SubString");
 
 template <typename V,typename E> static shared_ptr<nj::Value> arrayFromBuffer(jl_value_t *jlA)
@@ -50,10 +51,24 @@ template <typename V,typename E,V (&getElement)(jl_value_t*)> static shared_ptr<
    return value;
 }
 
+static jl_value_t *convertValue(jl_value_t *from,jl_datatype_t *destType)
+{
+   if(!juliaConvert) juliaConvert = jl_get_function(jl_base_module,"convert");
+   if(juliaConvert)
+   {
+      JL_GC_PUSH2(&from,&destType);
+  
+      jl_value_t *to = jl_call2(juliaConvert,(jl_value_t*)destType,from);
+
+      JL_GC_POP();
+
+      return to;
+   }
+   return 0;
+}
+
 static jl_value_t *convertArray(jl_value_t *from,jl_datatype_t *destElementType)
 {
-   static jl_function_t *juliaConvert = 0;
-
    if(!juliaConvert) juliaConvert = jl_get_function(jl_base_module,"convert");
    if(juliaConvert)
    {
@@ -104,19 +119,19 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlA)
    return value;
 }
 
-void addLValueElements(jl_value_t *jl_value,vector<shared_ptr<nj::Value>> &res)
+void addLValueElements(jl_value_t *jlVal,vector<shared_ptr<nj::Value>> &res)
 {
-   if(!jl_value) return;
+   if(!jlVal) return;
 
-   if(jl_is_null(jl_value))
+   if(jl_is_null(jlVal))
    {
       shared_ptr<nj::Value>  value(new nj::Null);
       res.push_back(value);
    }
-   else if(jl_is_array(jl_value)) res.push_back(getArrayValue(jl_value));
-   else if(jl_is_tuple(jl_value))
+   else if(jl_is_array(jlVal)) res.push_back(getArrayValue(jlVal));
+   else if(jl_is_tuple(jlVal))
    {
-      jl_tuple_t *t = (jl_tuple_t*)jl_value;
+      jl_tuple_t *t = (jl_tuple_t*)jlVal;
       size_t tupleLen = jl_tuple_len(t);
 
       for(size_t i = 0;i < tupleLen;i++) 
@@ -130,29 +145,40 @@ void addLValueElements(jl_value_t *jl_value,vector<shared_ptr<nj::Value>> &res)
    {   
       shared_ptr<nj::Value> value;
 
-      if(jl_is_float64(jl_value)) value.reset(new nj::Float64(jl_unbox_float64(jl_value)));
-      else if(jl_is_int64(jl_value)) value.reset(new nj::Int64(jl_unbox_int64(jl_value)));
-      else if(jl_is_int32(jl_value)) value.reset(new nj::Int32(jl_unbox_int32(jl_value)));
-      else if(jl_is_int8(jl_value)) value.reset(new nj::Int8(jl_unbox_int8(jl_value)));
-      else if(jl_is_utf8_string(jl_value)) value.reset(new nj::UTF8String(jl_string_data(jl_value)));
-      else if(jl_is_ascii_string(jl_value)) value.reset(new nj::ASCIIString(jl_string_data(jl_value)));
-      else if(jl_is_float32(jl_value)) value.reset(new nj::Float32(jl_unbox_float32(jl_value)));
-      else if(jl_is_uint64(jl_value)) value.reset(new nj::UInt64(jl_unbox_uint64(jl_value)));
-      else if(jl_is_uint32(jl_value)) value.reset(new nj::UInt32(jl_unbox_uint32(jl_value)));
-      else if(jl_is_int16(jl_value)) value.reset(new nj::Int16(jl_unbox_int16(jl_value)));
-      else if(jl_is_uint8(jl_value)) value.reset(new nj::UInt8(jl_unbox_uint8(jl_value)));
-      else if(jl_is_uint16(jl_value)) value.reset(new nj::UInt16(jl_unbox_uint16(jl_value)));
-      else if(jl_is_bool(jl_value)) value.reset(new nj::Boolean(jl_unbox_bool(jl_value)));
+      if(jl_is_float64(jlVal)) value.reset(new nj::Float64(jl_unbox_float64(jlVal)));
+      else if(jl_is_int64(jlVal)) value.reset(new nj::Int64(jl_unbox_int64(jlVal)));
+      else if(jl_is_int32(jlVal)) value.reset(new nj::Int32(jl_unbox_int32(jlVal)));
+      else if(jl_is_int8(jlVal)) value.reset(new nj::Int8(jl_unbox_int8(jlVal)));
+      else if(jl_is_utf8_string(jlVal)) value.reset(new nj::UTF8String(jl_string_data(jlVal)));
+      else if(jl_is_ascii_string(jlVal)) value.reset(new nj::ASCIIString(jl_string_data(jlVal)));
+      else if(jl_is_float32(jlVal)) value.reset(new nj::Float32(jl_unbox_float32(jlVal)));
+      else if(jl_is_uint64(jlVal)) value.reset(new nj::UInt64(jl_unbox_uint64(jlVal)));
+      else if(jl_is_uint32(jlVal)) value.reset(new nj::UInt32(jl_unbox_uint32(jlVal)));
+      else if(jl_is_int16(jlVal)) value.reset(new nj::Int16(jl_unbox_int16(jlVal)));
+      else if(jl_is_uint8(jlVal)) value.reset(new nj::UInt8(jl_unbox_uint8(jlVal)));
+      else if(jl_is_uint16(jlVal)) value.reset(new nj::UInt16(jl_unbox_uint16(jlVal)));
+      else if(jl_is_bool(jlVal)) value.reset(new nj::Boolean(jl_unbox_bool(jlVal)));
+      else
+      {
+         const char *juliaTypename = jl_typename_str(jl_typeof(jlVal));
+
+         if(SubString == juliaTypename)
+         {
+             jl_value_t *utf = convertValue(jlVal,jl_utf8_string_type);
+
+             if(utf) value.reset(new nj::UTF8String(jl_string_data(utf)));
+         }
+      }
 
       if(value.get()) res.push_back(value);
    }
 }
 
-vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jl_value)
+vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jlVal)
 {
    vector<shared_ptr<nj::Value>> res;
  
-   addLValueElements(jl_value,res);
+   addLValueElements(jlVal,res);
 
    return res;
 }
