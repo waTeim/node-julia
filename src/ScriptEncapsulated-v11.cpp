@@ -60,20 +60,7 @@ void nj::ScriptEncapsulated::New(const FunctionCallbackInfo<v8::Value>& args)
          shared_ptr<nj::Result> cruw = unwrapped->compile_res;
          int exId = cruw->exId();
 
-         if(exId != nj::Exception::no_exception)
-         {
-
-            switch(exId)
-            {
-               case nj::Exception::julia_undef_var_error_exception:
-               case nj::Exception::julia_method_error_exception:
-                  I->ThrowException(v8::Exception::ReferenceError(String::NewFromUtf8(I,cruw->exText().c_str())));
-               break;
-               default:
-                  I->ThrowException(v8::Exception::Error(String::NewFromUtf8(I,cruw->exText().c_str())));
-               break;
-            }
-         }
+         if(exId != nj::Exception::no_exception) raiseException(args,scope,cruw);
          else
          {  
             unwrapped->Wrap(args.This());
@@ -89,7 +76,7 @@ void nj::ScriptEncapsulated::New(const FunctionCallbackInfo<v8::Value>& args)
       Local<v8::Value> argv[argc] = { args[0] };
       Local<Function> cons = Local<Function>::New(I,constructor);
 
-      args.GetReturnValue().Set(cons->NewInstance(argc, argv));
+      args.GetReturnValue().Set(cons->NewInstance(argc,argv));
    }
 }
 
@@ -122,9 +109,18 @@ void nj::ScriptEncapsulated::exec(const FunctionCallbackInfo<v8::Value> &args)
    {
       vector<shared_ptr<nj::Value>> req;
       string funcName = "_";
-      Local<Function> cb = Local<Function>::Cast(args[args.Length() - 1]);
+      Local<Function> cb;
+      bool useCallback = false;
+      int numArgs = args.Length();
 
-      for(int i = 0;i < args.Length() - 1;i++)
+      if(numArgs != 0 && args[numArgs - 1]->IsFunction())
+      {
+         useCallback = true;
+         cb = Local<Function>::Cast(args[args.Length() - 1]);
+         numArgs--;
+      }
+
+      for(int i = 0;i < numArgs;i++)
       {
          shared_ptr<nj::Value> reqElement = buildRequest(args[i]);
 
@@ -133,7 +129,8 @@ void nj::ScriptEncapsulated::exec(const FunctionCallbackInfo<v8::Value> &args)
       engine->exec(obj->compile_res->results()[1],funcName,req);
       shared_ptr<nj::Result> res = engine->resultQueueGet();
 
-      return callbackWithResult(args,scope,cb,res);
+      if(useCallback) callbackWithResult(args,scope,cb,res);
+      else returnResult(args,scope,res);
    }
    else args.GetReturnValue().SetUndefined();
 }

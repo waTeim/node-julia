@@ -13,11 +13,6 @@ void returnNull(Isolate *I,const FunctionCallbackInfo<Value> &args)
    args.GetReturnValue().SetNull();
 }
 
-void returnString(Isolate *I,const FunctionCallbackInfo<Value> &args,const string &s)
-{
-   args.GetReturnValue().Set(String::NewFromUtf8(I,s.c_str()));
-}
-
 void callback(Isolate *I,const FunctionCallbackInfo<Value>& args,const Local<Function> &cb,int argc,Local<Value> *argv)
 {
   cb->Call(I->GetCurrentContext()->Global(),argc,argv);
@@ -183,6 +178,24 @@ int buildResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc,
    return index;
 }
 
+void raiseException(const FunctionCallbackInfo<Value> &args,HandleScope &scope,shared_ptr<nj::Result> &res)
+{
+   Isolate *I = Isolate::GetCurrent();
+   int exId = res->exId();
+
+   switch(exId)
+   {
+      case nj::Exception::julia_undef_var_error_exception:
+      case nj::Exception::julia_method_error_exception:
+         I->ThrowException(Exception::ReferenceError(String::NewFromUtf8(I,res->exText().c_str())));
+      break;
+      default:
+         I->ThrowException(Exception::Error(String::NewFromUtf8(I,res->exText().c_str())));
+      break;
+   }
+   args.GetReturnValue().SetUndefined();
+}
+
 void callbackWithResult(const FunctionCallbackInfo<Value> &args,HandleScope &scope,Local<Function> &cb,shared_ptr<nj::Result> &res)
 {
    Isolate *I = Isolate::GetCurrent();
@@ -191,19 +204,7 @@ void callbackWithResult(const FunctionCallbackInfo<Value> &args,HandleScope &sco
    {
       int exId = res->exId();
 
-      if(exId != nj::Exception::no_exception)
-      {
-         switch(exId)
-         {
-            case nj::Exception::julia_undef_var_error_exception:
-            case nj::Exception::julia_method_error_exception:
-               I->ThrowException(Exception::ReferenceError(String::NewFromUtf8(I,res->exText().c_str())));
-            break;
-            default:
-               I->ThrowException(Exception::Error(String::NewFromUtf8(I,res->exText().c_str())));
-            break;
-         }
-      }
+      if(exId != nj::Exception::no_exception) raiseException(args,scope,res);
       else
       {
          int argc = res->results().size();
@@ -216,6 +217,40 @@ void callbackWithResult(const FunctionCallbackInfo<Value> &args,HandleScope &sco
    else callback(I,args,cb,0,0);
 }
 
+void returnResult(const FunctionCallbackInfo<Value> &args,HandleScope &scope,shared_ptr<nj::Result> &res)
+{
+   Isolate *I = Isolate::GetCurrent();
+
+   if(res.get())
+   {
+      int exId = res->exId();
+
+      if(exId != nj::Exception::no_exception) raiseException(args,scope,res);
+      else
+      {
+         int argc = res->results().size();
+         Local<Value> *argv = new Local<Value>[argc];
+
+         argc = buildResponse(scope,res,argc,argv);
+
+         if(argc != 0)
+         {
+            if(argc > 1)
+            {
+               Local<Array> rV = Array::New(I,argc);
+
+               for(int i = 0;i < argc;i++) rV->Set(i,argv[i]);
+
+               args.GetReturnValue().Set(rV);
+            }
+            else args.GetReturnValue().Set(argv[0]);
+         }
+         else returnNull(I,args);
+      }
+   }
+   else args.GetReturnValue().SetUndefined();
+}
+
 
 void doEval(const FunctionCallbackInfo<Value> &args)
 {
@@ -223,7 +258,7 @@ void doEval(const FunctionCallbackInfo<Value> &args)
    HandleScope scope(I);
    int numArgs = args.Length();
 
-   if(numArgs < 2)
+   if(numArgs  == 0 || numArgs > 2 || (numArgs == 2 && !args[1]->IsFunction()))
    {
       returnNull(I,args);
       return;
@@ -232,22 +267,30 @@ void doEval(const FunctionCallbackInfo<Value> &args)
    if(!J) J = new JuliaExecEnv();
 
    Local<String> arg0 = args[0]->ToString();
-   Local<Function> cb = Local<Function>::Cast(args[1]);
+   Local<Function> cb;
    String::Utf8Value text(arg0);
    JMain *engine;
+
+   if(numArgs == 2) cb = Local<Function>::Cast(args[1]);
 
    if(text.length() > 0 && (engine = J->getEngine()))
    {
       engine->eval(*text);
       shared_ptr<nj::Result> res = engine->resultQueueGet();
 
-      callbackWithResult(args,scope,cb,res);
+      if(numArgs == 2) callbackWithResult(args,scope,cb,res);
+      else returnResult(args,scope,res);
    }
    else
    {
-      const unsigned argc = 1;
-      Local<Value> argv[argc] = { String::NewFromUtf8(I,"") };
-      callback(I,args,cb,argc,argv);
+      if(numArgs == 2)
+      {
+         const unsigned argc = 1;
+         Local<Value> argv[argc] = { String::NewFromUtf8(I,"") };
+
+         callback(I,args,cb,argc,argv);
+      }
+      else returnNull(I,args);
    }
 }
 
@@ -256,8 +299,9 @@ void doExec(const FunctionCallbackInfo<Value> &args)
    Isolate *I = Isolate::GetCurrent();
    HandleScope scope(I);
    int numArgs = args.Length();
+   bool useCallback = false;
 
-   if(numArgs < 2)
+   if(numArgs == 0)
    {
       returnNull(I,args);
       return;
@@ -267,30 +311,42 @@ void doExec(const FunctionCallbackInfo<Value> &args)
 
    Local<String> arg0 = Local<String>::Cast(args[0]);
    String::Utf8Value funcName(arg0);
-   Local<Function> cb = Local<Function>::Cast(args[args.Length() - 1]);
+   Local<Function> cb;
    JMain *engine;
+
+   if(numArgs >= 2 && args[args.Length() - 1]->IsFunction())
+   {
+      useCallback = true;
+      cb = Local<Function>::Cast(args[args.Length() - 1]);
+   }
 
    if(funcName.length() > 0 && (engine = J->getEngine()))
    {
       vector<shared_ptr<nj::Value>> req;
+      int numExecArgs = numArgs - 1;
 
-      for(int i = 1;i < args.Length() - 1;i++)
+      for(int i = 0;i < numExecArgs;i++)
       {
-         shared_ptr<nj::Value> reqElement = buildRequest(args[i]);
+         shared_ptr<nj::Value> reqElement = buildRequest(args[i + 1]);
 
          if(reqElement.get()) req.push_back(reqElement);
       }
       engine->exec(*funcName,req);
       shared_ptr<nj::Result> res = engine->resultQueueGet();
  
-      callbackWithResult(args,scope,cb,res);
+      if(useCallback) callbackWithResult(args,scope,cb,res);
+      else returnResult(args,scope,res);
    }
    else
    {
-      const unsigned argc = 1;
-      Local<Value> argv[argc] = { String::NewFromUtf8(I,"") };
+      if(useCallback)
+      {
+         const unsigned argc = 1;
+         Local<Value> argv[argc] = { String::NewFromUtf8(I,"") };
 
-      callback(I,args,cb,argc,argv);
+         callback(I,args,cb,argc,argv);
+      }
+      else returnNull(I,args);
    }
 }
 

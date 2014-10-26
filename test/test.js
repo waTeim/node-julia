@@ -134,6 +134,16 @@ describe('Regression Tests',function()
       expect(eval(julia,Number.MAX_VALUE)).to.equal(Number.MAX_VALUE);
    });
 
+   it('simple result return style for Eval',function()
+   {
+      expect(julia.eval('"x"')).to.equal('x');
+   });
+
+   it('tuple result return style for Eval',function()
+   {
+      expect(julia.eval('("x","y")')).to.eql(['x','y']);
+   });
+
    it('exec identity Null',function()
    {
       expect(execIdentity(julia,null)).to.equal(null);
@@ -157,6 +167,11 @@ describe('Regression Tests',function()
    it('exec identity String',function()
    {
       expect(execIdentity(julia,'x')).to.equal('x');
+   });
+
+   it('simple result return style for Exec',function()
+   {
+      expect(julia.exec('identity','x')).to.equal('x');
    });
 
    it('implicit conversion from SubString to String',function()
@@ -213,6 +228,13 @@ describe('Regression Tests',function()
       var script = julia.newScript("test/inc3.jl");
 
       expect(verifyIdentity(execB(script,10),10)).to.equal(true);
+   });
+
+   it('script exec using return style',function()
+   {
+      var script = julia.newScript("test/inc3.jl");
+
+      expect(script.exec(5,6)).to.eql(julia.exec('eye',5,6));
    });
 
    it('loading array type tests',function()
@@ -297,7 +319,7 @@ describe('Regression Tests',function()
 
    it('Array of elementwise conversion from SubString to String',function()
    {
-      expect(execA(julia,'split','a b c',' ')).to.eql(['a','b','c']);
+      expect(julia.exec('split','a b c',' ')).to.eql(['a','b','c']);
    });
 });
 

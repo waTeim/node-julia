@@ -59,19 +59,7 @@ Handle<Value> nj::ScriptEncapsulated::New(const Arguments& args)
          shared_ptr<nj::Result> cruw = unwrapped->compile_res;
          int exId = cruw->exId();
 
-         if(exId != nj::Exception::no_exception)
-         {
-            switch(exId)
-            {
-               case nj::Exception::julia_undef_var_error_exception:
-               case nj::Exception::julia_method_error_exception:
-                  ThrowException(v8::Exception::ReferenceError(String::New(cruw->exText().c_str())));
-               break;
-               default:
-                  ThrowException(v8::Exception::Error(String::New(cruw->exText().c_str())));
-               break;
-            }
-         }
+         if(exId != nj::Exception::no_exception) return raiseException(scope,cruw);
          else
          {  
             unwrapped->Wrap(args.This());
@@ -116,10 +104,18 @@ Handle<Value> nj::ScriptEncapsulated::exec(const Arguments &args)
    {
       vector<shared_ptr<nj::Value>> req;
       string funcName = "_";
-      Local<Function> cb = Local<Function>::Cast(args[args.Length() - 1]);
+      Local<Function> cb;
+      bool useCallback = false;
+      int numArgs = args.Length();
 
+      if(numArgs != 0 && args[numArgs - 1]->IsFunction())
+      {
+         useCallback = true;
+         cb = Local<Function>::Cast(args[args.Length() - 1]);
+         numArgs--;
+      }
 
-      for(int i = 0;i < args.Length() - 1;i++)
+      for(int i = 0;i < numArgs;i++)
       {
          shared_ptr<nj::Value> reqElement = buildRequest(args[i]);
 
@@ -128,7 +124,8 @@ Handle<Value> nj::ScriptEncapsulated::exec(const Arguments &args)
       engine->exec(obj->compile_res->results()[1],funcName,req);
       shared_ptr<nj::Result> res = engine->resultQueueGet();
 
-      return callbackWithResult(scope,cb,res);
+      if(useCallback) return callbackWithResult(scope,cb,res);
+      else return returnResult(scope,res);
    }
    return scope.Close(Undefined());
 }
