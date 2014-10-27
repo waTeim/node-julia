@@ -1,7 +1,7 @@
 {
   "name": "node-julia",
-  "version": "0.1.6",
-  "description": "A node.js portal to Julia",
+  "version": "0.2.0",
+  "description": "Fast and simple access to Julia embedded in node"
   "main": "lib/nj.js",
   "repository": {
     "type": "git",
@@ -11,7 +11,8 @@
     "bindings": "x"
   },
   "keywords": [
-    "julia"
+    "julia",
+    "embed"
   ],
   "author": "Jeff Waller <truthset@gmail.com>",
   "licenses": [
