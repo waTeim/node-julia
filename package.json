@@ -1,7 +1,7 @@
 {
   "name": "node-julia",
   "version": "0.2.0",
-  "description": "Fast and simple access to Julia embedded in node"
+  "description": "Fast and simple access to Julia embedded in node",
   "main": "lib/nj.js",
   "repository": {
     "type": "git",
