@@ -18,8 +18,7 @@ relative to where the julia executable is located.
 
 # Sample Syntax
 
-For example to compute the solution to a system of 3 equations and 3
-unknowns.
+To compute the solution to a system of 3 equations and 3 unknowns.
 
     julia = require('node-julia');
 
@@ -31,7 +30,7 @@ unknowns.
 
 # A Simple API
 
-There are 3 functions; **eval** **exec** and **script**, [see here](http://node-julia.readme.io/)
+There are 3 functions; **eval** **exec** and **Script**, [see here](http://node-julia.readme.io/)
 for full documentation.
 
 ## eval
@@ -43,7 +42,7 @@ in the Julia *REPL* and returns the result
        console.log('exp(10) = ' + x);
     });
 
-Calls to eval without a function callback are also supported. Matrices 
+Calls to **eval** without a function callback are also supported. Matrices 
 are easily constructed using Julia's Matlab-like matrix syntax.
 
     console.log("2x2 matrix: ", julia.eval('[ 1 2; 3 4]'));
@@ -51,10 +50,10 @@ are easily constructed using Julia's Matlab-like matrix syntax.
 ## exec
 
 This function takes a *String* the identifies the Julia function to
-use followed by any number of arguments for that function.  Like, eval
-argument may be a function callback.
+use followed by any number of arguments for that function.  Like **eval**
+the last argument may be a function callback.
 
-Calculate the inverse of the matrix returned and print the result.
+Calculate the inverse of a matrix and print the result.
 
     var a = julia.eval('[ 2 1; 1 1]');
     
@@ -68,9 +67,9 @@ Calculate the inverse of the matrix returned and print the result.
 Julia scripts can be functionalized and compiled and then subsequently
 called using **Script.exec** which has the same semantics as **exec**.
 
-    var aScript = julia.script('ascript.jl');
+    var aScript = julia.Script('ascript.jl');
 
-    aScript.exec(*arg1*,*arg2,...);
+    aScript.exec();
 
 ## Error conditions
 
