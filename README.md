@@ -39,19 +39,14 @@ for full documentation.
 This function takes a single string argument and evaluates it like it was typed
 in the Julia *REPL* and returns the result
 
-### Print *e*^10
-
     julia.eval('e^10', function(x) {
        console.log('exp(10) = ' + x);
     });
 
-### Print a 2x2 matrix
-
 Calls to eval without a function callback are also supported. Matrices 
 are easily constructed using Julia's Matlab-like matrix syntax.
 
-
-   console.log("2x2 matrix: ", julia.eval('[ 1 2; 3 4]'));
+    console.log("2x2 matrix: ", julia.eval('[ 1 2; 3 4]'));
 
 ## exec
 
@@ -59,7 +54,7 @@ This function takes a *String* the identifies the Julia function to
 use followed by any number of arguments for that function.  Like, eval
 argument may be a function callback.
 
-### Calculate the inverse of the matrix returned and print the result.
+Calculate the inverse of the matrix returned and print the result.
 
     var a = julia.eval('[ 2 1; 1 1]');
     
@@ -68,7 +63,16 @@ argument may be a function callback.
        console.log("Inverse: " + xInv);
     });
 
-# Error conditions
+## Script
+
+Julia scripts can be functionalized and compiled and then subsequently
+called using **Script.exec** which has the same semantics as **exec**.
+
+    var aScript = julia.script('ascript.jl');
+
+    aScript.exec(*arg1*,*arg2,...);
+
+## Error conditions
 
 Julia exceptions are caught and then re-thrown the in the node environment.
 
