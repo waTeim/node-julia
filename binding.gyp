@@ -12,7 +12,7 @@
             ],
             "juliaBase":"<!(python tools/find_julia.py <(OS))",
          },
-         "version":"<!(node --version | sed -e 's/^v\([0-9]*\.[0-9]*\).*$/\\1.x/')",
+         "version":"<!(python tools/node_version.py)",
          "njLib":"<!(python -c 'import os; print(os.path.abspath(\"\"))')/lib",
          "conditions":
          [

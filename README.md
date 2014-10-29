@@ -39,7 +39,7 @@ This function takes a single string argument and evaluates it like it was typed
 in the Julia *REPL* and returns the result
 
     julia.eval('e^10', function(x) {
-       console.log('exp(10) = ' + x);
+       console.log('exp(10) = ', x);
     });
 
 Calls to **eval** without a function callback are also supported. Matrices 
@@ -57,9 +57,8 @@ Calculate the inverse of a matrix and print the result.
 
     var a = julia.eval('[ 2 1; 1 1]');
     
-    julia.exec('inv',a,function(xInv)
-    {
-       console.log("Inverse: " + xInv);
+    julia.exec('inv',a,function(xInv) {
+       console.log('Inverse: ', xInv);
     });
 
 ## Script
