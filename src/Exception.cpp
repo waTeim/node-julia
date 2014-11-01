@@ -3,7 +3,7 @@
 #include <limits.h>
 #include "Exception.h"
 
-#if OS == win
+#if win
 #include <Windows.h>
 #define PATH_MAX MAX_PATH
 #define strerror_r(errno,buf,len) strerror_s(buf,len,errno)
@@ -33,7 +33,8 @@ nj::SystemException::SystemException(const string &what):Exception(system_except
  * Or it's windows.
 **********************************************************************************/
 
-#if OS == win
+#if win
+
       strerror_r(errno,buffer,sizeof(buffer));
       _what = what + ": " + buffer;
 #else

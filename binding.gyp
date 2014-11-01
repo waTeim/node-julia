@@ -51,7 +51,7 @@
       ],
       "defines":
       [
-         "OS=<(OS)",
+         '<(OS)',
          'NJ_LIB="<(njLib)"',
          'JULIA_LIB="<(juliaLib)"'
       ],
@@ -82,12 +82,12 @@
               "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
               "OTHER_CPLUSPLUSFLAGS":
               [
-                 "-DOS=<(OS)",
+                 #"-DOS=<(OS)",
                  "-std=c++11",
                  "-stdlib=libc++",
-                 '-DNJ_LIB="<(njLib)"',
-                 '-DJULIA_LIB="<(juliaLib)"',
-                 "-I<(juliaInclude)"
+                 #'-DNJ_LIB="<(njLib)"',
+                 #'-DJULIA_LIB="<(juliaLib)"',
+                 #"-I<(juliaInclude)"
               ],
               "OTHER_LDFLAGS":
               [

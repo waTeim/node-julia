@@ -1,4 +1,4 @@
-#if !WIN32 && !WIN64
+#if !win
 #include <dlfcn.h>
 #endif
 #include "JuliaExecEnv.h"
@@ -15,7 +15,7 @@ JuliaExecEnv::JuliaExecEnv(const std::string &installDir)
 // dlopen explicitly and cause resolution immediately.  Force all symbols
 // to global scope.
 
-#if OS == linux
+#if linux
    (void)dlopen(JULIA_LIB "/libjulia.so",RTLD_GLOBAL|RTLD_NOW);
 #endif
 
