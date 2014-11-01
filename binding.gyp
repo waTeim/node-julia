@@ -13,7 +13,8 @@
             "juliaBase":"<!(python tools/find_julia.py <(OS))",
          },
          "version":"<!(python tools/node_version.py)",
-         "njLib":"<!(python -c 'import os; print(os.path.abspath(\"\"))')/lib",
+         "njLib":"<!(python -c \"import os; print(os.path.abspath(''))\")/lib",
+         "juliaBin":"<(juliaBase)/bin",
          "conditions":
          [
             [ "gcc=='4.6'", { "std":"c++0x" } , { "std":"c++11" } ],
@@ -46,19 +47,25 @@
       "cflags!":     [ "-fno-exceptions" ],
       "cflags":
       [ 
-         "-DOS=<(OS)",
          "-std=<(std)",
-         '-DNJ_LIB="<(njLib)"',
-         '-DJULIA_LIB="<(juliaLib)"',
-         "-I<(juliaInclude)",
+      ],
+      "defines":
+      [
+         "OS=<(OS)",
+         'NJ_LIB="<(njLib)"',
+         'JULIA_LIB="<(juliaLib)"'
       ],
       "cflags_cc!":  [ "-fno-exceptions" ],
+      "include_dirs":
+      [
+         "<(juliaInclude)"
+      ],
       "link_settings":
       {
          "ldflags":
          [
             "-L<(juliaLib)",
-            "-Wl,-rpath,<(juliaLib)",
+            "-Wl,-rpath,<(juliaLib)"
          ],
          "libraries":
          [
@@ -89,6 +96,20 @@
                 "-Wl,-rpath,<(juliaLib)",
                 "-ljulia"
               ]
+            }
+          }
+        ],
+        [ "OS=='win'",
+          {
+            "msvs_settings":
+            {
+              "VCLinkerTool":
+              {
+                "AdditionalLibraryDirectories":
+                [
+                  "<(juliaBin)"
+                ]
+              }
             }
           }
         ],

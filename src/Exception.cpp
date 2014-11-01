@@ -3,6 +3,12 @@
 #include <limits.h>
 #include "Exception.h"
 
+#if OS == win
+#include <Windows.h>
+#define PATH_MAX MAX_PATH
+#define strerror_r(errno,buf,len) strerror_s(buf,len,errno)
+#endif
+
 using namespace std;
 
 nj::SystemException::SystemException(const string &what):Exception(system_exception,what)
@@ -20,10 +26,19 @@ nj::SystemException::SystemException(const string &what):Exception(system_except
       _what = what + ": " + buffer;
 #else
 
-// Otherwise, the GNU specific version is supplied and buffer may or may not
-// contain the result, but the function always will return it.
+/**********************************************************************************
+ * Otherwise, the GNU specific version is supplied and buffer may or may not
+ * contain the result, but the function always will return it.
+ *
+ * Or it's windows.
+**********************************************************************************/
 
+#if OS == win
+      strerror_r(errno,buffer,sizeof(buffer));
+      _what = what + ": " + buffer;
+#else
       _what = what + ": " + strerror_r(errno,buffer,sizeof(buffer));
+#endif
 
 #endif
 

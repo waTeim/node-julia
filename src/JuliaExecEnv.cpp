@@ -1,4 +1,6 @@
+#if !WIN32 && !WIN64
 #include <dlfcn.h>
+#endif
 #include "JuliaExecEnv.h"
 
 using namespace std;
