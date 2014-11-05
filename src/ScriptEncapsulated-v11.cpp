@@ -122,7 +122,7 @@ void nj::ScriptEncapsulated::exec(const FunctionCallbackInfo<v8::Value> &args)
 
       for(int i = 0;i < numArgs;i++)
       {
-         shared_ptr<nj::Value> reqElement = buildRequest(args[i]);
+         shared_ptr<nj::Value> reqElement = createRequest(args[i]);
 
          if(reqElement.get()) req.push_back(reqElement);
       }

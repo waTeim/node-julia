@@ -8,7 +8,7 @@ function topExpr(mod::Module,paths::Array{ASCIIString,1})
    return res
 end
 
-include(mod::Module,path::String,args::Vector) = include(mod,path,UTF8String[args...])
+include(mod::Module,path,args::Vector) = include(mod,path,UTF8String[args...])
 
 function scriptify(mod::Module,filename::ASCIIString)
     ast = parse("function _(args...)\n" * readall(filename) * "end");

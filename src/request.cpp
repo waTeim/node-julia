@@ -1,7 +1,9 @@
+#include <string>
+#include <iostream>
 #include <math.h>
 #include <stdio.h>
-#include <iostream>
-#include <string>
+#include <node_buffer.h>
+#include "NativeArray.h"
 #include "request.h"
 
 using namespace std;
@@ -22,7 +24,7 @@ static nj::Type *getPrimitiveType(const Local<Value> &prim)
    return 0;
 }
 
-static shared_ptr<nj::Value> buildPrimitive(const Local<Value> &prim)
+static shared_ptr<nj::Value> createPrimitive(const Local<Value> &prim)
 {
    shared_ptr<nj::Value> v;
 
@@ -146,7 +148,7 @@ template <typename V,typename E,V (&accessor)(const Local<Value>&)> static void 
    }
 }
 
-static shared_ptr<nj::Value> buildArray(const Local<Value> &from)
+static shared_ptr<nj::Value> createArrayFromArray(const Local<Value> &from)
 {
    shared_ptr<nj::Value> to;
 
@@ -208,8 +210,63 @@ static shared_ptr<nj::Value> buildArray(const Local<Value> &from)
    return to;
 }
 
-shared_ptr<nj::Value> buildRequest(const Local<Value> &value)
+static shared_ptr<nj::Value> createArrayFromBuffer(const Local<Value> &from)
 {
-   if(value->IsArray()) return buildArray(value);
-   return buildPrimitive(value);
+   Local<Object> buffer = from->ToObject();
+   char *data = node::Buffer::Data(buffer);
+   size_t len = node::Buffer::Length(buffer);
+   shared_ptr<nj::Value> to;
+   vector<size_t> dims;
+
+   dims.push_back(len);
+   to.reset(new nj::Array<unsigned char,nj::UInt8_t>(dims));
+
+   nj::Array<unsigned char,nj::UInt8_t> &a = static_cast<nj::Array<unsigned char,nj::UInt8_t>&>(*to);
+   unsigned char *p = a.ptr();
+
+   for(size_t index = 0;index < len;index++) *p++ = *data++;
+   return to;
+}
+
+template <typename V,typename E> static shared_ptr<nj::Value> createArrayFromNativeArray(const Local<Object> &array)
+{
+   shared_ptr<nj::Value> to;
+   nj::NativeArray<V> nat(array);
+   const V *data = nat.dptr();
+  
+   if(data)
+   {
+      vector<size_t> dims;
+      dims.push_back(nat.len());
+      to.reset(new nj::Array<V,E>(dims));
+
+      nj::Array<V,E> &a = static_cast<nj::Array<V,E>&>(*to);
+      V *p = a.ptr();
+
+      for(unsigned int index = 0;index < nat.len();index++) *p++ = *data++;
+   }
+
+   return to;
+}
+
+shared_ptr<nj::Value> createRequest(const Local<Value> &value)
+{
+   if(value->IsArray()) return createArrayFromArray(value);
+   else if(node::Buffer::HasInstance(value)) return createArrayFromBuffer(value);
+   else if(value->IsObject())
+   {
+      Local<Object> obj = value->ToObject();
+      String::Utf8Value utf(obj->GetConstructorName());
+      string cname(*utf);
+
+      if(cname == "Int8Array") return createArrayFromNativeArray<char,nj::Int8_t>(obj);
+      else if(cname == "Uint8Array") return createArrayFromNativeArray<unsigned char,nj::UInt8_t>(obj);
+      else if(cname == "Int16Array") return createArrayFromNativeArray<short,nj::Int16_t>(obj);
+      else if(cname == "Uint16Array") return createArrayFromNativeArray<unsigned short,nj::UInt16_t>(obj);
+      else if(cname == "Int32Array") return createArrayFromNativeArray<int,nj::Int32_t>(obj);
+      else if(cname == "Uint32Array") return createArrayFromNativeArray<unsigned int,nj::UInt32_t>(obj);
+      else if(cname == "Float32Array") return createArrayFromNativeArray<float,nj::Float32_t>(obj);
+      else if(cname == "Float64Array") return createArrayFromNativeArray<double,nj::Float64_t>(obj);
+   }
+   return createPrimitive(value);
 }

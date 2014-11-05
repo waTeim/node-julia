@@ -10,10 +10,10 @@
             [
                [ "OS=='linux'", { "gcc":"<!(gcc --version 2>&1 | head -1 | sed -e 's/^.*(.*) \(.*\)\..*$/\\1/')" } , { "gcc":"" } ]
             ],
-            "juliaBase":"<!(python tools/find_julia.py <(OS))",
+            "juliaBase":"<!(python tools/nj_config.py <(OS) find)",
          },
-         "version":"<!(python tools/node_version.py)",
-         "njLib":"<!(python -c \"import os; print(os.path.abspath(''))\")/lib",
+         "version":"<!(python tools/nj_config.py <(OS) version)",
+         "njLib":"<!(python tools/nj_config.py <(OS) cwd)/lib",
          "juliaBin":"<(juliaBase)/bin",
          "conditions":
          [

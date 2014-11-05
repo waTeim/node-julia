@@ -321,5 +321,87 @@ describe('Regression Tests',function()
    {
       expect(julia.exec('split','a b c',' ')).to.eql(['a','b','c']);
    });
+
+   it('Native Buffer to Array{Uint8,1}',function()
+   {
+      expect(julia.exec('identity',new Buffer(400000)).length).to.equal(400000);
+   });
+
+   it('Native Int8Array to Array{Int8,1}',function()
+   {
+      var a = new Int8Array(256);
+
+      for(var i = 0;i < 256;i++) a[i] = i - 128;
+      
+      expect(julia.exec('sum',a)).to.equal(-128);
+   });
+
+   it('Native Uint8Array to Array{Uint8,1}',function()
+   {
+      var a = new Uint8Array(256);
+
+      for(var i = 0;i < 256;i++) a[i] = i;
+
+      expect(julia.exec('sum',a)).to.equal(32640);
+   });
+
+   it('Native Int16Array to Array{Int16,1}',function()
+   {
+      var a = new Int16Array(65536);
+
+      for(var i = 0;i < 65536;i++) a[i] = i - 32768;
+
+      expect(julia.exec('sum',a)).to.equal(-32768);
+   });
+
+   it('Native Uint16Array to Array{Uint16,1}',function()
+   {
+      var a = new Uint16Array(65536);
+
+      for(var i = 0;i < 65536;i++) a[i] = i;
+      
+      expect(julia.exec('sum',a)).to.equal(2147450880);
+   });
+
+   it('Native Int32Array to Array{Int32,1}',function()
+   {
+      var a = new Int32Array(100000);
+
+      for(var i = 0;i < 100000;i++)
+      {  
+         if(i % 2 == 0) a[i] = i - 2147483648;
+         else a[i] = 2147483647 - i;
+      }
+      
+      expect(julia.exec('sum',a)).to.equal(-100000);
+   });
+
+   it('Native Uint32Array to Array{Uint32,1}',function()
+   {
+      var a = new Uint32Array(100000);
+
+      for(var i = 0;i < 100000;i++) a[i] = 4294967295 - i;
+
+      expect(julia.exec('sum',a)).to.equal(429491729550000);
+   });
+
+   it('Native Float32Array to Array{Float32,1}',function()
+   {
+      var a = new Float32Array(100000);
+
+      for(var i = 0;i < 100000;i++) a[i] = i*i*2.7182817;
+
+      expect(julia.exec('sum',a)).to.equal(906080326516736);
+   });
+
+   it('Native Float64Array to Array{Float64,1}',function()
+   {
+      var a = new Float64Array(100000);
+
+      for(var i = 0;i < 100000;i++) a[i] = i*i*3.4028234E38
+
+      expect(julia.exec('mean',a)).to.equal(1134257452606380264969216277107613028838939820032);
+   });
 });
+
 

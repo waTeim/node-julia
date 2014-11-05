@@ -304,7 +304,7 @@ Handle<Value> doExec(const Arguments &args)
 
       for(int i = 0;i < numExecArgs;i++)
       {
-         shared_ptr<nj::Value> reqElement = buildRequest(args[i + 1]);
+         shared_ptr<nj::Value> reqElement = createRequest(args[i + 1]);
 
          if(reqElement.get()) req.push_back(reqElement);
       }
