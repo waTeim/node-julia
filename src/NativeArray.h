@@ -39,7 +39,6 @@ namespace nj
          NativeArray(const v8::Local<v8::Object> &array)
          {
             v8::Isolate *I = v8::Isolate::GetCurrent();
-            //v8::HandleScope scope(I);
             v8::Local<v8::Value> byteOffset = array->Get(v8::String::NewFromUtf8(I,"byteOffset"));
             v8::Local<v8::Value> byteLength = array->Get(v8::String::NewFromUtf8(I,"byteLength"));
 
