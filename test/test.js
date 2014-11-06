@@ -391,7 +391,7 @@ describe('Regression Tests',function()
 
       for(var i = 0;i < 10000;i++) a[i] = 123.45678;
 
-      expect(Math.abs(julia.exec('sum',a) - 1.2345678E6)).to.be.below(1);
+      expect(Math.abs(julia.exec('sum',a) - 1.2345678E6)).to.be.below(50);
    });
 
    it('Native Float64Array to Array{Float64,1}',function()
@@ -400,7 +400,7 @@ describe('Regression Tests',function()
 
       for(var i = 0;i < 10000;i++) a[i] = 1.2345678E39
 
-      expect(Math.abs(julia.exec('sum',a) - 1.2345678E43)).to.be.below(1E29);
+      expect(Math.abs(julia.exec('sum',a) - 1.2345678E43)).to.be.below(1E30);
    });
 });
 
