@@ -385,25 +385,23 @@ describe('Regression Tests',function()
       expect(julia.exec('sum',a)).to.equal(429491729550000);
    });
 
-/*
    it('Native Float32Array to Array{Float32,1}',function()
    {
-      var a = new Float32Array(1000);
+      var a = new Float32Array(10000);
 
-      for(var i = 0;i < 1000;i++) a[i] = 2.7182817;
+      for(var i = 0;i < 10000;i++) a[i] = 123.45678;
 
-      expect(julia.exec('sum',a)).to.equal(2718.281700000002);
+      expect(Math.abs(julia.exec('sum',a) - 1.2345678E6)).to.be.below(1);
    });
 
    it('Native Float64Array to Array{Float64,1}',function()
    {
-      var a = new Float64Array(100000);
+      var a = new Float64Array(10000);
 
-      for(var i = 0;i < 100000;i++) a[i] = i*i*3.4028234E38
+      for(var i = 0;i < 10000;i++) a[i] = 1.2345678E39
 
-      expect(julia.exec('mean',a)).to.equal(1134257452606380264969216277107613028838939820032);
+      expect(Math.abs(julia.exec('sum',a) - 1.2345678E43)).to.be.below(1E29);
    });
-*/
 });
 
 
