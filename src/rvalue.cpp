@@ -9,7 +9,9 @@ using namespace std;
 static jl_function_t *getUnix2DateTime()
 {
    jl_module_t *dates_m = (jl_module_t*)jl_get_global(jl_base_module,jl_symbol("Dates"));
-   return jl_get_function(dates_m,"unix2datetime");
+
+   if(dates_m) return jl_get_function(dates_m,"unix2datetime");
+   return 0;
 }
 
 static jl_value_t *rPrimitive(const nj::Primitive &prim)

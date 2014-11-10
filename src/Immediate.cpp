@@ -19,7 +19,6 @@ nj::Result nj::Immediate::eval(vector<shared_ptr<nj::Value>> &args)
    if(jl_ex)
    {
      JL_GC_PUSH1(&jl_ex);
-cout  << "Error!\n";
      shared_ptr<Exception> ex = genJuliaError(jl_ex);
 
      JL_GC_POP();

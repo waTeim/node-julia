@@ -406,12 +406,18 @@ describe('Regression Tests',function()
       expect(Math.abs(julia.exec('sum',a) - 1.2345678E43)).to.be.below(1E30);
    });
 
+   /*
+    *  Date only supported with Julia 0.4, so keep this test commented
+    *  for now.
+
    it('Date',function()
    {
       var now = new Date();
 
       expect(julia.exec('identity',now)).to.eql(now);
    });
+
+    */
 });
 
 
