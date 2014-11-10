@@ -228,6 +228,21 @@ namespace nj
          virtual std::string toString() const throw(InvalidException) {  return val();  }
          virtual ~UTF8String() {}
    };
+
+   class Date:public Primitive,public PValue<double>
+   {
+      public:
+
+         Date(double d):PValue(d) {}
+         virtual const Type *type() const {  return Date_t::instance();  }
+         virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
+         virtual char toChar() const throw(InvalidException) {  return val();  }
+         virtual int64_t toInt() const throw(InvalidException) {  return val();  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
+         virtual double toFloat() const throw(InvalidException) {  return val();  }
+         virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
+         virtual ~Date() {}
+   };
 };
 
 #endif

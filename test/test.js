@@ -181,7 +181,10 @@ describe('Regression Tests',function()
 
    it('eval include',function()
    {
-      expect(eval(julia,'Core.include("test/inc1.jl")')).to.equal(true);
+      // Keep Core.include for the time being.  This should be unnecessary, but
+      // currently is.  Once the libuv problems are resolved, Core.include
+      // can be shortened to simply include.
+      expect(julia.eval('Core.include("test/inc1.jl")')).to.equal(true);
    });
 
    it('exec include',function()
@@ -401,6 +404,13 @@ describe('Regression Tests',function()
       for(var i = 0;i < 10000;i++) a[i] = 1.2345678E39
 
       expect(Math.abs(julia.exec('sum',a) - 1.2345678E43)).to.be.below(1E30);
+   });
+
+   it('Date',function()
+   {
+      var now = new Date();
+
+      expect(julia.exec('identity',now)).to.eql(now);
    });
 });
 

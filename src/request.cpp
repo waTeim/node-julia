@@ -21,6 +21,7 @@ static nj::Type *getPrimitiveType(const Local<Value> &prim)
       return nj::Float64_t::instance();
    }
    else if(prim->IsString()) return nj::UTF8String_t::instance();
+   else if(prim->IsDate()) return nj::Date_t::instance();
    return 0;
 }
 
@@ -46,6 +47,14 @@ static shared_ptr<nj::Value> createPrimitive(const Local<Value> &prim)
    }
 
    return v;
+}
+
+static shared_ptr<nj::Value> createDate(const Local<Value> &value)
+{
+   Local<Date> s = Local<Date>::Cast(value);
+   double milliseconds = s->NumberValue();
+
+   return shared_ptr<nj::Value>(new nj::Date(milliseconds));
 }
 
 static void examineArray(Local<Array> &a,size_t level,vector<size_t> &dims,nj::Type *&etype,bool &determineDimensions) throw(nj::InvalidException)
@@ -252,6 +261,7 @@ template <typename V,typename E> static shared_ptr<nj::Value> createArrayFromNat
 shared_ptr<nj::Value> createRequest(const Local<Value> &value)
 {
    if(value->IsArray()) return createArrayFromArray(value);
+   else if(value->IsDate()) return createDate(value);
    else if(node::Buffer::HasInstance(value)) return createArrayFromBuffer(value);
    else if(value->IsObject())
    {

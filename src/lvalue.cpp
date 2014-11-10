@@ -9,6 +9,13 @@ using namespace std;
 
 static jl_function_t *juliaConvert = 0;
 static const string SubString("SubString");
+static const string DateTime("DateTime");
+
+static jl_function_t *getDateTime2Unix()
+{
+   jl_module_t *dates_m = (jl_module_t*)jl_get_global(jl_base_module,jl_symbol("Dates"));
+   return jl_get_function(dates_m,"datetime2unix");
+}
 
 template <typename V,typename E> static shared_ptr<nj::Value> arrayFromBuffer(jl_value_t *jlA)
 {
@@ -84,6 +91,32 @@ static jl_value_t *convertValue(jl_value_t *from,jl_datatype_t *destType)
       return to;
    }
    return 0;
+}
+
+void getNamedTypeValue(jl_value_t *from,shared_ptr<nj::Value> &value)
+{
+   const char *juliaTypename = jl_typename_str(jl_typeof(from));
+
+   if(juliaTypename == SubString)
+   {
+      jl_value_t *utf = convertValue(from,jl_utf8_string_type);
+
+      if(utf) value.reset(new nj::UTF8String(jl_string_data(utf)));
+   }
+   else if(juliaTypename == DateTime)
+   {
+      static jl_function_t *dateTime2Unix_f = 0;
+      jl_value_t *res = 0;
+
+      if(!dateTime2Unix_f) dateTime2Unix_f = getDateTime2Unix();
+      if(dateTime2Unix_f)
+      {
+         JL_GC_PUSH1(from);
+         res = jl_call1(dateTime2Unix_f,from);
+         JL_GC_POP();
+      }
+      if(res) value.reset(new nj::Date(jl_unbox_float64(res)*1000));
+   }
 }
 
 static jl_value_t *convertArray(jl_value_t *from,jl_datatype_t *destElementType)
@@ -179,17 +212,7 @@ void addLValueElements(jl_value_t *jlVal,vector<shared_ptr<nj::Value>> &res)
       else if(jl_is_uint8(jlVal)) value.reset(new nj::UInt8(jl_unbox_uint8(jlVal)));
       else if(jl_is_uint16(jlVal)) value.reset(new nj::UInt16(jl_unbox_uint16(jlVal)));
       else if(jl_is_bool(jlVal)) value.reset(new nj::Boolean(jl_unbox_bool(jlVal)));
-      else
-      {
-         const char *juliaTypename = jl_typename_str(jl_typeof(jlVal));
-
-         if(SubString == juliaTypename)
-         {
-             jl_value_t *utf = convertValue(jlVal,jl_utf8_string_type);
-
-             if(utf) value.reset(new nj::UTF8String(jl_string_data(utf)));
-         }
-      }
+      else getNamedTypeValue(jlVal,value);
 
       if(value.get()) res.push_back(value);
    }

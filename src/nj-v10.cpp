@@ -69,6 +69,13 @@ Local<Value> buildPrimitiveResponse(HandleScope &scope,const nj::Primitive &prim
          return dest;
       }
       break;
+      case nj::date_type:
+      {
+         Local<Value> dest = Date::New(primitive.toFloat());
+
+         return dest;
+      }
+      break;
    }
 
    return Local<Value>::New(Null());

@@ -18,6 +18,7 @@ namespace nj
    const int float32_type = 74;
    const int ascii_string_type = 75;
    const int utf8_string_type = 76;
+   const int date_type = 77;
 
    class Boolean_t:public Type
    {
@@ -134,6 +135,15 @@ namespace nj
          static Type *instance() {  return Type::instance<UTF8String_t>();  }
 
          UTF8String_t():Type(utf8_string_type) {}
+   };
+
+   class Date_t:public Type
+   {
+      public:
+
+         static Type *instance() {  return Type::instance<Date_t>();  }
+
+         Date_t():Type(date_type) {}
    };
 
    bool operator<(const nj::Type &t1,const nj::Type &t2);

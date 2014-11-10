@@ -74,9 +74,16 @@ Local<Value> buildPrimitiveResponse(HandleScope &scope,const nj::Primitive &prim
          return dest;
       }
       break;
+      case nj::date_type:
+      {
+         Local<Value> dest = Date::New(I,primitive.toFloat());
+
+         return dest;
+      }
+      break;
    }
 
-   return Array::New(I,0);
+   return Null(I);
 }
 
 template <typename V> Local<Value> getNumberFromValue(Isolate *I,const V &val)

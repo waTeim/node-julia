@@ -6,6 +6,12 @@
 
 using namespace std;
 
+static jl_function_t *getUnix2DateTime()
+{
+   jl_module_t *dates_m = (jl_module_t*)jl_get_global(jl_base_module,jl_symbol("Dates"));
+   return jl_get_function(dates_m,"unix2datetime");
+}
+
 static jl_value_t *rPrimitive(const nj::Primitive &prim)
 {
    jl_value_t *res = 0;
@@ -102,6 +108,23 @@ static jl_value_t *rPrimitive(const nj::Primitive &prim)
          const nj::UTF8String &v = static_cast<const nj::UTF8String&>(prim);
 
          res = jl_cstr_to_string(v.val().c_str());
+      }
+      break;
+      case nj::date_type:
+      {
+         const nj::Date &v = static_cast<const nj::Date&>(prim);
+         static jl_function_t *unix2DateTime_f = 0;
+
+         if(!unix2DateTime_f) unix2DateTime_f = getUnix2DateTime();
+
+         if(unix2DateTime_f)
+         {
+            jl_value_t *milliseconds = jl_box_float64(v.val()/1000);
+
+            JL_GC_PUSH1(milliseconds);
+            res = jl_call1(unix2DateTime_f,milliseconds);
+            JL_GC_POP();
+         }
       }
       break;
    }

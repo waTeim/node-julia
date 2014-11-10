@@ -42,25 +42,25 @@ nj::Result nj::Script::eval(vector<shared_ptr<nj::Value>> &args)
 
    if(!util_loaded)
    {
-      string njUtilPath = libDir + "/njUtil.jl";
+      string njPath = libDir + "/nj.jl";
 
       jl_function_t *func = jl_get_function(jl_core_module,"include");
 
       if(!func) return loadErrorResult("unable to locate Core.include");
 
-      jl_call1(func,jl_cstr_to_string(njUtilPath.c_str()));
+      jl_call1(func,jl_cstr_to_string(njPath.c_str()));
       jl_ex = jl_exception_occurred();
 
       if(jl_ex) return exceptionResult(jl_ex);
       util_loaded = true;
    }
 
-   jl_sym_t *modName = jl_symbol("njUtil");
-   jl_value_t *njUtilMod = jl_get_global(jl_main_module,modName);
+   jl_sym_t *modName = jl_symbol("nj");
+   jl_value_t *njMod = jl_get_global(jl_main_module,modName);
 
-   if(njUtilMod && jl_is_module(njUtilMod))
+   if(njMod && jl_is_module(njMod))
    {
-      jl_function_t *func = jl_get_function((jl_module_t*)njUtilMod,"scriptify");
+      jl_function_t *func = jl_get_function((jl_module_t*)njMod,"scriptify");
 
       if(func)
       {
@@ -96,7 +96,7 @@ nj::Result nj::Script::eval(vector<shared_ptr<nj::Value>> &args)
 
          return res;
       }
-      else return loadErrorResult("unable to locate njUtil.scriptify");
+      else return loadErrorResult("unable to locate nj.scriptify");
    }
-   else return loadErrorResult("Could not locate module njUtil");
+   else return loadErrorResult("Could not locate module nj");
 }
