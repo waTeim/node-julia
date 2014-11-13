@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
+#include <string.h>
 #include <node_buffer.h>
 #include "Types.h"
 #include "request.h"
