@@ -325,11 +325,6 @@ describe('Regression Tests',function()
       expect(julia.exec('split','a b c',' ')).to.eql(['a','b','c']);
    });
 
-   it('Native Buffer to Array{Uint8,1}',function()
-   {
-      expect(julia.exec('identity',new Buffer(400000)).length).to.equal(400000);
-   });
-
    it('Native Int8Array to Array{Int8,1}',function()
    {
       var a = new Int8Array(256);
@@ -418,6 +413,14 @@ describe('Regression Tests',function()
    });
 
     */
+
+   it('Native Buffer to Array{Uint8,1} and back',function()
+   {
+      var b = new Buffer(400000);
+
+      for(var i = 0;i < 400000;i++) b[i] = i % 256;
+      expect(julia.exec('identity',b)).to.eql(b);
+   });
 });
 
 

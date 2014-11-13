@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
+#include <node_buffer.h>
 #include "Types.h"
 #include "request.h"
 #include "ScriptEncapsulated-v11.h"
@@ -18,7 +19,7 @@ void callback(Isolate *I,const FunctionCallbackInfo<Value>& args,const Local<Fun
   cb->Call(I->GetCurrentContext()->Global(),argc,argv);
 }
 
-Local<Value> buildPrimitiveResponse(HandleScope &scope,const nj::Primitive &primitive)
+Local<Value> createPrimitiveRes(HandleScope &scope,const nj::Primitive &primitive)
 {
    Isolate *I = Isolate::GetCurrent();
 
@@ -101,7 +102,7 @@ Local<Value> getNullValue(Isolate *I,const unsigned char &val)
    return Null(I);
 }
 
-template<typename V,typename E,Local<Value> getElement(Isolate *I,const V &val)> Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &value)
+template<typename V,typename E,Local<Value> getElement(Isolate *I,const V &val)> Local<Array> createArrayRes(HandleScope &scope,const shared_ptr<nj::Value> &value)
 {
    Isolate *I = Isolate::GetCurrent();
    const nj::Array<V,E> &array = static_cast<const nj::Array<V,E>&>(*value);
@@ -135,26 +136,22 @@ template<typename V,typename E,Local<Value> getElement(Isolate *I,const V &val)>
    return Array::New(I,0);
 }
 
-Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &value)
+Local<Array> createArrayRes(HandleScope &scope,const shared_ptr<nj::Value> &value,const nj::Type *elementType)
 {
-   const nj::Array_t *array_type = static_cast<const nj::Array_t*>(value->type());
-   const nj::Type *element_type = array_type->etype();
-
-   switch(element_type->getId())
+   switch(elementType->getId())
    {
-      case nj::null_type: return buildArrayResponse<unsigned char,nj::Null_t,getNullValue>(scope,value); break;
-      case nj::float64_type: return buildArrayResponse<double,nj::Float64_t,getNumberFromValue<double>>(scope,value); break;
-      case nj::float32_type: return buildArrayResponse<float,nj::Float32_t,getNumberFromValue<float>>(scope,value); break;
-      case nj::int64_type: return buildArrayResponse<int64_t,nj::Int64_t,getNumberFromValue<int64_t>>(scope,value); break;
-      case nj::int32_type: return buildArrayResponse<int,nj::Int32_t,getNumberFromValue<int>>(scope,value); break;
-      case nj::int16_type: return buildArrayResponse<short,nj::Int16_t,getNumberFromValue<short>>(scope,value); break;
-      case nj::int8_type: return buildArrayResponse<char,nj::Int8_t,getNumberFromValue<char>>(scope,value); break;
-      case nj::uint64_type: return buildArrayResponse<uint64_t,nj::UInt64_t,getNumberFromValue<uint64_t>>(scope,value); break;
-      case nj::uint32_type: return buildArrayResponse<unsigned,nj::UInt32_t,getNumberFromValue<unsigned>>(scope,value); break;
-      case nj::uint16_type: return buildArrayResponse<unsigned short,nj::UInt16_t,getNumberFromValue<unsigned short>>(scope,value); break;
-      case nj::uint8_type: return buildArrayResponse<unsigned char,nj::UInt8_t,getNumberFromValue<unsigned char>>(scope,value); break;
-      case nj::ascii_string_type: return buildArrayResponse<string,nj::ASCIIString_t,getStringFromValue>(scope,value); break;
-      case nj::utf8_string_type: return buildArrayResponse<string,nj::UTF8String_t,getStringFromValue>(scope,value); break;
+      case nj::null_type: return createArrayRes<unsigned char,nj::Null_t,getNullValue>(scope,value); break;
+      case nj::float64_type: return createArrayRes<double,nj::Float64_t,getNumberFromValue<double>>(scope,value); break;
+      case nj::float32_type: return createArrayRes<float,nj::Float32_t,getNumberFromValue<float>>(scope,value); break;
+      case nj::int64_type: return createArrayRes<int64_t,nj::Int64_t,getNumberFromValue<int64_t>>(scope,value); break;
+      case nj::int32_type: return createArrayRes<int,nj::Int32_t,getNumberFromValue<int>>(scope,value); break;
+      case nj::int16_type: return createArrayRes<short,nj::Int16_t,getNumberFromValue<short>>(scope,value); break;
+      case nj::int8_type: return createArrayRes<char,nj::Int8_t,getNumberFromValue<char>>(scope,value); break;
+      case nj::uint64_type: return createArrayRes<uint64_t,nj::UInt64_t,getNumberFromValue<uint64_t>>(scope,value); break;
+      case nj::uint32_type: return createArrayRes<unsigned,nj::UInt32_t,getNumberFromValue<unsigned>>(scope,value); break;
+      case nj::uint16_type: return createArrayRes<unsigned short,nj::UInt16_t,getNumberFromValue<unsigned short>>(scope,value); break;
+      case nj::ascii_string_type: return createArrayRes<string,nj::ASCIIString_t,getStringFromValue>(scope,value); break;
+      case nj::utf8_string_type: return createArrayRes<string,nj::UTF8String_t,getStringFromValue>(scope,value); break;
    }
 
    Isolate *I = Isolate::GetCurrent();
@@ -162,7 +159,19 @@ Local<Array> buildArrayResponse(HandleScope &scope,const shared_ptr<nj::Value> &
    return Array::New(I,0);
 }
 
-int buildResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc,Local<Value> *argv)
+Local<Object> createBufferRes(HandleScope &scope,const shared_ptr<nj::Value> &value)
+{
+   const nj::Array<unsigned char,nj::UInt8_t> &array = static_cast<const nj::Array<unsigned char,nj::UInt8_t>&>(*value);
+   Isolate *I = Isolate::GetCurrent();
+   size_t length = array.dims()[0];
+   unsigned char *p = array.ptr();
+   Local<Object> buffer = node::Buffer::New(I,length);
+
+   memcpy(node::Buffer::Data(buffer),p,length);
+   return buffer;
+}
+
+int createResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc,Local<Value> *argv)
 {
    int index = 0;
 
@@ -174,11 +183,15 @@ int buildResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc,
          {
             const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
 
-            argv[index++] = buildPrimitiveResponse(scope,primitive);
+            argv[index++] = createPrimitiveRes(scope,primitive);
          }
          else
          {
-            argv[index++] = buildArrayResponse(scope,value);
+            const nj::Array_t *array_type = static_cast<const nj::Array_t*>(value->type());
+            const nj::Type *etype = array_type->etype();
+
+            if(etype == nj::UInt8_t::instance()  && value->dims().size() == 1) argv[index++] = createBufferRes(scope,value);
+            else argv[index++] = createArrayRes(scope,value,etype);
          }
       }
    }
@@ -217,7 +230,7 @@ void callbackWithResult(const FunctionCallbackInfo<Value> &args,HandleScope &sco
          int argc = res->results().size();
          Local<Value> *argv = new Local<Value>[argc];
 
-         argc = buildResponse(scope,res,argc,argv);
+         argc = createResponse(scope,res,argc,argv);
          callback(I,args,cb,argc,argv);
       }
    }
@@ -238,7 +251,7 @@ void returnResult(const FunctionCallbackInfo<Value> &args,HandleScope &scope,sha
          int argc = res->results().size();
          Local<Value> *argv = new Local<Value>[argc];
 
-         argc = buildResponse(scope,res,argc,argv);
+         argc = createResponse(scope,res,argc,argv);
 
          if(argc != 0)
          {

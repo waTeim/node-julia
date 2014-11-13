@@ -25,7 +25,7 @@ static nj::Type *getPrimitiveType(const Local<Value> &prim)
    return 0;
 }
 
-static shared_ptr<nj::Value> createPrimitive(const Local<Value> &prim)
+static shared_ptr<nj::Value> createPrimitiveReq(const Local<Value> &prim)
 {
    shared_ptr<nj::Value> v;
 
@@ -49,7 +49,7 @@ static shared_ptr<nj::Value> createPrimitive(const Local<Value> &prim)
    return v;
 }
 
-static shared_ptr<nj::Value> createDate(const Local<Value> &value)
+static shared_ptr<nj::Value> createDateReq(const Local<Value> &value)
 {
    Local<Date> s = Local<Date>::Cast(value);
    double milliseconds = s->NumberValue();
@@ -157,7 +157,7 @@ template <typename V,typename E,V (&accessor)(const Local<Value>&)> static void 
    }
 }
 
-static shared_ptr<nj::Value> createArrayFromArray(const Local<Value> &from)
+static shared_ptr<nj::Value> createArrayReqFromArray(const Local<Value> &from)
 {
    shared_ptr<nj::Value> to;
 
@@ -219,7 +219,7 @@ static shared_ptr<nj::Value> createArrayFromArray(const Local<Value> &from)
    return to;
 }
 
-static shared_ptr<nj::Value> createArrayFromBuffer(const Local<Value> &from)
+static shared_ptr<nj::Value> createArrayReqFromBuffer(const Local<Value> &from)
 {
    Local<Object> buffer = from->ToObject();
    char *data = node::Buffer::Data(buffer);
@@ -237,7 +237,7 @@ static shared_ptr<nj::Value> createArrayFromBuffer(const Local<Value> &from)
    return to;
 }
 
-template <typename V,typename E> static shared_ptr<nj::Value> createArrayFromNativeArray(const Local<Object> &array)
+template <typename V,typename E> static shared_ptr<nj::Value> createArrayReqFromNativeArray(const Local<Object> &array)
 {
    shared_ptr<nj::Value> to;
    nj::NativeArray<V> nat(array);
@@ -260,23 +260,23 @@ template <typename V,typename E> static shared_ptr<nj::Value> createArrayFromNat
 
 shared_ptr<nj::Value> createRequest(const Local<Value> &value)
 {
-   if(value->IsArray()) return createArrayFromArray(value);
-   else if(value->IsDate()) return createDate(value);
-   else if(node::Buffer::HasInstance(value)) return createArrayFromBuffer(value);
+   if(value->IsArray()) return createArrayReqFromArray(value);
+   else if(value->IsDate()) return createDateReq(value);
+   else if(node::Buffer::HasInstance(value)) return createArrayReqFromBuffer(value);
    else if(value->IsObject())
    {
       Local<Object> obj = value->ToObject();
       String::Utf8Value utf(obj->GetConstructorName());
       string cname(*utf);
 
-      if(cname == "Int8Array") return createArrayFromNativeArray<char,nj::Int8_t>(obj);
-      else if(cname == "Uint8Array") return createArrayFromNativeArray<unsigned char,nj::UInt8_t>(obj);
-      else if(cname == "Int16Array") return createArrayFromNativeArray<short,nj::Int16_t>(obj);
-      else if(cname == "Uint16Array") return createArrayFromNativeArray<unsigned short,nj::UInt16_t>(obj);
-      else if(cname == "Int32Array") return createArrayFromNativeArray<int,nj::Int32_t>(obj);
-      else if(cname == "Uint32Array") return createArrayFromNativeArray<unsigned int,nj::UInt32_t>(obj);
-      else if(cname == "Float32Array") return createArrayFromNativeArray<float,nj::Float32_t>(obj);
-      else if(cname == "Float64Array") return createArrayFromNativeArray<double,nj::Float64_t>(obj);
+      if(cname == "Int8Array") return createArrayReqFromNativeArray<char,nj::Int8_t>(obj);
+      else if(cname == "Uint8Array") return createArrayReqFromNativeArray<unsigned char,nj::UInt8_t>(obj);
+      else if(cname == "Int16Array") return createArrayReqFromNativeArray<short,nj::Int16_t>(obj);
+      else if(cname == "Uint16Array") return createArrayReqFromNativeArray<unsigned short,nj::UInt16_t>(obj);
+      else if(cname == "Int32Array") return createArrayReqFromNativeArray<int,nj::Int32_t>(obj);
+      else if(cname == "Uint32Array") return createArrayReqFromNativeArray<unsigned int,nj::UInt32_t>(obj);
+      else if(cname == "Float32Array") return createArrayReqFromNativeArray<float,nj::Float32_t>(obj);
+      else if(cname == "Float64Array") return createArrayReqFromNativeArray<double,nj::Float64_t>(obj);
    }
-   return createPrimitive(value);
+   return createPrimitiveReq(value);
 }
