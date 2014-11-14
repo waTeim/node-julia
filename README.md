@@ -81,12 +81,14 @@ Tests run using npm
 
 # Limitations
 
-* Currently only primitative types and arrays of primatives are supported.
+* Julia composite types are currently not supported.
 
 * Julia invocations are currently synchronous.
 
-* Currently, supported linux installations include any version that uses the binary
-distribution of Julia (e.g. ubuntu PPA), or if Julia is compiled from source, then
-the nodejs version 11.13.
+* Linux installations must compile using -Bsymbolic-functions to avoid mismatched
+use of libuv.  This occurs by default when using a distribution of Julia via
+Ubuntu PPA. Addition of this flag regardless of the distribution is in progress
+[see here](http://http://node-julia.readme.io/v0.2.1/docs/use-of-libuv) for more
+details.
 
 * Work on Windows support is in progress.
