@@ -88,7 +88,7 @@ Tests run using npm
 * Linux installations must compile using -Bsymbolic-functions to avoid mismatched
 use of libuv.  This occurs by default when using a distribution of Julia via
 Ubuntu PPA. Addition of this flag regardless of the distribution is in progress
-[see here](http://http://node-julia.readme.io/v0.2.1/docs/use-of-libuv) for more
+[see here](http://node-julia.readme.io/v0.2.1/docs/use-of-libuv) for more
 details.
 
 * Work on Windows support is in progress.
