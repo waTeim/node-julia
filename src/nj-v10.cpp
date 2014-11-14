@@ -146,6 +146,7 @@ Local<Array> createArrayRes(HandleScope &scope,const shared_ptr<nj::Value> &valu
       case nj::uint64_type: return createArrayRes<uint64_t,nj::UInt64_t,getNumberFromValue<uint64_t>>(scope,value); break;
       case nj::uint32_type: return createArrayRes<unsigned,nj::UInt32_t,getNumberFromValue<unsigned>>(scope,value); break;
       case nj::uint16_type: return createArrayRes<unsigned short,nj::UInt16_t,getNumberFromValue<unsigned short>>(scope,value); break;
+      case nj::uint8_type: return createArrayRes<unsigned char,nj::UInt8_t,getNumberFromValue<unsigned char>>(scope,value); break;
       case nj::ascii_string_type: return createArrayRes<string,nj::ASCIIString_t,getStringFromValue>(scope,value); break;
       case nj::utf8_string_type: return createArrayRes<string,nj::UTF8String_t,getStringFromValue>(scope,value); break;
    }

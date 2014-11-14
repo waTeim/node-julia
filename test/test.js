@@ -414,12 +414,20 @@ describe('Regression Tests',function()
 
     */
 
-   it('Native Buffer to Array{Uint8,1} and back',function()
+   it('Buffer to Array{Uint8,1} and back as Buffer',function()
    {
       var b = new Buffer(400000);
 
       for(var i = 0;i < 400000;i++) b[i] = i % 256;
       expect(julia.exec('identity',b)).to.eql(b);
+   });
+
+   it('Buffer to Array{Uint8,1} and back as reshaped Array',function()
+   {
+      var b = new Buffer(6);
+
+      for(var i = 0;i < b.length;i++) b[i] = i;
+      expect(julia.exec('reshape',b,2,3)).to.eql([[0,2,4],[1,3,5]]);
    });
 });
 
