@@ -99,6 +99,32 @@ Local<Value> getNullValue(const unsigned char &val)
 }
 
 
+template<typename V,Local<Value> getElement(const V &val)> static void connectSubArrays(const vector<size_t> &dims,const vector<size_t> &strides,size_t ixNum,size_t offset,const Local<Array> &to,V *from)
+{
+   size_t numElements = dims[ixNum];
+   size_t stride = strides[ixNum];
+
+   if(ixNum == dims.size() - 1)
+   {
+      for(size_t elementNum = 0;elementNum < numElements;elementNum++)
+      {
+         to->Set(elementNum,getElement(*(from + offset)));
+         offset += stride;
+      }
+   }
+   else
+   {
+      for(size_t elementNum = 0;elementNum < numElements;elementNum++)
+      {
+         Local<Array> subArray = Array::New(dims[ixNum + 1]);
+
+         to->Set(elementNum,subArray);
+         connectSubArrays<V,getElement>(dims,strides,ixNum + 1,offset,subArray,from);
+         offset += stride;
+      }
+   }
+}
+
 template<typename V,typename E,Local<Value> getElement(const V &val)> Local<Array> createArrayRes(HandleScope &scope,const shared_ptr<nj::Value> &value)
 {
    const nj::Array<V,E> &array = static_cast<const nj::Array<V,E>&>(*value);
@@ -127,6 +153,17 @@ template<typename V,typename E,Local<Value> getElement(const V &val)> Local<Arra
          dest->Set(i,row);
          for(size_t j = 0;j < size1;j++) row->Set(j,getElement(p[size0*j + i]));
       }
+      return dest;
+   }
+   else
+   {
+      vector<size_t> strides;
+      size_t size0 = array.dims()[0];
+      Local<Array> dest = Array::New(size0);
+
+      strides.push_back(1);
+      for(size_t idxNum = 1;idxNum < array.dims().size();idxNum++) strides.push_back(array.dims()[idxNum]*strides[idxNum - 1]);
+      connectSubArrays<V,getElement>(array.dims(),strides,0,0,dest,array.ptr());
       return dest;
    }
    return Array::New(0);

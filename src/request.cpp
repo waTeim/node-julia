@@ -132,6 +132,32 @@ string getStringValue(const Local<Value> &val)
    return string(*text);
 }
 
+template <typename V,V (&accessor)(const Local<Value>&)> static void fillSubArray(const vector<size_t> &dims,const vector<size_t> &strides,size_t ixNum,size_t offset,V *to,const Local<Array> &from)
+{
+   size_t numElements = dims[ixNum];
+   size_t stride = strides[ixNum];
+
+   if(ixNum == dims.size() - 1)
+   {
+      for(size_t elementNum = 0;elementNum < numElements;elementNum++)
+      {
+         *(to + offset) = accessor(from->Get(elementNum));
+         offset += stride;
+      }
+   }
+   else
+   {
+      for(size_t elementNum = 0;elementNum < numElements;elementNum++)
+      {
+         Local<Array> subArray = Local<Array>::Cast(from->Get(elementNum));
+
+         fillSubArray<V,accessor>(dims,strides,ixNum + 1,offset,to,subArray);
+         offset += stride;
+      }
+   }
+}
+
+
 template <typename V,typename E,V (&accessor)(const Local<Value>&)> static void fillArray(shared_ptr<nj::Value> &to,const Local<Array> &from)
 {
    nj::Array<V,E> &a = static_cast<nj::Array<V,E>&>(*to);
@@ -154,6 +180,14 @@ template <typename V,typename E,V (&accessor)(const Local<Value>&)> static void 
 
          for(size_t col = 0;col < cols;col++) p[col*rows + row] = accessor(rowVector->Get(col));
       }
+   }
+   else
+   {
+      vector<size_t> strides;
+
+      strides.push_back(1);
+      for(size_t idxNum = 1;idxNum < a.dims().size();idxNum++) strides.push_back(a.dims()[idxNum]*strides[idxNum - 1]);
+      fillSubArray<V,accessor>(a.dims(),strides,0,0,a.ptr(),from);
    }
 }
 

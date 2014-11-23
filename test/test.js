@@ -429,6 +429,20 @@ describe('Regression Tests',function()
       for(var i = 0;i < b.length;i++) b[i] = i;
       expect(julia.exec('reshape',b,2,3)).to.eql([[0,2,4],[1,3,5]]);
    });
+
+   it('Multidimensional Array',function()
+   {
+      var a = [ [ [1,2], [3,4] ], [ [5,6], [7,8] ] ]
+
+      expect(julia.exec('identity',a)).to.eql(a);
+   });
+
+   it('Buffer to Multidimensional Array',function()
+   {
+      var b = new Buffer(16);
+
+      for(var i = 0;i < b.length;i++) b[i] = i;
+
+      expect(julia.exec('reshape',b,2,2,2,2)).to.eql([ [[[0, 8], [4, 12]], [[2, 10], [6, 14]]],[[[1, 9], [5, 13]], [[3, 11], [7, 15]]]]);
+   });
 });
-
-
