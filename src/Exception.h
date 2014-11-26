@@ -2,6 +2,7 @@
 #define __Exception
 
 #include <string>
+#include <memory>
 
 namespace nj
 {
