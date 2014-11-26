@@ -114,6 +114,11 @@ describe('Regression Tests',function()
       expect(eval(julia,0)).to.equal(0);
    });
 
+   it('version',function()
+   {
+      expect(julia.eval('VERSION.minor')).to.within(3,4);
+   });
+
    it('eval max 32 bit Integer (4294967296)',function()
    {
       expect(eval(julia,4294967296)).to.equal(4294967296);
@@ -401,19 +406,6 @@ describe('Regression Tests',function()
       expect(Math.abs(julia.exec('sum',a) - 1.2345678E43)).to.be.below(1E30);
    });
 
-   /*
-    *  Date only supported with Julia 0.4, so keep this test commented
-    *  for now.
-
-   it('Date',function()
-   {
-      var now = new Date();
-
-      expect(julia.exec('identity',now)).to.eql(now);
-   });
-
-    */
-
    it('Buffer to Array{Uint8,1} and back as Buffer',function()
    {
       var b = new Buffer(400000);
@@ -444,5 +436,25 @@ describe('Regression Tests',function()
       for(var i = 0;i < b.length;i++) b[i] = i;
 
       expect(julia.exec('reshape',b,2,2,2,2)).to.eql([ [[[0, 8], [4, 12]], [[2, 10], [6, 14]]],[[[1, 9], [5, 13]], [[3, 11], [7, 15]]]]);
+   });
+
+   it('Simplistic Regex',function()
+   {
+      var re = /a/;
+
+      expect(julia.exec('identity',re)).to.eql(re);
+   });
+
+   /***
+    *
+    * Kind of a workaround here
+    *
+    */
+   it('Date (Julia version 0.4+ only)',function()
+   {
+      var now = new Date();
+      var version = julia.eval('VERSION.minor');
+
+      if(version == 4) expect(julia.exec('identity',now)).to.eql(now);
    });
 });

@@ -1,15 +1,11 @@
 #include <julia.h>
 #include <iostream>
+#include "Kernel.h"
 #include "Script.h"
 #include "JuliaHandle.h"
 #include "error.h"
-#include "lvalue.h"
 
 using namespace std;
-
-static const string libDir(NJ_LIB);
-
-bool nj::Script::util_loaded = false;
 
 static nj::Result exceptionResult(jl_value_t *jl_ex)
 {
@@ -28,7 +24,6 @@ static nj::Result loadErrorResult(string msg)
    return nj::Result(ex);
 }
 
-
 nj::Result nj::Script::eval(vector<shared_ptr<nj::Value>> &args)
 {
    vector<shared_ptr<nj::Value>> res;
@@ -39,64 +34,39 @@ nj::Result nj::Script::eval(vector<shared_ptr<nj::Value>> &args)
    Primitive &text = static_cast<Primitive&>(*args[0]);
 
    jl_value_t *jl_ex = 0;
+   Kernel *kernel = Kernel::getSingleton();
 
-   if(!util_loaded)
+   try
    {
-      string njPath = libDir + "/nj.jl";
+      string isolatingModName = string("njIsoMod") + to_string(modNum++);
+      jl_value_t *filenameToInclude = jl_cstr_to_string(text.toString().c_str());
+      jl_sym_t *isolatingModSym = jl_symbol(isolatingModName.c_str());
+      jl_module_t *isolatingMod = jl_new_module(isolatingModSym);
 
-      jl_function_t *func = jl_get_function(jl_core_module,"include");
-
-      if(!func) return loadErrorResult("unable to locate Core.include");
-
-      jl_call1(func,jl_cstr_to_string(njPath.c_str()));
       jl_ex = jl_exception_occurred();
-
       if(jl_ex) return exceptionResult(jl_ex);
-      util_loaded = true;
+
+      (void)jl_add_standard_imports(isolatingMod);
+
+      jl_ex = jl_exception_occurred();
+      if(jl_ex) return exceptionResult(jl_ex);
+
+      jl_value_t *ast = kernel->scriptify(isolatingMod,filenameToInclude);
+      jl_function_t *func = jl_get_function(jl_core_module,"eval");
+
+      if(!func) return loadErrorResult("unable to locate Core.eval");
+
+      (void)jl_call2(func,(jl_value_t*)isolatingMod,ast);
+      jl_ex = jl_exception_occurred();
+      if(jl_ex) return exceptionResult(jl_ex);
+
+      res.push_back(shared_ptr<nj::Value>(new nj::ASCIIString(isolatingModName)));
+      res.push_back(shared_ptr<nj::Value>(new nj::JuliaHandle((jl_value_t*)isolatingMod)));
+
+      return res;
    }
-
-   jl_sym_t *modName = jl_symbol("nj");
-   jl_value_t *njMod = jl_get_global(jl_main_module,modName);
-
-   if(njMod && jl_is_module(njMod))
+   catch(JuliaException je)
    {
-      jl_function_t *func = jl_get_function((jl_module_t*)njMod,"scriptify");
-
-      if(func)
-      {
-         string isolatingModName = string("njIsoMod") + to_string(modNum++);
-         jl_value_t *filenameToInclude = jl_cstr_to_string(text.toString().c_str());
-         jl_sym_t *isolatingModSym = jl_symbol(isolatingModName.c_str());
-         jl_module_t *isolatingMod = jl_new_module(isolatingModSym);
-
-         jl_ex = jl_exception_occurred();
-         if(jl_ex) return exceptionResult(jl_ex);
-
-         (void)jl_add_standard_imports(isolatingMod);
-
-         jl_ex = jl_exception_occurred();
-         if(jl_ex) return exceptionResult(jl_ex);
-
-         JL_GC_PUSH1(&isolatingMod);
-
-         jl_value_t *ast = jl_call2(func,(jl_value_t*)isolatingMod,filenameToInclude);
-
-         jl_ex = jl_exception_occurred();
-         if(jl_ex) return exceptionResult(jl_ex);
-
-         func = jl_get_function(jl_core_module,"eval");
-         if(!func) return loadErrorResult("unable to locate Core.eval");
-
-         (void)jl_call2(func,(jl_value_t*)isolatingMod,ast);
-         jl_ex = jl_exception_occurred();
-         if(jl_ex) return exceptionResult(jl_ex);
-
-         res.push_back(shared_ptr<nj::Value>(new nj::ASCIIString(isolatingModName)));
-         res.push_back(shared_ptr<nj::Value>(new nj::JuliaHandle((jl_value_t*)isolatingMod)));
-
-         return res;
-      }
-      else return loadErrorResult("unable to locate nj.scriptify");
+      return nj::Result(je.err);
    }
-   else return loadErrorResult("Could not locate module nj");
 }

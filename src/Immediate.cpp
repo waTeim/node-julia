@@ -26,9 +26,17 @@ nj::Result nj::Immediate::eval(vector<shared_ptr<nj::Value>> &args)
    }
    else
    {
-      JL_GC_PUSH1(&jl_res);
-      res = lvalue(jl_res);
-      JL_GC_POP();
-      return Result(res);
+      try
+      {
+         JL_GC_PUSH1(&jl_res);
+         res = lvalue(jl_res);
+         JL_GC_POP();
+         return Result(res);
+      }
+      catch(JuliaException e)
+      {
+        JL_GC_POP();
+        return Result(e.err);
+      }
    }
 }

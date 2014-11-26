@@ -243,6 +243,21 @@ namespace nj
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~Date() {}
    };
+
+   class Regex:public Primitive,public PValue<std::string>
+   {
+      public:
+
+         Regex(const std::string &s):PValue(s) {}
+         virtual const Type *type() const {  return Regex_t::instance();  }
+         virtual bool toBoolean() const throw(InvalidException) {  return val() != "";  }
+         virtual char toChar() const throw(InvalidException) {  return 0;  }
+         virtual int64_t toInt() const throw(InvalidException) {  return 0;  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return 0;  }
+         virtual double toFloat() const throw(InvalidException) {  return 0.0;  }
+         virtual std::string toString() const throw(InvalidException) {  return val();  }
+         virtual ~Regex() {}
+   };
 };
 
 #endif

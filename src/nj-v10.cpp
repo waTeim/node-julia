@@ -78,6 +78,14 @@ Local<Value> createPrimitiveRes(HandleScope &scope,const nj::Primitive &primitiv
          return dest;
       }
       break;
+      case nj::regex_type:
+      {
+         Local<String> pattern = String::New(primitive.toString().c_str());
+         Local<Value> dest = RegExp::New(pattern,RegExp::kNone);
+
+         return dest;
+      }
+      break;
    }
 
    return Local<Value>::New(Null());

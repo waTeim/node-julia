@@ -5,20 +5,21 @@
 
 namespace nj
 {
-   const int boolean_type = 64;
-   const int int64_type = 65;
-   const int uint64_type = 66;
-   const int int32_type = 67;
-   const int uint32_type = 68;
-   const int int16_type = 69;
-   const int uint16_type = 70;
-   const int int8_type = 71;
-   const int uint8_type = 72;
-   const int float64_type = 73;
-   const int float32_type = 74;
-   const int ascii_string_type = 75;
-   const int utf8_string_type = 76;
-   const int date_type = 77;
+   const int boolean_type = 10;
+   const int int64_type = 11;
+   const int uint64_type = 12;
+   const int int32_type = 13;
+   const int uint32_type = 14;
+   const int int16_type = 15;
+   const int uint16_type = 16;
+   const int int8_type = 17;
+   const int uint8_type = 18;
+   const int float64_type = 19;
+   const int float32_type = 20;
+   const int ascii_string_type = 21;
+   const int utf8_string_type = 22;
+   const int date_type = 23;
+   const int regex_type = 24;
 
    class Boolean_t:public Type
    {
@@ -144,6 +145,15 @@ namespace nj
          static Type *instance() {  return Type::instance<Date_t>();  }
 
          Date_t():Type(date_type) {}
+   };
+
+   class Regex_t:public Type
+   {
+      public:
+
+         static Type *instance() {  return Type::instance<Regex_t>();  }
+
+         Regex_t():Type(regex_type) {}
    };
 
    bool operator<(const nj::Type &t1,const nj::Type &t2);

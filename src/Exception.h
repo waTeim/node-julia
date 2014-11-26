@@ -17,6 +17,7 @@ namespace nj
          static const int julia_method_error_exception = 5;
          static const int julia_undef_var_error_exception = 6;
          static const int julia_load_error_exception = 7;
+         static const int julia_exception = 8;
 
       protected:
 
@@ -39,6 +40,14 @@ namespace nj
    class JuliaMethodError:public Exception {  public: JuliaMethodError(std::string what):Exception(julia_method_error_exception,what){} };
    class JuliaUndefVarError:public Exception {  public: JuliaUndefVarError(std::string what):Exception(julia_undef_var_error_exception,what){} };
    class JuliaLoadError:public Exception {  public: JuliaLoadError(std::string what):Exception(julia_load_error_exception,what){} };
+   class JuliaException:public Exception
+   {  
+      public:
+      
+         std::shared_ptr<nj::Exception> err;
+         
+         JuliaException(std::shared_ptr<nj::Exception> err):Exception(julia_exception,"Julia Exception") { this->err = err; }
+   };
 }
 
 #endif

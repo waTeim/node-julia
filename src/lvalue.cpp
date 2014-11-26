@@ -1,5 +1,6 @@
 #include <iostream>
 #include <julia.h>
+#include "Kernel.h"
 #include "juliav.h"
 #include <memory.h>
 #include "Values.h"
@@ -8,8 +9,9 @@
 using namespace std;
 
 static jl_function_t *juliaConvert = 0;
-static const string SubString("SubString");
-static const string DateTime("DateTime");
+static const string JuliaSubString("SubString");
+static const string JuliaDateTime("DateTime");
+static const string JuliaRegex("Regex");
 
 static jl_function_t *getDateTime2Unix()
 {
@@ -93,17 +95,17 @@ static jl_value_t *convertValue(jl_value_t *from,jl_datatype_t *destType)
    return 0;
 }
 
-void getNamedTypeValue(jl_value_t *from,shared_ptr<nj::Value> &value)
+void getNamedTypeValue(jl_value_t *from,shared_ptr<nj::Value> &value) throw(nj::JuliaException)
 {
    const char *juliaTypename = jl_typename_str(jl_typeof(from));
 
-   if(juliaTypename == SubString)
+   if(juliaTypename == JuliaSubString)
    {
       jl_value_t *utf = convertValue(from,jl_utf8_string_type);
 
       if(utf) value.reset(new nj::UTF8String(jl_string_data(utf)));
    }
-   else if(juliaTypename == DateTime)
+   else if(juliaTypename == JuliaDateTime)
    {
       static jl_function_t *dateTime2Unix_f = 0;
       jl_value_t *res = 0;
@@ -111,11 +113,18 @@ void getNamedTypeValue(jl_value_t *from,shared_ptr<nj::Value> &value)
       if(!dateTime2Unix_f) dateTime2Unix_f = getDateTime2Unix();
       if(dateTime2Unix_f)
       {
-         JL_GC_PUSH1(from);
+         JL_GC_PUSH1(&from);
          res = jl_call1(dateTime2Unix_f,from);
          JL_GC_POP();
       }
       if(res) value.reset(new nj::Date(jl_unbox_float64(res)*1000));
+   }
+   else if(juliaTypename == JuliaRegex)
+   {
+      nj::Kernel *kernel = nj::Kernel::getSingleton();
+      jl_value_t *pattern = kernel->getPattern(from);
+
+      value.reset(new nj::Regex(jl_string_data(pattern)));
    }
 }
 
@@ -161,7 +170,7 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlA)
    { 
       const char *juliaTypename = jl_typename_str(elementType);
 
-      if(SubString == juliaTypename)
+      if(juliaTypename == JuliaSubString)
       {
          jl_value_t *utfArray = convertArray(jlA,jl_utf8_string_type);
 
@@ -172,7 +181,7 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlA)
    return value;
 }
 
-void addLValueElements(jl_value_t *jlVal,vector<shared_ptr<nj::Value>> &res)
+void addLValueElements(jl_value_t *jlVal,vector<shared_ptr<nj::Value>> &res) throw(nj::JuliaException)
 {
    if(!jlVal) return;
 
@@ -218,7 +227,7 @@ void addLValueElements(jl_value_t *jlVal,vector<shared_ptr<nj::Value>> &res)
    }
 }
 
-vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jlVal)
+vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jlVal) throw(JuliaException)
 {
    vector<shared_ptr<nj::Value>> res;
  

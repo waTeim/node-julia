@@ -7,7 +7,7 @@
 
 namespace nj
 {
-   jl_value_t *rvalue(const std::shared_ptr<nj::Value> &value);
+   jl_value_t *rvalue(const std::shared_ptr<nj::Value> &value) throw(JuliaException);
 };
 
 #endif

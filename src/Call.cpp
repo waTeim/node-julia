@@ -66,58 +66,65 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args)
 
    bool rvalue_error = false;
 
-   if(numArgs <= 3)
+   try
    {
-      switch(numArgs)
+      if(numArgs <= 3)
       {
-         case 0: jl_res = jl_call0(func); break;
-         case 1:
+         switch(numArgs)
          {
-            jl_value_t *arg1 = rvalue(args[argOffset]);
+            case 0: jl_res = jl_call0(func); break;
+            case 1:
+            {
+               jl_value_t *arg1 = rvalue(args[argOffset]);
 
-            if(!arg1) rvalue_error = true;
-            else jl_res = jl_call1(func,arg1);
+               if(!arg1) rvalue_error = true;
+               else jl_res = jl_call1(func,arg1);
+            }
+            break;
+            case 2:
+            {
+	       jl_value_t *arg1 = rvalue(args[argOffset]);
+               jl_value_t *arg2 = rvalue(args[argOffset + 1]);
+   
+               if(!arg1 || !arg2) rvalue_error = true;
+               else jl_res = jl_call2(func,arg1,arg2);
+            }
+            break;
+            case 3:
+            {
+	       jl_value_t *arg1 = rvalue(args[argOffset]);
+               jl_value_t *arg2 = rvalue(args[argOffset + 1]);
+               jl_value_t *arg3 = rvalue(args[argOffset + 2]);
+   
+               if(!arg1 || !arg2 || !arg3) rvalue_error = true;
+               else jl_res = jl_call3(func,arg1,arg2,arg3);
+            }
+            break;
          }
-         break;
-         case 2:
+      }
+      else
+      {
+         jl_value_t **jl_args = new jl_value_t*[numArgs];
+   
+         for(int i = 0;i < numArgs && !rvalue_error;i++)
          {
-	    jl_value_t *arg1 = rvalue(args[argOffset]);
-            jl_value_t *arg2 = rvalue(args[argOffset + 1]);
-
-            if(!arg1 || !arg2) rvalue_error = true;
-            else jl_res = jl_call2(func,arg1,arg2);
+            jl_args[i] = rvalue(args[i + argOffset]);
+            if(!jl_args[i]) rvalue_error = true;
          }
-         break;
-         case 3:
-         {
-	    jl_value_t *arg1 = rvalue(args[argOffset]);
-            jl_value_t *arg2 = rvalue(args[argOffset + 1]);
-            jl_value_t *arg3 = rvalue(args[argOffset + 2]);
+         if(!rvalue_error) jl_res = jl_call(func,jl_args,numArgs);
+         delete jl_args;
+      }
 
-            if(!arg1 || !arg2 || !arg3) rvalue_error = true;
-            else jl_res = jl_call3(func,arg1,arg2,arg3);
-         }
-         break;
+      if(rvalue_error)
+      {
+         shared_ptr<Exception> ex = shared_ptr<Exception>(new InvalidException("can not convert RHS to a Julia value"));
+
+         return Result(ex);
       }
    }
-   else
+   catch(JuliaException e)
    {
-      jl_value_t **jl_args = new jl_value_t*[numArgs];
-
-      for(int i = 0;i < numArgs && !rvalue_error;i++)
-      {
-         jl_args[i] = rvalue(args[i + argOffset]);
-         if(!jl_args[i]) rvalue_error = true;
-      }
-      if(!rvalue_error) jl_res = jl_call(func,jl_args,numArgs);
-      delete jl_args;
-   }
-
-   if(rvalue_error)
-   {
-      shared_ptr<Exception> ex = shared_ptr<Exception>(new InvalidException("can not convert RHS to a Julia value"));
-
-      return Result(ex);
+      return Result(e.err);
    }
 
    jl_value_t *jl_ex = jl_exception_occurred();
@@ -133,9 +140,17 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args)
    }
    else
    {
-      JL_GC_PUSH1(&jl_res);
-      res = lvalue(jl_res);
-      JL_GC_POP();
-      return Result(res);
+      try
+      {
+         JL_GC_PUSH1(&jl_res);
+         res = lvalue(jl_res);
+         JL_GC_POP();
+         return Result(res);
+      }
+      catch(JuliaException e)
+      {
+        JL_GC_POP();
+        return Result(e.err);
+      }
    }
 }

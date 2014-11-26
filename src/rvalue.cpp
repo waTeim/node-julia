@@ -3,6 +3,8 @@
 #include "juliav.h"
 #include "rvalue.h"
 #include "Values.h"
+#include "error.h"
+#include "Kernel.h"
 
 using namespace std;
 
@@ -14,7 +16,7 @@ static jl_function_t *getUnix2DateTime()
    return 0;
 }
 
-static jl_value_t *rPrimitive(const nj::Primitive &prim)
+static jl_value_t *rPrimitive(const nj::Primitive &prim) throw(nj::JuliaException)
 {
    jl_value_t *res = 0;
 
@@ -123,10 +125,19 @@ static jl_value_t *rPrimitive(const nj::Primitive &prim)
          {
             jl_value_t *milliseconds = jl_box_float64(v.val()/1000);
 
-            JL_GC_PUSH1(milliseconds);
+            JL_GC_PUSH1(&milliseconds);
             res = jl_call1(unix2DateTime_f,milliseconds);
             JL_GC_POP();
          }
+      }
+      break;
+      case nj::regex_type:
+      {
+         const nj::Regex &v = static_cast<const nj::Regex&>(prim);
+         jl_value_t *pattern  = jl_cstr_to_string(v.val().c_str());
+         nj::Kernel *kernel = nj::Kernel::getSingleton();
+
+         res = kernel->newRegex(pattern);
       }
       break;
    }
@@ -198,7 +209,7 @@ static jl_array_t *rArray(const shared_ptr<nj::Value> &array)
    return res;
 }
 
-jl_value_t *nj::rvalue(const shared_ptr<nj::Value> &value)
+jl_value_t *nj::rvalue(const shared_ptr<nj::Value> &value) throw(JuliaException)
 {
    if(value->isPrimitive())
    {

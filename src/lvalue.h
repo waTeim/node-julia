@@ -7,7 +7,7 @@
 
 namespace nj
 {
-   std::vector<std::shared_ptr<nj::Value>> lvalue(jl_value_t *jvalue);
+   std::vector<std::shared_ptr<nj::Value>> lvalue(jl_value_t *jvalue) throw(JuliaException);
 };
 
 #endif

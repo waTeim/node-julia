@@ -8,6 +8,8 @@
 namespace nj
 {
    std::shared_ptr<nj::Exception> genJuliaError(jl_value_t *jl_ex);
+   nj::JuliaException getJuliaException(jl_value_t *jl_ex);
+   nj::JuliaException getJuliaException(const std::string &msg);
 };
 
 #endif

@@ -27,4 +27,7 @@ function scriptify(mod::Module,filename::ASCIIString)
     res
 end
 
+newRegex(pattern::AbstractString) = Regex(pattern)
+getPattern(re::Regex) = re.pattern
+
 end

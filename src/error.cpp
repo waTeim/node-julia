@@ -126,7 +126,7 @@ static string errorMsg(jl_value_t *ex)
    else if(jl_typeis(ex,jl_methoderror_type)) return methodErrorMsg(ex);
    else if(jl_typeis(ex,jl_undefvarerror_type)) return undefVarErrorMsg(ex);
    else if(jl_typeis(ex,jl_loaderror_type)) return loadErrorMsg(ex);
-   else return "unknown error";
+   else return jl_typeof_str(ex);
 }
 
 static void initializeETypes()
@@ -150,8 +150,24 @@ shared_ptr<nj::Exception> nj::genJuliaError(jl_value_t *ex)
    {
       if(jl_typeis(ex,jl_typeerror_type)) ss << "ex is jl_typeerror_type";
       else if(jl_is_ascii_string(ex) || jl_is_utf8_string(ex)) ss << jl_string_data(ex);
-      else ss << "Julia unknown error";
+      ss << "Julia " << jl_typeof_str(ex);
  
       return shared_ptr<Exception>(new InvalidException(ss.str()));
    }
 }
+
+nj::JuliaException nj::getJuliaException(jl_value_t *jl_ex)
+{
+   JL_GC_PUSH1(&jl_ex);
+
+   shared_ptr<nj::Exception> ex = nj::genJuliaError(jl_ex);
+
+   JL_GC_POP();
+   return JuliaException(ex);
+}
+
+nj::JuliaException nj::getJuliaException(const string &msg)
+{
+   return JuliaException(shared_ptr<nj::Exception>(new nj::JuliaErrorException(msg)));
+}
+

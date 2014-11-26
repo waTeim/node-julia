@@ -33,6 +33,7 @@
         "src/JMain.cpp",
         "src/JuliaExecEnv.cpp",
         "src/JuliaHandle.cpp",
+        "src/Kernel.cpp",
         "src/Script.cpp",
         "src/Type.cpp",
         "src/Types.cpp",

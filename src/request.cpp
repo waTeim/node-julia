@@ -57,6 +57,15 @@ static shared_ptr<nj::Value> createDateReq(const Local<Value> &value)
    return shared_ptr<nj::Value>(new nj::Date(milliseconds));
 }
 
+static shared_ptr<nj::Value> createRegexReq(const Local<Value> &value)
+{
+   Local<RegExp> re = Local<RegExp>::Cast(value);
+   Local<String> s = re->GetSource();
+   String::Utf8Value text(s);
+
+   return shared_ptr<nj::Value>(new nj::Regex(*text));
+}
+
 static void examineArray(Local<Array> &a,size_t level,vector<size_t> &dims,nj::Type *&etype,bool &determineDimensions) throw(nj::InvalidException)
 {
    size_t len = a->Length();
@@ -296,6 +305,7 @@ shared_ptr<nj::Value> createRequest(const Local<Value> &value)
 {
    if(value->IsArray()) return createArrayReqFromArray(value);
    else if(value->IsDate()) return createDateReq(value);
+   else if(value->IsRegExp()) return createRegexReq(value);
    else if(node::Buffer::HasInstance(value)) return createArrayReqFromBuffer(value);
    else if(value->IsObject())
    {
