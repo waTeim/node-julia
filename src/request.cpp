@@ -49,7 +49,7 @@ static shared_ptr<nj::Value> createPrimitiveReq(const Local<Value> &prim)
    return v;
 }
 
-static double getDateValue(const Local<Value> &val)
+double getDateValue(const Local<Value> &val)
 {
    Local<Date> s = Local<Date>::Cast(val);
    return s->NumberValue();

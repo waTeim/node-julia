@@ -50,14 +50,14 @@ template <typename V,typename E> static shared_ptr<nj::Value> arrayFromBuffer(jl
    return value;
 }
 
-static string getSTDStringFromJuliaString(jl_value_t *val)
+string getSTDStringFromJuliaString(jl_value_t *val)
 {
    string res = string(jl_string_data(val));
 
    return res;
 }
 
-static double getDoubleFromJuliaDateTime(jl_value_t *val) throw(nj::JuliaException)
+double getDoubleFromJuliaDateTime(jl_value_t *val) throw(nj::JuliaException)
 {
    jl_value_t *unixTime = getUnixTime(val);
    double res = jl_unbox_float64(unixTime)*1000;

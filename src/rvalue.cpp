@@ -29,7 +29,7 @@ static jl_value_t *getDateTime(jl_value_t *float64Value) throw(nj::JuliaExceptio
    return dateTimeValue;
 }
 
-static jl_value_t *getJuliaDateTimeFromDouble(const double &val) throw(nj::JuliaException)
+jl_value_t *getJuliaDateTimeFromDouble(const double &val) throw(nj::JuliaException)
 {
    jl_value_t *milliseconds = jl_box_float64(val/1000);
 
