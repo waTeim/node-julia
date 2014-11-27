@@ -106,6 +106,11 @@ Local<Value> getStringFromValue(Isolate *I,const string &val)
    return String::NewFromUtf8(I,val.c_str());
 }
 
+Local<Value> getDateFromValue(Isolate *I,const double &val)
+{
+   return Date::New(I,val);
+}
+
 Local<Value> getNullValue(Isolate *I,const unsigned char &val)
 {
    return Null(I);
@@ -200,6 +205,7 @@ Local<Array> createArrayRes(HandleScope &scope,const shared_ptr<nj::Value> &valu
       case nj::uint8_type: return createArrayRes<unsigned char,nj::UInt8_t,getNumberFromValue<unsigned char>>(scope,value); break;
       case nj::ascii_string_type: return createArrayRes<string,nj::ASCIIString_t,getStringFromValue>(scope,value); break;
       case nj::utf8_string_type: return createArrayRes<string,nj::UTF8String_t,getStringFromValue>(scope,value); break;
+      case nj::date_type: return createArrayRes<double,nj::Date_t,getDateFromValue>(scope,value); break;
    }
 
    Isolate *I = Isolate::GetCurrent();
