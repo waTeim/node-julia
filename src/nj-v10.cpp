@@ -91,22 +91,22 @@ Local<Value> createPrimitiveRes(HandleScope &scope,const nj::Primitive &primitiv
    return Local<Value>::New(Null());
 }
 
-template <typename V> static Local<Value> getNumberFromValue(const V &val)
+template <typename V> Local<Value> getNumberFromValue(const V &val)
 {
    return Number::New(val);
 }
 
-static Local<Value> getStringFromValue(const string &val)
+Local<Value> getStringFromValue(const string &val)
 {
    return String::New(val.c_str());
 }
 
-static Local<Value> getDateFromValue(const double &val)
+Local<Value> getDateFromValue(const double &val)
 {
    return Date::New(val);
 }
 
-static Local<Value> getNullValue(const unsigned char &val)
+Local<Value> getNullValue(const unsigned char &val)
 {
    return Local<Value>::New(Null());
 }
