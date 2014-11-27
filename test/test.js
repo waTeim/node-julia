@@ -457,4 +457,14 @@ describe('Regression Tests',function()
 
       if(version == 4) expect(julia.exec('identity',now)).to.eql(now);
    });
+
+   it('Array of Date (Julia version 0.4+ only)',function()
+   {
+      var now = new Date();
+      var nowMinus20 = new Date(now - 20);
+      var version = julia.eval('VERSION.minor');
+      var a = [ now, nowMinus20 ];
+
+      if(version == 4) expect(julia.exec('identity',a)).to.eql([now,nowMinus20]);
+   });
 });

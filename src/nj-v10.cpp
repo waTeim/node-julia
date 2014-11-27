@@ -91,17 +91,22 @@ Local<Value> createPrimitiveRes(HandleScope &scope,const nj::Primitive &primitiv
    return Local<Value>::New(Null());
 }
 
-template <typename V> Local<Value> getNumberFromValue(const V &val)
+template <typename V> static Local<Value> getNumberFromValue(const V &val)
 {
    return Number::New(val);
 }
 
-Local<Value> getStringFromValue(const string &val)
+static Local<Value> getStringFromValue(const string &val)
 {
    return String::New(val.c_str());
 }
 
-Local<Value> getNullValue(const unsigned char &val)
+static Local<Value> getDateFromValue(const double &val)
+{
+   return Date::New(val);
+}
+
+static Local<Value> getNullValue(const unsigned char &val)
 {
    return Local<Value>::New(Null());
 }
@@ -194,6 +199,7 @@ Local<Array> createArrayRes(HandleScope &scope,const shared_ptr<nj::Value> &valu
       case nj::uint8_type: return createArrayRes<unsigned char,nj::UInt8_t,getNumberFromValue<unsigned char>>(scope,value); break;
       case nj::ascii_string_type: return createArrayRes<string,nj::ASCIIString_t,getStringFromValue>(scope,value); break;
       case nj::utf8_string_type: return createArrayRes<string,nj::UTF8String_t,getStringFromValue>(scope,value); break;
+      case nj::date_type: return createArrayRes<double,nj::Date_t,getDateFromValue>(scope,value); break;
    }
 
    return Array::New(0);

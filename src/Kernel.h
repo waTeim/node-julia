@@ -25,6 +25,7 @@ namespace nj
          jl_value_t *scriptify(jl_module_t *isolatingMod,jl_value_t *filenameToInclude) throw(JuliaException);
          jl_value_t *newRegex(jl_value_t *pattern) throw(JuliaException);
          jl_value_t *getPattern(jl_value_t *re) throw(JuliaException);
+         jl_datatype_t *getDateTimeType() throw(JuliaException);
    };
 };
 

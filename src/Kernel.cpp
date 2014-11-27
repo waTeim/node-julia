@@ -40,7 +40,7 @@ jl_value_t *nj::Kernel::scriptify(jl_module_t *isolatingMod,jl_value_t *filename
 
    jl_function_t *func = jl_get_function(njModule,"scriptify");
 
-   if(!func) throw getJuliaException("Could not locate function scriptify");
+   if(!func) throw getJuliaException("Could not locate function nj.scriptify");
     
    JL_GC_PUSH2(&isolatingMod,&filenameToInclude);
 
@@ -59,7 +59,7 @@ jl_value_t *nj::Kernel::newRegex(jl_value_t *pattern) throw(JuliaException)
 
    jl_function_t *func = jl_get_function(njModule,"newRegex");
 
-   if(!func) throw getJuliaException("Could not locate function newRegex");
+   if(!func) throw getJuliaException("Could not locate function nj.newRegex");
 
    JL_GC_PUSH1(&pattern);
 
@@ -79,7 +79,7 @@ jl_value_t *nj::Kernel::getPattern(jl_value_t *re) throw(JuliaException)
 
    jl_function_t *func = jl_get_function(njModule,"getPattern");
 
-   if(!func) throw getJuliaException("Could not locate function getPattern");
+   if(!func) throw getJuliaException("Could not locate function nj.getPattern");
 
    JL_GC_PUSH1(&re);
 
@@ -92,3 +92,17 @@ jl_value_t *nj::Kernel::getPattern(jl_value_t *re) throw(JuliaException)
    return pattern;
 }
 
+jl_datatype_t *nj::Kernel::getDateTimeType() throw(JuliaException)
+{
+   if(!njModule) njModule = load();
+
+   jl_function_t *func = jl_get_function(njModule,"getDateTimeType");
+
+   if(!func) throw getJuliaException("Could not locate function nj.getDateTimeType");
+
+   jl_datatype_t *dateTimeType = (jl_datatype_t*)jl_call0(func);
+   jl_value_t *ex = jl_exception_occurred();
+
+   if(ex) throw getJuliaException(ex);
+   return dateTimeType;
+}

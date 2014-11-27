@@ -5,6 +5,7 @@
 #include <memory.h>
 #include "Values.h"
 #include "lvalue.h"
+#include "error.h"
 
 using namespace std;
 
@@ -13,10 +14,24 @@ static const string JuliaSubString("SubString");
 static const string JuliaDateTime("DateTime");
 static const string JuliaRegex("Regex");
 
-static jl_function_t *getDateTime2Unix()
+static jl_value_t *getUnixTime(jl_value_t *dateTime) throw(nj::JuliaException)
 {
-   jl_module_t *dates_m = (jl_module_t*)jl_get_global(jl_base_module,jl_symbol("Dates"));
-   return jl_get_function(dates_m,"datetime2unix");
+   jl_module_t *datesModule = (jl_module_t*)jl_get_global(jl_base_module,jl_symbol("Dates"));
+
+   if(!datesModule) throw nj::getJuliaException("unable to locate module Dates");
+
+   jl_function_t *func = jl_get_function(datesModule,"datetime2unix");
+
+   if(!func) throw nj::getJuliaException("Could not locate function datetime2unix");
+
+   JL_GC_PUSH1(&dateTime);
+
+   jl_value_t *unixTime = jl_call1(func,dateTime);
+   jl_value_t *ex = jl_exception_occurred();
+
+   JL_GC_POP();
+   if(ex) throw nj::getJuliaException(ex);
+   return unixTime;
 }
 
 template <typename V,typename E> static shared_ptr<nj::Value> arrayFromBuffer(jl_value_t *jlA)
@@ -35,9 +50,17 @@ template <typename V,typename E> static shared_ptr<nj::Value> arrayFromBuffer(jl
    return value;
 }
 
-string getSTDStringFromJuliaString(jl_value_t *val)
+static string getSTDStringFromJuliaString(jl_value_t *val)
 {
    string res = string(jl_string_data(val));
+
+   return res;
+}
+
+static double getDoubleFromJuliaDateTime(jl_value_t *val) throw(nj::JuliaException)
+{
+   jl_value_t *unixTime = getUnixTime(val);
+   double res = jl_unbox_float64(unixTime)*1000;
 
    return res;
 }
@@ -107,17 +130,8 @@ void getNamedTypeValue(jl_value_t *from,shared_ptr<nj::Value> &value) throw(nj::
    }
    else if(juliaTypename == JuliaDateTime)
    {
-      static jl_function_t *dateTime2Unix_f = 0;
-      jl_value_t *res = 0;
-
-      if(!dateTime2Unix_f) dateTime2Unix_f = getDateTime2Unix();
-      if(dateTime2Unix_f)
-      {
-         JL_GC_PUSH1(&from);
-         res = jl_call1(dateTime2Unix_f,from);
-         JL_GC_POP();
-      }
-      if(res) value.reset(new nj::Date(jl_unbox_float64(res)*1000));
+      jl_value_t *unixTime = getUnixTime(from);
+      if(unixTime) value.reset(new nj::Date(jl_unbox_float64(unixTime)*1000));
    }
    else if(juliaTypename == JuliaRegex)
    {
@@ -176,6 +190,7 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlA)
 
          if(utfArray) value = arrayFromElements<string,nj::UTF8String_t,getSTDStringFromJuliaString>(utfArray);
       }
+      else if(juliaTypename == JuliaDateTime) value = arrayFromElements<double,nj::Date_t,getDoubleFromJuliaDateTime>(jlA);
    }
 
    return value;

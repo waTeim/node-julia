@@ -49,10 +49,15 @@ static shared_ptr<nj::Value> createPrimitiveReq(const Local<Value> &prim)
    return v;
 }
 
+static double getDateValue(const Local<Value> &val)
+{
+   Local<Date> s = Local<Date>::Cast(val);
+   return s->NumberValue();
+}
+
 static shared_ptr<nj::Value> createDateReq(const Local<Value> &value)
 {
-   Local<Date> s = Local<Date>::Cast(value);
-   double milliseconds = s->NumberValue();
+   double milliseconds = getDateValue(value);
 
    return shared_ptr<nj::Value>(new nj::Date(milliseconds));
 }
@@ -104,37 +109,37 @@ static void examineArray(Local<Array> &a,size_t level,vector<size_t> &dims,nj::T
    }
 }
 
-unsigned char getNullValue(const Local<Value> &val)
+static unsigned char getNullValue(const Local<Value> &val)
 {
    return 0;
 }
 
-unsigned char getBooleanValue(const Local<Value> &val)
+static unsigned char getBooleanValue(const Local<Value> &val)
 {
    return val->BooleanValue();
 }
 
-int getInt32Value(const Local<Value> &val)
+static int getInt32Value(const Local<Value> &val)
 {
    return val->Int32Value();
 }
 
-unsigned int getUInt32Value(const Local<Value> &val)
+static unsigned int getUInt32Value(const Local<Value> &val)
 {
    return val->Uint32Value();
 }
 
-int64_t getInt64Value(const Local<Value> &val)
+static int64_t getInt64Value(const Local<Value> &val)
 {
    return val->IntegerValue();
 }
 
-double getFloat64Value(const Local<Value> &val)
+static double getFloat64Value(const Local<Value> &val)
 {
    return val->NumberValue();
 }
 
-string getStringValue(const Local<Value> &val)
+static string getStringValue(const Local<Value> &val)
 {
    String::Utf8Value text(val);
    
@@ -253,6 +258,10 @@ static shared_ptr<nj::Value> createArrayReqFromArray(const Local<Value> &from)
                case nj::utf8_string_type:
                   to.reset(new nj::Array<string,nj::UTF8String_t>(dims));
                   fillArray<string,nj::UTF8String_t,getStringValue>(to,a);
+               break;
+               case nj::date_type:
+                  to.reset(new nj::Array<double,nj::Date_t>(dims));
+                  fillArray<double,nj::Date_t,getDateValue>(to,a);
                break;
             }
          }

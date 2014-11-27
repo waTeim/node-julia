@@ -8,12 +8,32 @@
 
 using namespace std;
 
-static jl_function_t *getUnix2DateTime()
-{
-   jl_module_t *dates_m = (jl_module_t*)jl_get_global(jl_base_module,jl_symbol("Dates"));
 
-   if(dates_m) return jl_get_function(dates_m,"unix2datetime");
-   return 0;
+static jl_value_t *getDateTime(jl_value_t *float64Value) throw(nj::JuliaException)
+{
+   jl_module_t *datesModule = (jl_module_t*)jl_get_global(jl_base_module,jl_symbol("Dates"));
+
+   if(!datesModule) throw nj::getJuliaException("unable to locate module Dates");
+
+   jl_function_t *func = jl_get_function(datesModule,"unix2datetime");
+
+   if(!func) throw nj::getJuliaException("Could not locate function unix2datetime");
+
+   JL_GC_PUSH1(&float64Value);
+
+   jl_value_t *dateTimeValue = jl_call1(func,float64Value);
+   jl_value_t *ex = jl_exception_occurred();
+
+   JL_GC_POP();
+   if(ex) throw nj::getJuliaException(ex);
+   return dateTimeValue;
+}
+
+static jl_value_t *getJuliaDateTimeFromDouble(const double &val) throw(nj::JuliaException)
+{
+   jl_value_t *milliseconds = jl_box_float64(val/1000);
+
+   return getDateTime(milliseconds);
 }
 
 static jl_value_t *rPrimitive(const nj::Primitive &prim) throw(nj::JuliaException)
@@ -117,18 +137,8 @@ static jl_value_t *rPrimitive(const nj::Primitive &prim) throw(nj::JuliaExceptio
       case nj::date_type:
       {
          const nj::Date &v = static_cast<const nj::Date&>(prim);
-         static jl_function_t *unix2DateTime_f = 0;
 
-         if(!unix2DateTime_f) unix2DateTime_f = getUnix2DateTime();
-
-         if(unix2DateTime_f)
-         {
-            jl_value_t *milliseconds = jl_box_float64(v.val()/1000);
-
-            JL_GC_PUSH1(&milliseconds);
-            res = jl_call1(unix2DateTime_f,milliseconds);
-            JL_GC_POP();
-         }
+         res = getJuliaDateTimeFromDouble(v.val());
       }
       break;
       case nj::regex_type:
@@ -205,6 +215,14 @@ static jl_array_t *rArray(const shared_ptr<nj::Value> &array)
       case nj::uint8_type: res = arrayFromBuffer<unsigned char,nj::UInt8_t>(array,jl_uint8_type); break;
       case nj::ascii_string_type: res = arrayFromElements<string,nj::ASCIIString_t,getJuliaStringFromSTDString>(array,jl_ascii_string_type); break;
       case nj::utf8_string_type: res = arrayFromElements<string,nj::UTF8String_t,getJuliaStringFromSTDString>(array,jl_utf8_string_type); break;
+      case nj::date_type:
+      {
+         nj::Kernel *kernel = nj::Kernel::getSingleton();
+         jl_datatype_t *dateTimeType = kernel->getDateTimeType();
+
+         res = arrayFromElements<double,nj::Date_t,getJuliaDateTimeFromDouble>(array,dateTimeType);
+      }
+      break;
    }
    return res;
 }

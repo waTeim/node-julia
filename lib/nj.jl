@@ -1,5 +1,21 @@
 module nj
 
+macro vers03x(ex)
+   VERSION.minor == 3
+end
+
+macro vers03x_only(ex)
+   @vers03x(ex)?esc(ex):nothing
+end
+
+macro vers04x(ex)
+   VERSION.minor == 4
+end
+
+macro vers04x_only(ex)
+   @vers04x(ex)?esc(ex):nothing
+end
+
 function topExpr(mod::Module,paths::Array{ASCIIString,1})
    res = Expr(:toplevel,:(eval(x) = Core.eval(mod,x)),:(eval(m,x) = Core.eval(m,x)))
    for path in paths
@@ -29,5 +45,8 @@ end
 
 newRegex(pattern) = Regex(pattern)
 getPattern(re::Regex) = re.pattern
+
+@vers04x_only getDateTimeType() = DateTime
+@vers03x_only getDateTimeType() = typeof(nothing)
 
 end
