@@ -109,37 +109,37 @@ static void examineArray(Local<Array> &a,size_t level,vector<size_t> &dims,nj::T
    }
 }
 
-static unsigned char getNullValue(const Local<Value> &val)
+unsigned char getNullValue(const Local<Value> &val)
 {
    return 0;
 }
 
-static unsigned char getBooleanValue(const Local<Value> &val)
+unsigned char getBooleanValue(const Local<Value> &val)
 {
    return val->BooleanValue();
 }
 
-static int getInt32Value(const Local<Value> &val)
+int getInt32Value(const Local<Value> &val)
 {
    return val->Int32Value();
 }
 
-static unsigned int getUInt32Value(const Local<Value> &val)
+unsigned int getUInt32Value(const Local<Value> &val)
 {
    return val->Uint32Value();
 }
 
-static int64_t getInt64Value(const Local<Value> &val)
+int64_t getInt64Value(const Local<Value> &val)
 {
    return val->IntegerValue();
 }
 
-static double getFloat64Value(const Local<Value> &val)
+double getFloat64Value(const Local<Value> &val)
 {
    return val->NumberValue();
 }
 
-static string getStringValue(const Local<Value> &val)
+string getStringValue(const Local<Value> &val)
 {
    String::Utf8Value text(val);
    
