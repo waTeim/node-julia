@@ -36,5 +36,5 @@ before_install:
     fi
   - node --version
 script:
-  - node-gyp rebuild
+  - npm install
   - npm test
