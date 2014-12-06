@@ -467,4 +467,12 @@ describe('Regression Tests',function()
 
       if(version == 4) expect(julia.exec('identity',a)).to.eql([now,nowMinus20]);
    });
+
+   it('Array of Regex',function()
+   {
+      var reArray = [ /a/, /b/, /c/ ];
+
+      expect(julia.exec('identity',reArray)).to.eql(reArray);
+   });
+ 
 });

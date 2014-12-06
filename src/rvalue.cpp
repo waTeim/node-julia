@@ -36,6 +36,14 @@ jl_value_t *getJuliaDateTimeFromDouble(const double &val) throw(nj::JuliaExcepti
    return getDateTime(milliseconds);
 }
 
+jl_value_t *getJuliaRegexFromString(const string &val) throw(nj::JuliaException)
+{
+   jl_value_t *pattern  = jl_cstr_to_string(val.c_str());
+   nj::Kernel *kernel = nj::Kernel::getSingleton();
+
+   return kernel->newRegex(pattern);
+}
+
 static jl_value_t *rPrimitive(const nj::Primitive &prim) throw(nj::JuliaException)
 {
    jl_value_t *res = 0;
@@ -221,6 +229,14 @@ static jl_array_t *rArray(const shared_ptr<nj::Value> &array)
          jl_datatype_t *dateTimeType = kernel->getDateTimeType();
 
          res = arrayFromElements<double,nj::Date_t,getJuliaDateTimeFromDouble>(array,dateTimeType);
+      }
+      break;
+      case nj::regex_type:
+      {
+         nj::Kernel *kernel = nj::Kernel::getSingleton();
+         jl_datatype_t *regexType = kernel->getRegexType();
+
+         res = arrayFromElements<string,nj::Regex_t,getJuliaRegexFromString>(array,regexType);
       }
       break;
    }

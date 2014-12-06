@@ -65,6 +65,19 @@ double getDoubleFromJuliaDateTime(jl_value_t *val) throw(nj::JuliaException)
    return res;
 }
 
+string getStringFromJuliaRegex(jl_value_t *val) throw(nj::JuliaException)
+{
+   JL_GC_PUSH1(&val);
+
+   nj::Kernel *kernel = nj::Kernel::getSingleton();
+   jl_value_t *pattern = kernel->getPattern(val);
+   string res = string(jl_string_data(pattern));
+
+   JL_GC_POP();
+
+   return res;
+}
+
 template <typename V,typename E,V (&getElement)(jl_value_t*)> static shared_ptr<nj::Value> arrayFromElements(jl_value_t *jlA)
 {
    shared_ptr<nj::Value> value;
@@ -191,6 +204,7 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlA)
          if(utfArray) value = arrayFromElements<string,nj::UTF8String_t,getSTDStringFromJuliaString>(utfArray);
       }
       else if(juliaTypename == JuliaDateTime) value = arrayFromElements<double,nj::Date_t,getDoubleFromJuliaDateTime>(jlA);
+      else if(juliaTypename == JuliaRegex) value = arrayFromElements<string,nj::Regex_t,getStringFromJuliaRegex>(jlA);
    }
 
    return value;

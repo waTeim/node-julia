@@ -22,6 +22,7 @@ static nj::Type *getPrimitiveType(const Local<Value> &prim)
    }
    else if(prim->IsString()) return nj::UTF8String_t::instance();
    else if(prim->IsDate()) return nj::Date_t::instance();
+   else if(prim->IsRegExp()) return nj::Regex_t::instance();
    return 0;
 }
 
@@ -55,6 +56,15 @@ double getDateValue(const Local<Value> &val)
    return s->NumberValue();
 }
 
+string getRegexValue(const Local<Value> &val)
+{
+   Local<RegExp> re = Local<RegExp>::Cast(val);
+   Local<String> s = re->GetSource();
+   String::Utf8Value text(s);
+
+   return string(*text);
+}
+
 static shared_ptr<nj::Value> createDateReq(const Local<Value> &value)
 {
    double milliseconds = getDateValue(value);
@@ -64,11 +74,9 @@ static shared_ptr<nj::Value> createDateReq(const Local<Value> &value)
 
 static shared_ptr<nj::Value> createRegexReq(const Local<Value> &value)
 {
-   Local<RegExp> re = Local<RegExp>::Cast(value);
-   Local<String> s = re->GetSource();
-   String::Utf8Value text(s);
+   string text = getRegexValue(value);
 
-   return shared_ptr<nj::Value>(new nj::Regex(*text));
+   return shared_ptr<nj::Value>(new nj::Regex(text));
 }
 
 static void examineArray(Local<Array> &a,size_t level,vector<size_t> &dims,nj::Type *&etype,bool &determineDimensions) throw(nj::InvalidException)
@@ -262,6 +270,10 @@ static shared_ptr<nj::Value> createArrayReqFromArray(const Local<Value> &from)
                case nj::date_type:
                   to.reset(new nj::Array<double,nj::Date_t>(dims));
                   fillArray<double,nj::Date_t,getDateValue>(to,a);
+               break;
+               case nj::regex_type:
+                  to.reset(new nj::Array<string,nj::Regex_t>(dims));
+                  fillArray<string,nj::Regex_t,getRegexValue>(to,a);
                break;
             }
          }

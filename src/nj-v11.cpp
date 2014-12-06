@@ -111,6 +111,13 @@ Local<Value> getDateFromValue(Isolate *I,const double &val)
    return Date::New(I,val);
 }
 
+Local<Value> getRegexFromValue(Isolate *I,const string &val)
+{
+   Local<String> pattern = String::NewFromUtf8(I,val.c_str());
+
+   return RegExp::New(pattern,RegExp::kNone);
+}
+
 Local<Value> getNullValue(Isolate *I,const unsigned char &val)
 {
    return Null(I);
@@ -206,6 +213,7 @@ Local<Array> createArrayRes(HandleScope &scope,const shared_ptr<nj::Value> &valu
       case nj::ascii_string_type: return createArrayRes<string,nj::ASCIIString_t,getStringFromValue>(scope,value); break;
       case nj::utf8_string_type: return createArrayRes<string,nj::UTF8String_t,getStringFromValue>(scope,value); break;
       case nj::date_type: return createArrayRes<double,nj::Date_t,getDateFromValue>(scope,value); break;
+      case nj::regex_type: return createArrayRes<string,nj::Regex_t,getRegexFromValue>(scope,value); break;
    }
 
    Isolate *I = Isolate::GetCurrent();

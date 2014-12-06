@@ -106,3 +106,18 @@ jl_datatype_t *nj::Kernel::getDateTimeType() throw(JuliaException)
    if(ex) throw getJuliaException(ex);
    return dateTimeType;
 }
+
+jl_datatype_t *nj::Kernel::getRegexType() throw(JuliaException)
+{
+   if(!njModule) njModule = load();
+
+   jl_function_t *func = jl_get_function(njModule,"getRegexType");
+
+   if(!func) throw getJuliaException("Could not locate function nj.getRegexType");
+
+   jl_datatype_t *regexType = (jl_datatype_t*)jl_call0(func);
+   jl_value_t *ex = jl_exception_occurred();
+
+   if(ex) throw getJuliaException(ex);
+   return regexType;
+}

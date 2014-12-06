@@ -45,6 +45,7 @@ end
 
 newRegex(pattern) = Regex(pattern)
 getPattern(re::Regex) = re.pattern
+getRegexType() = Regex
 
 @vers04x_only getDateTimeType() = DateTime
 @vers03x_only getDateTimeType() = typeof(nothing)

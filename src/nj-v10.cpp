@@ -106,6 +106,13 @@ Local<Value> getDateFromValue(const double &val)
    return Date::New(val);
 }
 
+Local<Value> getRegexFromValue(const string &val)
+{
+   Local<String> pattern = String::New(val.c_str());
+
+   return RegExp::New(pattern,RegExp::kNone);
+}
+
 Local<Value> getNullValue(const unsigned char &val)
 {
    return Local<Value>::New(Null());
@@ -200,6 +207,7 @@ Local<Array> createArrayRes(HandleScope &scope,const shared_ptr<nj::Value> &valu
       case nj::ascii_string_type: return createArrayRes<string,nj::ASCIIString_t,getStringFromValue>(scope,value); break;
       case nj::utf8_string_type: return createArrayRes<string,nj::UTF8String_t,getStringFromValue>(scope,value); break;
       case nj::date_type: return createArrayRes<double,nj::Date_t,getDateFromValue>(scope,value); break;
+      case nj::regex_type: return createArrayRes<string,nj::Regex_t,getRegexFromValue>(scope,value); break;
    }
 
    return Array::New(0);
