@@ -18,15 +18,20 @@ relative to where the julia executable is located.
 
 # Sample Syntax
 
-To compute the solution to a system of 3 equations and 3 unknowns.
+To compute the solution to a system of 3 equations and 3 unknowns, use the Julia
+linear algebra package.
 
     julia = require('node-julia');
 
-    var a = julia.eval('[1 2 3; 4 5 6; 7 8 9 ]');
+    var a = julia.eval('[ 1 2 3 ; 3 4 1; 8 2 9]');
     var b = julia.eval("[1 1 1]'");
     var c = julia.exec('\\',a,b);
 
     console.log('Solution: ' + c[0] + 'x + ' + c[1] + 'y + ' + c[2] + 'z');
+
+produces
+
+    Solution: -0.1463414634146341x + 0.3170731707317073y + 0.17073170731707316z
 
 # A Simple API
 
