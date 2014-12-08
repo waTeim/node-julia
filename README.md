@@ -31,7 +31,7 @@ To compute the solution to a system of 3 equations and 3 unknowns.
 # A Simple API
 
 There are 3 functions; **eval** **exec** and **Script**, [see here](http://node-julia.readme.io/)
-for full documentation.
+for full documentation and release notes.
 
 ## eval
 
@@ -45,7 +45,7 @@ in the Julia *REPL* and returns the result
 Calls to **eval** without a function callback are also supported. Matrices 
 are easily constructed using Julia's Matlab-like matrix syntax.
 
-    console.log("2x2 matrix: ", julia.eval('[ 1 2; 3 4]'));
+    console.log('2x2 matrix: ', julia.eval('[ 1 2; 3 4]'));
 
 ## exec
 
@@ -85,10 +85,9 @@ Tests run using npm
 
 * Julia invocations are currently synchronous.
 
-* Linux installations must compile using -Bsymbolic-functions to avoid mismatched
-use of libuv.  This occurs by default when using a distribution of Julia via
-Ubuntu PPA. Addition of this flag regardless of the distribution is in progress
-[see here](http://node-julia.readme.io/v0.2.1/docs/use-of-libuv) for more
-details.
+* Linux Julia installations must compile using -Bsymbolic-functions to avoid mismatched
+use of libuv, and is now the default.  However, builds of Julia prior to Dec 1, 2014 may
+still have this problem [see here](http://node-julia.readme.io/v0.2.2/docs/use-of-libuv)
+for more information.
 
 * Work on Windows support is in progress.
