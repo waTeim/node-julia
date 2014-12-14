@@ -47,11 +47,10 @@ static string methodErrorMsg(jl_value_t *ex)
 
    for(size_t i = 0;i < numArgs;i++) 
    {
-      jl_value_t *ti = jl_tupleref(f1,i);
-      jl_datatype_t *t = (jl_datatype_t*)jl_typeof(ti);
+      jl_value_t *arg = jl_tupleref(f1,i);
 
       if(i != 0) ss << ",";
-      ss << t->name->name->name;
+      ss << jl_typename_str(jl_typeof(arg));
    }
 
    ss << ")";

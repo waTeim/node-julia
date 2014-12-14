@@ -5,7 +5,9 @@
 #include <node_buffer.h>
 #include "Types.h"
 #include "request.h"
+#include "JuliaHandle.h"
 #include "ScriptEncapsulated-v11.h"
+#include "JRef-v11.h"
 
 using namespace std;
 using namespace v8;
@@ -236,12 +238,22 @@ Local<Object> createBufferRes(HandleScope &scope,const shared_ptr<nj::Value> &va
 int createResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc,Local<Value> *argv)
 {
    int index = 0;
+   Isolate *I = Isolate::GetCurrent();
 
    for(shared_ptr<nj::Value> value: res->results())
    {
       if(value.get())
       {
-         if(value->isPrimitive())
+         if(value->type()->getId() == nj::julia_handle_type)
+         {
+            nj::JuliaHandle *handle = static_cast<nj::JuliaHandle*>(value.get());
+            int64_t hIndex = handle->intern();
+            Handle<Value> arguments[1] = { Number::New(I,hIndex) };
+            Local<Function> cons = Local<Function>::New(I,nj::JRef::constructor);
+
+            argv[index++] = cons->NewInstance(1,arguments);
+         }
+         else if(value->isPrimitive())
          {
             const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
 
@@ -443,6 +455,7 @@ void newScript(const FunctionCallbackInfo<Value> &args)
 void init(Handle<Object> exports)
 {
   nj::ScriptEncapsulated::Init(exports);
+  nj::JRef::Init(exports);
 
   NODE_SET_METHOD(exports,"eval",doEval);
   NODE_SET_METHOD(exports,"exec",doExec);

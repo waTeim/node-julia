@@ -474,5 +474,20 @@ describe('Regression Tests',function()
 
       expect(julia.exec('identity',reArray)).to.eql(reArray);
    });
- 
+     
+   it('JRef from eval',function()
+   {
+      julia.exec('include','test/inc5.jl');
+      
+      var juliaObj = julia.eval('T1(5,[3,4,5,6,7,8])');
+
+      expect(julia.exec('t1Mult',juliaObj)).to.eql([15,20,25,30,35,40]);
+   });
+
+   it('JRef from exec',function()
+   {
+      var juliaObj = julia.exec('t1Cons',5,[1,2,3]);
+
+      expect(julia.exec('t1Mult',juliaObj)).to.eql([5,10,15]);
+   });
 });

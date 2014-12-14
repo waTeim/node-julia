@@ -4,7 +4,14 @@
 #include <stdio.h>
 #include <node_buffer.h>
 #include "NativeArray.h"
+#include "JuliaHandle.h"
 #include "request.h"
+
+#if NODE_MINOR_VERSION == 10
+#include "JRef-v10.h"
+#elif NODE_MINOR_VERSION == 11
+#include "JRef-v11.h"
+#endif
 
 using namespace std;
 using namespace v8;
@@ -77,6 +84,14 @@ static shared_ptr<nj::Value> createRegexReq(const Local<Value> &value)
    string text = getRegexValue(value);
 
    return shared_ptr<nj::Value>(new nj::Regex(text));
+}
+
+static shared_ptr<nj::Value> createJRefReq(const Local<Object> &obj)
+{
+   nj::JRef *src = node::ObjectWrap::Unwrap<nj::JRef>(obj);
+   shared_ptr<nj::Value> handle = dynamic_pointer_cast<nj::Value>(src->getHandle());
+
+   return handle;
 }
 
 static void examineArray(Local<Array> &a,size_t level,vector<size_t> &dims,nj::Type *&etype,bool &determineDimensions) throw(nj::InvalidException)
@@ -334,7 +349,8 @@ shared_ptr<nj::Value> createRequest(const Local<Value> &value)
       String::Utf8Value utf(obj->GetConstructorName());
       string cname(*utf);
 
-      if(cname == "Int8Array") return createArrayReqFromNativeArray<char,nj::Int8_t>(obj);
+      if(cname == "JRef") return createJRefReq(obj);
+      else if(cname == "Int8Array") return createArrayReqFromNativeArray<char,nj::Int8_t>(obj);
       else if(cname == "Uint8Array") return createArrayReqFromNativeArray<unsigned char,nj::UInt8_t>(obj);
       else if(cname == "Int16Array") return createArrayReqFromNativeArray<short,nj::Int16_t>(obj);
       else if(cname == "Uint16Array") return createArrayReqFromNativeArray<unsigned short,nj::UInt16_t>(obj);

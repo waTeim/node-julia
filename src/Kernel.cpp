@@ -8,22 +8,69 @@ static const string libDir(NJ_LIB);
 
 nj::Kernel *nj::Kernel::singleton = 0;
 
+jl_value_t *nj::Kernel::get_preserve_array() throw(JuliaException)
+{
+   if(!nj_module) nj_module = load();
+
+   jl_sym_t *preserveSym = jl_symbol("preserve");
+   jl_value_t *preserve = jl_get_global(nj_module,preserveSym);
+   jl_value_t *ex = jl_exception_occurred();
+
+   if(ex) throw getJuliaException(ex);
+   return preserve;
+}
+
+jl_value_t *nj::Kernel::invoke(const string &functionName) throw(JuliaException)
+{
+   if(!nj_module) nj_module = load();
+
+   jl_function_t *func = jl_get_function(nj_module,functionName.c_str());
+
+   if(!func) throw getJuliaException("Could not locate function nj." + functionName);
+
+   jl_value_t *res = jl_call0(func);
+   jl_value_t *ex = jl_exception_occurred();
+
+   if(ex) throw getJuliaException(ex);
+   return res;
+}
+
+jl_value_t *nj::Kernel::invoke(const string &functionName,jl_value_t *arg) throw(JuliaException)
+{
+   if(!nj_module) nj_module = load();
+
+   jl_function_t *func = jl_get_function(nj_module,functionName.c_str());
+
+   if(!func) throw getJuliaException("Could not locate function nj." + functionName);
+
+   JL_GC_PUSH1(&arg);
+
+   jl_value_t *res = jl_call1(func,arg);
+   jl_value_t *ex = jl_exception_occurred();
+
+   JL_GC_POP();
+
+   if(ex) throw getJuliaException(ex);
+   return res;
+}
+
 jl_module_t *nj::Kernel::load() throw(JuliaException)
 {
    string njPath = libDir + "/nj.jl";
    jl_function_t *func = jl_get_function(jl_core_module,"include");
-   jl_value_t *jl_ex = 0;
 
    if(!func) throw getJuliaException("unable to locate Core.include");
    jl_call1(func,jl_cstr_to_string(njPath.c_str()));
-   jl_ex = jl_exception_occurred();
-   if(jl_ex) throw getJuliaException(jl_ex);
+
+   jl_value_t *ex = jl_exception_occurred();
+
+   if(ex) throw getJuliaException(ex);
 
    jl_sym_t *modName = jl_symbol("nj");
    jl_module_t *mod = (jl_module_t*)jl_get_global(jl_main_module,modName);
 
-   jl_ex = jl_exception_occurred();
-   if(jl_ex) throw getJuliaException(jl_ex);
+   ex = jl_exception_occurred();
+   if(ex) throw getJuliaException(ex);
    
    return mod;
 }
@@ -34,11 +81,19 @@ nj::Kernel *nj::Kernel::getSingleton()
    return singleton;
 }
 
+nj::Kernel::Kernel()
+{ 
+   nj_module = 0;
+   preserve_array = 0;
+   freelist_start = -1;
+}
+
+
 jl_value_t *nj::Kernel::scriptify(jl_module_t *isolatingMod,jl_value_t *filenameToInclude) throw(JuliaException)
 {
-   if(!njModule) njModule = load();
+   if(!nj_module) nj_module = load();
 
-   jl_function_t *func = jl_get_function(njModule,"scriptify");
+   jl_function_t *func = jl_get_function(nj_module,"scriptify");
 
    if(!func) throw getJuliaException("Could not locate function nj.scriptify");
     
@@ -55,9 +110,9 @@ jl_value_t *nj::Kernel::scriptify(jl_module_t *isolatingMod,jl_value_t *filename
 
 jl_value_t *nj::Kernel::newRegex(jl_value_t *pattern) throw(JuliaException)
 {
-   if(!njModule) njModule = load();
+   if(!nj_module) nj_module = load();
 
-   jl_function_t *func = jl_get_function(njModule,"newRegex");
+   jl_function_t *func = jl_get_function(nj_module,"newRegex");
 
    if(!func) throw getJuliaException("Could not locate function nj.newRegex");
 
@@ -73,51 +128,49 @@ jl_value_t *nj::Kernel::newRegex(jl_value_t *pattern) throw(JuliaException)
 }
 
 
-jl_value_t *nj::Kernel::getPattern(jl_value_t *re) throw(JuliaException)
+jl_value_t *nj::Kernel::getPattern(jl_value_t *re) throw(JuliaException) { return invoke("getPattern",re); }
+jl_datatype_t *nj::Kernel::getDateTimeType() throw(JuliaException) { return (jl_datatype_t*)invoke("getDateTimeType"); }
+jl_datatype_t *nj::Kernel::getRegexType() throw(JuliaException) { return (jl_datatype_t*)invoke("getRegexType"); }
+
+int64_t nj::Kernel::preserve(jl_value_t *val) throw(JuliaException)
 {
-   if(!njModule) njModule = load();
+   int64_t free_index;
 
-   jl_function_t *func = jl_get_function(njModule,"getPattern");
+   if(!preserve_array) preserve_array = get_preserve_array();
 
-   if(!func) throw getJuliaException("Could not locate function nj.getPattern");
+   if(freelist_start == -1)
+   {
+      jl_cell_1d_push((jl_array_t*)preserve_array,val);
+      freelist.push_back(-1);
+      free_index = freelist.size() - 1;
+   }
+   else
+   {
+      free_index = freelist_start;
+      freelist_start = freelist[free_index];
+      freelist[free_index] = -1;
+      jl_cellset(preserve_array,free_index + 1,val);
+   }
 
-   JL_GC_PUSH1(&re);
-
-   jl_value_t *pattern = jl_call1(func,re);
    jl_value_t *ex = jl_exception_occurred();
 
-   JL_GC_POP();
-
    if(ex) throw getJuliaException(ex);
-   return pattern;
+   return free_index;
 }
 
-jl_datatype_t *nj::Kernel::getDateTimeType() throw(JuliaException)
+jl_value_t *nj::Kernel::free(int64_t valIndex) throw(JuliaException)
 {
-   if(!njModule) njModule = load();
+   if(!preserve_array) preserve_array = get_preserve_array();
 
-   jl_function_t *func = jl_get_function(njModule,"getDateTimeType");
+   freelist[valIndex] = freelist_start;
+   freelist_start = valIndex;
 
-   if(!func) throw getJuliaException("Could not locate function nj.getDateTimeType");
-
-   jl_datatype_t *dateTimeType = (jl_datatype_t*)jl_call0(func);
+   jl_value_t *val = jl_cellref(preserve_array,valIndex + 1);
    jl_value_t *ex = jl_exception_occurred();
 
    if(ex) throw getJuliaException(ex);
-   return dateTimeType;
-}
-
-jl_datatype_t *nj::Kernel::getRegexType() throw(JuliaException)
-{
-   if(!njModule) njModule = load();
-
-   jl_function_t *func = jl_get_function(njModule,"getRegexType");
-
-   if(!func) throw getJuliaException("Could not locate function nj.getRegexType");
-
-   jl_datatype_t *regexType = (jl_datatype_t*)jl_call0(func);
-   jl_value_t *ex = jl_exception_occurred();
-
+   jl_cellset(preserve_array,valIndex + 1,0);
+   ex = jl_exception_occurred();
    if(ex) throw getJuliaException(ex);
-   return regexType;
+   return val;
 }

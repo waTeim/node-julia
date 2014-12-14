@@ -5,6 +5,7 @@
 #include "Values.h"
 #include "error.h"
 #include "Kernel.h"
+#include "JuliaHandle.h"
 
 using namespace std;
 
@@ -245,6 +246,12 @@ static jl_array_t *rArray(const shared_ptr<nj::Value> &array)
 
 jl_value_t *nj::rvalue(const shared_ptr<nj::Value> &value) throw(JuliaException)
 {
+   if(value->type() == JuliaHandle_t::instance())
+   {
+      const nj::JuliaHandle &h = static_cast<const nj::JuliaHandle&>(*value);   
+
+      return h.val();
+   }
    if(value->isPrimitive())
    {
       const nj::Primitive &p = static_cast<const nj::Primitive&>(*value);

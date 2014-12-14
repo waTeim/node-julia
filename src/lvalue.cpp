@@ -1,6 +1,7 @@
 #include <iostream>
 #include <julia.h>
 #include "Kernel.h"
+#include "JuliaHandle.h"
 #include "juliav.h"
 #include <memory.h>
 #include "Values.h"
@@ -13,6 +14,7 @@ static jl_function_t *juliaConvert = 0;
 static const string JuliaSubString("SubString");
 static const string JuliaDateTime("DateTime");
 static const string JuliaRegex("Regex");
+static const string JuliaFunction("Function");
 
 static jl_value_t *getUnixTime(jl_value_t *dateTime) throw(nj::JuliaException)
 {
@@ -135,6 +137,7 @@ void getNamedTypeValue(jl_value_t *from,shared_ptr<nj::Value> &value) throw(nj::
 {
    const char *juliaTypename = jl_typename_str(jl_typeof(from));
 
+   if(juliaTypename == JuliaFunction) return;
    if(juliaTypename == JuliaSubString)
    {
       jl_value_t *utf = convertValue(from,jl_utf8_string_type);
@@ -153,6 +156,7 @@ void getNamedTypeValue(jl_value_t *from,shared_ptr<nj::Value> &value) throw(nj::
 
       value.reset(new nj::Regex(jl_string_data(pattern)));
    }
+   else value.reset(new nj::JuliaHandle(from,true));
 }
 
 static jl_value_t *convertArray(jl_value_t *from,jl_datatype_t *destElementType)

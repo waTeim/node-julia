@@ -5,7 +5,9 @@
 #include <node_buffer.h>
 #include "Types.h"
 #include "request.h"
+#include "JuliaHandle.h"
 #include "ScriptEncapsulated-v10.h"
+#include "JRef-v10.h"
 
 using namespace std;
 using namespace v8;
@@ -238,7 +240,15 @@ int createResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc
    {
       if(value.get())
       {
-         if(value->isPrimitive())
+         if(value->type()->getId() == nj::julia_handle_type)
+         {
+            nj::JuliaHandle *handle = static_cast<nj::JuliaHandle*>(value.get());
+            int64_t hIndex = handle->intern();
+            Local<Value> arguments[1] = { Number::New(hIndex) };
+
+            argv[index++] = nj::JRef::constructor->Call(Context::GetCurrent()->Global(),1,arguments);
+         }
+         else if(value->isPrimitive())
          {
             const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
 
@@ -344,7 +354,7 @@ Handle<Value> doEval(const Arguments &args)
    {
       engine->eval(*text);
       shared_ptr<nj::Result> res = engine->resultQueueGet();
- 
+
       if(numArgs == 2) return callbackWithResult(scope,cb,res);
       else return returnResult(scope,res);
    }
@@ -423,6 +433,7 @@ Handle<Value> newScript(const Arguments& args)
 void init(Handle<Object> exports)
 {
    nj::ScriptEncapsulated::Init(exports);
+   nj::JRef::Init(exports);
 
    NODE_SET_METHOD(exports,"eval",doEval);
    NODE_SET_METHOD(exports,"exec",doExec);

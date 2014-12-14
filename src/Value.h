@@ -15,7 +15,7 @@ namespace nj
          virtual const Type *type() const = 0;
          virtual bool isPrimitive() const = 0;
          virtual const std::vector<size_t> &dims() const = 0;
-         virtual ~Value() {}
+         virtual ~Value() throw(JuliaException) {}
    };
 
    class Primitive: public Value

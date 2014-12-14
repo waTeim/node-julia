@@ -16,6 +16,8 @@ macro vers04x_only(ex)
    @vers04x(ex)?esc(ex):nothing
 end
 
+preserve = Array(Any,0);
+
 function topExpr(mod::Module,paths::Array{ASCIIString,1})
    res = Expr(:toplevel,:(eval(x) = Core.eval(mod,x)),:(eval(m,x) = Core.eval(m,x)))
    for path in paths

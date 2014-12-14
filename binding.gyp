@@ -116,8 +116,9 @@
         ],
         [ "version=='0.10.x'",
           {
-             "sources":
+            "sources":
             [ 
+              "src/JRef-v10.cpp",
               "src/ScriptEncapsulated-v10.cpp",
               "src/nj-v10.cpp"
             ]
@@ -125,11 +126,12 @@
         ],
         [ "version=='0.11.x'",
           {
-             "sources":
-             [ 
-               "src/ScriptEncapsulated-v11.cpp",
-               "src/nj-v11.cpp"
-             ]
+            "sources":
+            [ 
+              "src/JRef-v11.cpp",
+              "src/ScriptEncapsulated-v11.cpp",
+              "src/nj-v11.cpp"
+            ]
           }
         ]
       ]
