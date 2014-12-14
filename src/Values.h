@@ -31,7 +31,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException)  {  throw InvalidException("is null");  }
          virtual double toFloat() const throw(InvalidException) {  throw InvalidException("is null");  }
          virtual std::string toString() const throw(InvalidException) {  throw InvalidException("is null");  }
-         virtual ~Null() {}
+         virtual ~Null() throw(JuliaException) {}
    };
 
    class Boolean:public Primitive,public PValue<bool>
@@ -46,7 +46,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException) {  return val()?1:0;  }
          virtual double toFloat() const throw(InvalidException) {  return val()?1:0;  }
          virtual std::string toString() const throw(InvalidException) {  return val()?"true":"false";  }
-         virtual ~Boolean() {}
+         virtual ~Boolean() throw(JuliaException) {}
    };
 
    class Int64:public Primitive,public PValue<int64_t>
@@ -61,7 +61,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
-         virtual ~Int64() {}
+         virtual ~Int64() throw(JuliaException) {}
    }; 
 
    class UInt64:public Primitive,public PValue<uint64_t>
@@ -76,7 +76,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
-         virtual ~UInt64() {}
+         virtual ~UInt64() throw(JuliaException) {}
    }; 
 
    class Int32:public Primitive,public PValue<int>
@@ -91,7 +91,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
-         virtual ~Int32() {}
+         virtual ~Int32() throw(JuliaException) {}
    }; 
 
    class UInt32:public Primitive,public PValue<unsigned int>
@@ -106,7 +106,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
-         virtual ~UInt32() {}
+         virtual ~UInt32() throw(JuliaException) {}
    }; 
 
    class Int16:public Primitive,public PValue<short>
@@ -121,7 +121,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
-         virtual ~Int16() {}
+         virtual ~Int16() throw(JuliaException) {}
    }; 
 
    class UInt16:public Primitive,public PValue<unsigned short>
@@ -136,7 +136,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
-         virtual ~UInt16() {}
+         virtual ~UInt16() throw(JuliaException) {}
    }; 
 
    class Int8:public Primitive,public PValue<char>
@@ -151,7 +151,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
-         virtual ~Int8() {}
+         virtual ~Int8() throw(JuliaException) {}
    }; 
 
    class UInt8:public Primitive,public PValue<unsigned char>
@@ -166,7 +166,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
-         virtual ~UInt8() {}
+         virtual ~UInt8() throw(JuliaException) {}
    }; 
 
    class Float64:public Primitive,public PValue<double>
@@ -181,7 +181,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
-         virtual ~Float64() {}
+         virtual ~Float64() throw(JuliaException) {}
    };    
 
    class Float32:public Primitive,public PValue<float>
@@ -196,7 +196,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
-         virtual ~Float32() {}
+         virtual ~Float32() throw(JuliaException) {}
    };    
 
    class ASCIIString:public Primitive,public PValue<std::string>
@@ -211,7 +211,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException);
          virtual double toFloat() const throw(InvalidException);
          virtual std::string toString() const throw(InvalidException) {  return val();  }
-         virtual ~ASCIIString() {}
+         virtual ~ASCIIString() throw(JuliaException) {}
    };
 
    class UTF8String:public Primitive,public PValue<std::string>
@@ -226,7 +226,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException);
          virtual double toFloat() const throw(InvalidException);
          virtual std::string toString() const throw(InvalidException) {  return val();  }
-         virtual ~UTF8String() {}
+         virtual ~UTF8String() throw(JuliaException) {}
    };
 
    class Date:public Primitive,public PValue<double>
@@ -241,7 +241,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
-         virtual ~Date() {}
+         virtual ~Date() throw(JuliaException) {}
    };
 
    class Regex:public Primitive,public PValue<std::string>
@@ -256,7 +256,7 @@ namespace nj
          virtual uint64_t toUInt() const throw(InvalidException) {  return 0;  }
          virtual double toFloat() const throw(InvalidException) {  return 0.0;  }
          virtual std::string toString() const throw(InvalidException) {  return val();  }
-         virtual ~Regex() {}
+         virtual ~Regex() throw(JuliaException) {}
    };
 };
 
