@@ -63,6 +63,7 @@ namespace nj
          virtual const Type *type() const {  return Array_t::instance(E::instance());  }
          virtual V *ptr() const {  return data.get()->data();  }
          virtual size_t size() const {  return num_elements;  }
+         virtual ~Array() throw(JuliaException) {}
    };
 };
 
