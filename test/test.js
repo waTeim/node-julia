@@ -295,6 +295,11 @@ describe('Regression Tests',function()
       expect(execA(julia,'typecheckArray',[1,1.1])).to.equal('float');
    });
 
+   it('Typecheck [Float,Integer] -> [Float]',function()
+   {
+      expect(execA(julia,'typecheckArray',[1.1,1])).to.equal('float');
+   });
+
    it('Prevent widening String elements',function()
    {
       expect(execA(julia,'typecheckArray',[true,"x",1,1.1])).to.equal('none');

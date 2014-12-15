@@ -49,7 +49,7 @@ static jl_value_t *rPrimitive(const nj::Primitive &prim) throw(nj::JuliaExceptio
 {
    jl_value_t *res = 0;
 
-   switch(prim.type()->getId())
+   switch(prim.type()->id())
    {
       case nj::null_type: res = (jl_value_t*)jl_null; break;
       case nj::boolean_type:
@@ -208,7 +208,7 @@ static jl_array_t *rArray(const shared_ptr<nj::Value> &array)
    jl_array_t *res = 0;
    const nj::Array_t *atype = static_cast<const nj::Array_t*>(array->type());
 
-   switch(atype->etype()->getId())
+   switch(atype->etype()->id())
    {  
       case nj::null_type: res = arrayFromElements<unsigned char,nj::Null_t,getJuliaNullElement>(array,JVOID_T); break;
       case nj::boolean_type: res = arrayFromBuffer<unsigned char,nj::Boolean_t>(array,jl_bool_type); break;

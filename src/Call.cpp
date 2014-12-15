@@ -18,7 +18,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args)
 
    if(args.size() == 0) return res;
 
-   switch(args[0]->type()->getId())
+   switch(args[0]->type()->id())
    {
       case ascii_string_type:
       case utf8_string_type:

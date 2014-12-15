@@ -21,7 +21,7 @@ Handle<Value> callback(HandleScope &scope,const Local<Function> &cb,int argc,Loc
 Local<Value> createPrimitiveRes(HandleScope &scope,const nj::Primitive &primitive)
 {
 
-   switch(primitive.type()->getId())
+   switch(primitive.type()->id())
    {
       case nj::null_type:
       {
@@ -193,7 +193,7 @@ template<typename V,typename E,Local<Value> getElement(const V &val)> Local<Arra
 
 Local<Array> createArrayRes(HandleScope &scope,const shared_ptr<nj::Value> &value,const nj::Type *elementType)
 {
-   switch(elementType->getId())
+   switch(elementType->id())
    {
       case nj::null_type: return createArrayRes<unsigned char,nj::Null_t,getNullValue>(scope,value); break;
       case nj::float64_type: return createArrayRes<double,nj::Float64_t,getNumberFromValue<double>>(scope,value); break;
@@ -240,7 +240,7 @@ int createResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc
    {
       if(value.get())
       {
-         if(value->type()->getId() == nj::julia_handle_type)
+         if(value->type()->id() == nj::julia_handle_type)
          {
             nj::JuliaHandle *handle = static_cast<nj::JuliaHandle*>(value.get());
             int64_t hIndex = handle->intern();

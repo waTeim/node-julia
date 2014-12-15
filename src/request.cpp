@@ -94,7 +94,7 @@ static shared_ptr<nj::Value> createJRefReq(const Local<Object> &obj)
    return handle;
 }
 
-static void examineArray(Local<Array> &a,size_t level,vector<size_t> &dims,nj::Type *&etype,bool &determineDimensions) throw(nj::InvalidException)
+static void examineArray(Local<Array> &a,size_t level,vector<size_t> &dims,nj::Type *&maxType,bool &determineDimensions) throw(nj::InvalidException)
 {
    size_t len = a->Length();
 
@@ -118,16 +118,17 @@ static void examineArray(Local<Array> &a,size_t level,vector<size_t> &dims,nj::T
       {
          Local<Array> sub = Local<Array>::Cast(el);
 
-         examineArray(sub,level + 1,dims,etype,determineDimensions);
+         examineArray(sub,level + 1,dims,maxType,determineDimensions);
       }
       else
       {
-         nj::Type *etypeNarrow = getPrimitiveType(el);
+         nj::Type *etype = getPrimitiveType(el);
 
-         if(!etypeNarrow) throw(nj::InvalidException("unknown array element type"));
-         if(!etype || *etype < *etypeNarrow) etype = etypeNarrow;
-         if((etype->getId() == nj::int64_type || etype->getId() == nj::uint64_type) && etypeNarrow->getId() == nj::float64_type) etype = etypeNarrow;
-         if(etype != etypeNarrow && !(*etype < *etypeNarrow)) etype = nj::Any_t::instance();
+         if(!etype) throw(nj::InvalidException("unknown array element type"));
+         if(!maxType || *maxType < *etype) maxType = etype;
+         if((maxType->id() == nj::int64_type || maxType->id() == nj::uint64_type) && etype->id() == nj::float64_type) maxType = etype;
+         if(maxType->id() == nj::float64_type && (etype->id() == nj::int64_type || etype->id() == nj::uint64_type)) continue;
+         if(maxType != etype && !(*maxType < *etype)) maxType = nj::Any_t::instance();
       }
    }
 }
@@ -251,7 +252,7 @@ static shared_ptr<nj::Value> createArrayReqFromArray(const Local<Value> &from)
 
          if(etype)
          {
-            switch(etype->getId())
+            switch(etype->id())
             {
                case nj::null_type:
                   to.reset(new nj::Array<unsigned char,nj::Null_t>(dims));

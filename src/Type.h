@@ -10,7 +10,7 @@ namespace nj
    {
       protected:
 
-         int id;
+         int _id;
    
       public:
  
@@ -24,10 +24,10 @@ namespace nj
 
          Type(int id)
          {  
-            this->id = id;
+            this->_id = id;
          }
 
-         virtual int getId() const {  return id;  }
+         virtual int id() const {  return _id;  }
 
    };
 
