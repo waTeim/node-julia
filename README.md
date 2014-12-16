@@ -86,13 +86,11 @@ Tests run using npm
 
 # Limitations
 
-* Julia composite types are currently not supported.
-
 * Julia invocations are currently synchronous.
 
 * Linux Julia installations must compile using -Bsymbolic-functions to avoid mismatched
 use of libuv, and is now the default.  However, builds of Julia prior to Dec 1, 2014 may
-still have this problem [see here](http://node-julia.readme.io/v0.2.2/docs/use-of-libuv)
+still have this problem [see here](http://node-julia.readme.io/v0.2.3/docs/use-of-libuv)
 for more information.
 
 * Work on Windows support is in progress.
