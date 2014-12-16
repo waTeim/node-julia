@@ -43,7 +43,11 @@ void JMain::operator()()
    {
       if(install_directory == "") jl_init(0);
       else jl_init_with_image((char*)install_directory.c_str(),(char*)"sys.ji");
+
+      #ifdef JL_SET_STACK_BASE
       JL_SET_STACK_BASE;
+      #endif
+
       done = false;
 
       while(!done)
