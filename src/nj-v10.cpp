@@ -8,6 +8,10 @@
 #include "JuliaHandle.h"
 #include "ScriptEncapsulated-v10.h"
 #include "JRef-v10.h"
+#include "JMain.h"
+#include "Callback.h"
+#include "nj-v10.h"
+#include "dispatch.h"
 
 using namespace std;
 using namespace v8;
@@ -234,7 +238,7 @@ Local<Object> createBufferRes(HandleScope &scope,const shared_ptr<nj::Value> &va
 
 int createResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc,Local<Value> *argv)
 {
-   int index = 0;
+   int index = argc - res->results().size();
 
    for(shared_ptr<nj::Value> value: res->results())
    {
@@ -267,35 +271,48 @@ int createResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc
    return index;
 }
 
-Handle<Value> raiseException(HandleScope &scope,shared_ptr<nj::Result> &res)
+Local<String> genError(HandleScope &scope,const shared_ptr<nj::Result> &res)
 {
-   int exId = res->exId();
+   return String::New(res->exceptionText().c_str());
+}
 
-   switch(exId)
+Handle<Value> raiseException(HandleScope &scope,const shared_ptr<nj::Result> &res)
+{
+   int exceptionId = res->exceptionId();
+
+   switch(exceptionId)
    {
       case nj::Exception::julia_undef_var_error_exception:
       case nj::Exception::julia_method_error_exception:
-         ThrowException(Exception::ReferenceError(String::New(res->exText().c_str())));
+         ThrowException(Exception::ReferenceError(String::New(res->exceptionText().c_str())));
       break;
       default:
-         ThrowException(Exception::Error(String::New(res->exText().c_str())));
+         ThrowException(Exception::Error(String::New(res->exceptionText().c_str())));
       break;
    }
    return scope.Close(Undefined());
 }
 
-Handle<Value> callbackWithResult(HandleScope &scope,Local<Function> &cb,shared_ptr<nj::Result> &res)
+Handle<Value> callbackWithResult(HandleScope &scope,const Local<Function> &cb,const shared_ptr<nj::Result> &res)
 {
    if(res.get())
    {
-      int exId = res->exId();
+      int exceptionId = res->exceptionId();
 
-      if(exId != nj::Exception::no_exception) return raiseException(scope,res);
-      else
+      if(exceptionId != nj::Exception::no_exception)
       {
-         int argc = res->results().size();
+         int argc = 1;
          Local<Value> *argv = new Local<Value>[argc];
 
+         argv[0] = genError(scope,res);
+         return callback(scope,cb,argc,argv);
+      }
+      else
+      {
+         int argc = res->results().size() + 1;
+         Local<Value> *argv = new Local<Value>[argc];
+
+         argv[0] = Local<Value>::New(Null());
          argc = createResponse(scope,res,argc,argv);
          return callback(scope,cb,argc,argv);
       }
@@ -307,9 +324,9 @@ Handle<Value> returnResult(HandleScope &scope,shared_ptr<nj::Result> &res)
 {
    if(res.get())
    {
-      int exId = res->exId();
+      int exceptionId = res->exceptionId();
 
-      if(exId != nj::Exception::no_exception) return raiseException(scope,res);
+      if(exceptionId != nj::Exception::no_exception) return raiseException(scope,res);
       else
       {
          int argc = res->results().size();
@@ -341,29 +358,44 @@ Handle<Value> doEval(const Arguments &args)
    int numArgs = args.Length();
 
    if(numArgs  == 0 || numArgs > 2 || (numArgs == 2 && !args[1]->IsFunction())) return scope.Close(Null());
-   if(!J) J = new JuliaExecEnv();
 
+   JuliaExecEnv *J = JuliaExecEnv::getSingleton();
    Local<String> arg0 = Local<String>::Cast(args[0]);
    Local<Function> cb;
    String::Utf8Value text(arg0);
    JMain *engine;
+   bool useCallback = false;
 
-   if(numArgs == 2) cb = Local<Function>::Cast(args[1]);
+   if(numArgs >= 2 && args[args.Length() - 1]->IsFunction())
+   {
+      useCallback = true;
+      cb = Local<Function>::Cast(args[args.Length() - 1]);
+   }
 
    if(text.length() > 0 && (engine = J->getEngine()))
    {
-      engine->eval(*text);
-      shared_ptr<nj::Result> res = engine->resultQueueGet();
+      if(!useCallback)
+      {
+         engine->eval(*text);
 
-      if(numArgs == 2) return callbackWithResult(scope,cb,res);
-      else return returnResult(scope,res);
+         shared_ptr<nj::Result> res = engine->syncQueueGet();
+
+         return returnResult(scope,res);
+      }
+      else
+      {
+         nj::Callback *c = new nj::Callback(cb);
+
+         engine->eval(*text,c);
+         return scope.Close(Undefined());
+      }
    }
    else
    {
-      if(numArgs == 2)
-      {  
+      if(useCallback)
+      {
          const unsigned argc = 1;
-         Local<Value> argv[argc] = { String::New("") };
+         Local<Value> argv[argc] = { String::New("missing eval string") };
 
          return callback(scope,cb,argc,argv);
       }
@@ -378,8 +410,8 @@ Handle<Value> doExec(const Arguments &args)
    bool useCallback = false;
 
    if(numArgs == 0) return scope.Close(Null());
-   if(!J) J = new JuliaExecEnv();
 
+   JuliaExecEnv *J = JuliaExecEnv::getSingleton();
    Local<String> arg0 = Local<String>::Cast(args[0]);
    String::Utf8Value funcName(arg0);
    Local<Function> cb;
@@ -404,18 +436,29 @@ Handle<Value> doExec(const Arguments &args)
 
          if(reqElement.get()) req.push_back(reqElement);
       }
-      engine->exec(*funcName,req);
-      shared_ptr<nj::Result> res = engine->resultQueueGet();
 
-      if(useCallback) return callbackWithResult(scope,cb,res);
-      else return returnResult(scope,res);
+      if(!useCallback)
+      {
+         engine->exec(*funcName,req);
+
+         shared_ptr<nj::Result> res = engine->syncQueueGet();
+
+         return returnResult(scope,res);
+      }
+      else
+      {
+         nj::Callback *c = new nj::Callback(cb);
+
+         engine->exec(*funcName,req,c);
+         return scope.Close(Undefined());
+      }
    }
    else
    {
       if(useCallback)
       {  
          const unsigned argc = 1;
-         Local<Value> argv[argc] = { String::New("") };
+         Local<Value> argv[argc] = { String::New("could not execut") };
 
          return callback(scope,cb,argc,argv);
       }
@@ -434,10 +477,10 @@ void init(Handle<Object> exports)
 {
    nj::ScriptEncapsulated::Init(exports);
    nj::JRef::Init(exports);
-
    NODE_SET_METHOD(exports,"eval",doEval);
    NODE_SET_METHOD(exports,"exec",doExec);
    NODE_SET_METHOD(exports,"newScript",newScript);
+   nj::dispatch_init();
 }
 
 NODE_MODULE(nj,init)

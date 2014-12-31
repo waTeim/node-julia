@@ -2,69 +2,7 @@ var chai = require('chai'),
     julia = require('..'),
     expect = chai.expect;
 
-function eval(julia,x)
-{
-   var res;
-
-   julia.eval('' + x,function(juliaResult)
-   {
-      res = juliaResult; 
-   });
-
-   return res;
-}
-
-function execIdentity(julia,x)
-{
-   var res;
-
-   julia.exec('identity',x,function(juliaResult)
-   {
-      res = juliaResult; 
-   });
-
-   return res;
-}
-
-function execInclude(julia,filename)
-{
-   var res;
-
-   julia.exec('include',filename,function(juliaResult)
-   {
-      res = juliaResult;
-   });
-
-   return res;
-}
-
-function execA(julia)
-{
-   var args = [];
-   var res;
-
-   for(var i = 1;i < arguments.length;i++) args.push(arguments[i]);
-   args.push(function(juliaResult) { res = juliaResult; });
-
-   julia.exec.apply(null,args);
-
-   return res;
-}
-
-function execB(script)
-{
-   var args = [];
-   var res;
-
-   for(var i = 1;i < arguments.length;i++) args.push(arguments[i]);
-   args.push(function(juliaResult) { res = juliaResult; });
-
-   script.exec.apply(script,args);
-
-   return res;
-}
-
-function verifyIdentity(X,expectedLength)
+function verifyIdentityMatrix(X,expectedLength)
 {
    var len = X.length;
    var passed = X.length == expectedLength;
@@ -101,17 +39,17 @@ describe('Regression Tests',function()
 {
    it('eval Null return',function()
    {
-      expect(eval(julia,"()")).to.equal(null);
+      expect(julia.eval('()')).to.equal(null);
    });
 
    it('eval Boolean return',function()
    {
-      expect(eval(julia,true)).to.equal(true);
+      expect(julia.eval('true')).to.equal(true);
    });
 
    it('eval Integer return',function()
    {
-      expect(eval(julia,0)).to.equal(0);
+      expect(julia.eval('0')).to.equal(0);
    });
 
    it('version',function()
@@ -121,22 +59,22 @@ describe('Regression Tests',function()
 
    it('eval max 32 bit Integer (4294967296)',function()
    {
-      expect(eval(julia,4294967296)).to.equal(4294967296);
+      expect(julia.eval('4294967296')).to.equal(4294967296);
    });
 
    it('eval max JavaScript Integer (9007199254740992)',function()
    {
-      expect(eval(julia,9007199254740992)).to.equal(9007199254740992);
+      expect(julia.eval('9007199254740992')).to.equal(9007199254740992);
    });
 
    it('eval primitive Float return',function()
    {
-      expect(eval(julia,1.0)).to.equal(1.0);
+      expect(julia.eval('1.0')).to.equal(1.0);
    });
 
    it('eval max JavaScript Float (' + Number.MAX_VALUE + ')',function()
    {
-      expect(eval(julia,Number.MAX_VALUE)).to.equal(Number.MAX_VALUE);
+      expect(julia.eval('' + Number.MAX_VALUE)).to.equal(Number.MAX_VALUE);
    });
 
    it('simple result return style for Eval',function()
@@ -149,29 +87,54 @@ describe('Regression Tests',function()
       expect(julia.eval('("x","y")')).to.eql(['x','y']);
    });
 
-   it('exec identity Null',function()
+   it('exec identity Null',function(done)
    {
-      expect(execIdentity(julia,null)).to.equal(null);
+      julia.exec('identity',null,function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal(null);
+         done();
+      });
    });
 
-   it('exec identity Boolean',function()
+   it('exec identity Boolean',function(done)
    {
-      expect(execIdentity(julia,true)).to.equal(true);
+      julia.exec('identity',true,function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal(true);
+         done();
+      });
    });
 
-   it('exec identity Integer',function()
+   it('exec identity Integer',function(done)
    {
-      expect(execIdentity(julia,1)).to.equal(1);
+      julia.exec('identity',1,function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal(1);
+         done();
+      });
    });
 
-   it('exec identity Float',function()
+   it('exec identity Float',function(done)
    {
-      expect(execIdentity(julia,0.1)).to.equal(0.1);
+      julia.exec('identity',0.1,function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal(0.1);
+         done();
+      });
    });
 
-   it('exec identity String',function()
+   it('exec identity String',function(done)
    {
-      expect(execIdentity(julia,'x')).to.equal('x');
+      julia.exec('identity','x',function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal('x');
+         done();
+      });
    });
 
    it('simple result return style for Exec',function()
@@ -181,7 +144,7 @@ describe('Regression Tests',function()
 
    it('implicit conversion from SubString to String',function()
    {
-      expect(eval(julia,'match(r"(a)","a").match')).to.equal("a");
+      expect(julia.eval('match(r"(a)","a").match')).to.equal('a');
    });
 
    it('eval include',function()
@@ -192,29 +155,42 @@ describe('Regression Tests',function()
       expect(julia.eval('Core.include("test/inc1.jl")')).to.equal(true);
    });
 
-   it('exec include',function()
+   it('exec include',function(done)
    {
-      expect(execInclude(julia,'test/inc2.jl')).to.equal(true);
+      julia.exec('include','test/inc2.jl',function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal(true);
+         done();
+      });
    });
 
    it('user defined functions via exec',function()
    {
-      expect(execA(julia,'f',100)).to.equal(execA(julia,'g',100));
+      var res1 = julia.exec('f',100);
+      var res2 = julia.exec('g',100);
+
+      expect(res1).to.equal(res2);
    });
 
    it('macros via eval',function()
    {
-      expect(eval(julia,'@sprintf("x")')).to.equal('x');
+      expect(julia.eval('@sprintf("x")')).to.equal('x');
    });
 
    it('arrays via eval',function()
    {
-      expect(verifyIdentity(eval(julia,'eye(1000)'),1000)).to.equal(true);
+      expect(verifyIdentityMatrix(julia.eval('eye(1000)'),1000)).to.equal(true);
    });
 
-   it('arrays via exec',function()
+   it('arrays via exec',function(done)
    {
-      expect(verifyIdentity(execA(julia,'eye',1000),1000)).to.equal(true);
+      julia.exec('eye',1000,function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(verifyIdentityMatrix(res,1000)).to.equal(true);
+         done();
+      });
    });
 
    it('construction of Script using new',function()
@@ -235,7 +211,7 @@ describe('Regression Tests',function()
    {
       var script = julia.newScript("test/inc3.jl");
 
-      expect(verifyIdentity(execB(script,10),10)).to.equal(true);
+      expect(verifyIdentityMatrix(script.exec(10),10)).to.equal(true);
    });
 
    it('script exec using return style',function()
@@ -245,89 +221,169 @@ describe('Regression Tests',function()
       expect(script.exec(5,6)).to.eql(julia.exec('eye',5,6));
    });
 
-   it('loading array type tests',function()
+   it('loading array type tests',function(done)
    {
-      expect(execInclude(julia,'test/inc4.jl')).to.equal(true);
+      julia.exec('include','test/inc4.jl',function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal(true);
+         done();
+      });
    });
 
-   it('Typecheck Null array elements',function()
+   it('typecheck Null array elements',function(done)
    {
-      expect(execA(julia,'typecheckArray',[null])).to.equal('void');
+      julia.exec('typecheckArray',[null],function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal('void');
+         done();
+      });
    });
 
-   it('Typecheck Boolean array elements',function()
+   it('typecheck Boolean array elements',function(done)
    {
-      expect(execA(julia,'typecheckArray',[true,false,true])).to.equal('boolean');
+      julia.exec('typecheckArray',[true,false,true],function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal('boolean');
+         done();
+      });
    });
 
-   it('Typecheck Integer array elements',function()
+   it('typecheck Integer array elements',function(done)
    {
-      expect(execA(julia,'typecheckArray',[1.0])).to.equal('int');
+      julia.exec('typecheckArray',[1.0],function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal('int');
+         done();
+      });
    });
 
-   it('Typecheck Float array elements',function()
+   it('typecheck Float array elements',function(done)
    {
-      expect(execA(julia,'typecheckArray',[1.1])).to.equal('float');
+      julia.exec('typecheckArray',[1.1],function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal('float');
+         done();
+      });
    });
 
-   it('Typecheck String array elements',function()
+   it('typecheck String array elements',function(done)
    {
-      expect(execA(julia,'typecheckArray',[""])).to.equal('string');
+      julia.exec('typecheckArray',[""],function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal('string');
+         done();
+      });
    });
 
-   it('Typecheck [Boolean,Integer] -> [Integer]',function()
+   it('typecheck [Boolean,Integer] -> [Integer]',function(done)
    {
-      expect(execA(julia,'typecheckArray',[true,1])).to.equal('int');
+      julia.exec('typecheckArray',[true,1],function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal('int');
+         done();
+      });
    });
 
-   it('Typecheck [Boolean,Float] -> [Float]',function()
+   it('typecheck [Boolean,Float] -> [Float]',function(done)
    {
-      expect(execA(julia,'typecheckArray',[true,1.1])).to.equal('float');
+      julia.exec('typecheckArray',[true,1.1],function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal('float');
+         done();
+      });
    });
 
-   it('Typecheck [Boolean,String] -> [String]',function()
+   it('typecheck [Boolean,String] -> [String]',function(done)
    {
-      expect(execA(julia,'typecheckArray',[""])).to.equal('string');
+      julia.exec('typecheckArray',[true,""],function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal('string');
+         done();
+      });
    });
 
-   it('Typecheck [Integer,Float] -> [Float]',function()
+   it('typecheck [Integer,Float] -> [Float]',function(done)
    {
-      expect(execA(julia,'typecheckArray',[1,1.1])).to.equal('float');
+      julia.exec('typecheckArray',[1,1.1],function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal('float');
+         done();
+      });
    });
 
-   it('Typecheck [Float,Integer] -> [Float]',function()
+   it('typecheck [Float,Integer] -> [Float]',function(done)
    {
-      expect(execA(julia,'typecheckArray',[1.1,1])).to.equal('float');
+      julia.exec('typecheckArray',[1.1,1],function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal('float');
+         done();
+      });
    });
 
-   it('Prevent widening String elements',function()
+   it('Prevent widening String elements',function(done)
    {
-      expect(execA(julia,'typecheckArray',[true,"x",1,1.1])).to.equal('none');
+      julia.exec('typecheckArray',[true,"x",1,1.1],function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal('none');
+         done();
+      });
    });
 
-   it('Prevent widening Null elements',function()
+   it('Prevent widening Null elements',function(done)
    {
-      expect(execA(julia,'typecheckArray',[true,null,1,1.1])).to.equal('none');
+      julia.exec('typecheckArray',[true,null,1,1.1],function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal('none');
+         done();
+      });
    });
 
-   it('Simple Integer array input',function()
+   it('Simple Integer array input',function(done)
    {
-      expect(execA(julia,'sum',[1,2,3])).to.equal(6);
+      julia.exec('sum',[1,2,3],function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal(6);
+         done();
+      });
    });
 
-   it('Simple Float array input',function()
+   it('Simple Float array input',function(done)
    {
-      expect(execA(julia,'sum',[1.5,2.6,3.7])).to.equal(7.8);
+      julia.exec('sum',[1.5,2.6,3.7],function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal(7.8);
+         done();
+      });
    });
 
-   it('Simple String array input',function()
+   it('Simple String array input',function(done)
    {
-      expect(execA(julia,'concat',['a','b','c'])).to.equal('abc');
+      julia.exec('concat',['a','b','c'],function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal('abc');
+         done();
+      });
    });
 
    it('Array of null',function()
    {
-      expect(eval(julia,'Array(Void,2,2)')).to.eql([[null,null],[null,null]]);
+      expect(julia.eval('Array(Void,2,2)')).to.eql([[null,null],[null,null]]);
    });
 
    it('Array of elementwise conversion from SubString to String',function()

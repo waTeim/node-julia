@@ -1,8 +1,10 @@
 #include <iostream>
 #include <node.h>
 #include "ScriptEncapsulated-v10.h"
+#include "JMain.h"
 #include "JuliaExecEnv.h"
 #include "request.h"
+#include "Callback.h"
 #include "nj-v10.h"
 
 using namespace std;
@@ -12,7 +14,8 @@ Persistent<Function> nj::ScriptEncapsulated::constructor;
 
 nj::ScriptEncapsulated::ScriptEncapsulated(string path):path(path)
 {
-   if(!J) J = new JuliaExecEnv();
+   JuliaExecEnv *J = JuliaExecEnv::getSingleton();
+
    if(J)
    {
       JMain *engine = J->getEngine();
@@ -20,11 +23,11 @@ nj::ScriptEncapsulated::ScriptEncapsulated(string path):path(path)
       if(engine)
       {
          engine->compileScript(path);
-         compile_res = engine->resultQueueGet();
+         compile_res = engine->syncQueueGet();
 
-         int exId = compile_res->exId();
+         int exceptionId = compile_res->exceptionId();
 
-         if(exId == nj::Exception::no_exception)
+         if(exceptionId == nj::Exception::no_exception)
          {
             Primitive &moduleName_r = static_cast<Primitive&>(*compile_res->results()[0]);
 
@@ -57,9 +60,9 @@ Handle<Value> nj::ScriptEncapsulated::New(const Arguments& args)
       if(unwrapped->compile_res.get())
       {
          shared_ptr<nj::Result> cruw = unwrapped->compile_res;
-         int exId = cruw->exId();
+         int exceptionId = cruw->exceptionId();
 
-         if(exId != nj::Exception::no_exception) return raiseException(scope,cruw);
+         if(exceptionId != nj::Exception::no_exception) return raiseException(scope,cruw);
          else
          {  
             unwrapped->Wrap(args.This());
@@ -98,7 +101,7 @@ Handle<Value> nj::ScriptEncapsulated::exec(const Arguments &args)
 {
    HandleScope scope;
    ScriptEncapsulated *obj = ObjectWrap::Unwrap<ScriptEncapsulated>(args.This());
-   JMain *engine = J->getEngine();
+   JMain *engine = JuliaExecEnv::getSingleton()->getEngine();
 
    if(engine)
    {
@@ -121,11 +124,21 @@ Handle<Value> nj::ScriptEncapsulated::exec(const Arguments &args)
 
          if(reqElement.get()) req.push_back(reqElement);
       }
-      engine->exec(obj->compile_res->results()[1],funcName,req);
-      shared_ptr<nj::Result> res = engine->resultQueueGet();
 
-      if(useCallback) return callbackWithResult(scope,cb,res);
-      else return returnResult(scope,res);
+      if(!useCallback)
+      {
+         engine->exec(obj->compile_res->results()[1],funcName,req);
+
+         shared_ptr<nj::Result> res = engine->syncQueueGet();
+
+         return returnResult(scope,res);
+      }
+      else
+      {
+         nj::Callback *c = new nj::Callback(cb);
+
+         engine->exec(obj->compile_res->results()[1],funcName,req,c);
+      }
    }
    return scope.Close(Undefined());
 }

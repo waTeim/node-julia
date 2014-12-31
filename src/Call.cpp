@@ -8,7 +8,7 @@
 
 using namespace std;
 
-nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args)
+nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
 {
    vector<shared_ptr<nj::Value>> res;
    string funcName;
@@ -16,7 +16,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args)
    int numArgs;
    int argOffset;
 
-   if(args.size() == 0) return res;
+   if(args.size() == 0) return Result(res,exprId);
 
    switch(args[0]->type()->id())
    {
@@ -32,7 +32,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args)
       break;
       case julia_handle_type:
       {
-         if(args.size() < 2 || !args[1]->isPrimitive()) return res;
+         if(args.size() < 2 || !args[1]->isPrimitive()) return Result(res,exprId);
 
          JuliaHandle &mod_h = static_cast<JuliaHandle&>(*args[0]);
          Primitive &funcName_r = static_cast<Primitive&>(*args[1]);
@@ -43,7 +43,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args)
          argOffset = 2;
       }
       break;
-      default: return res;
+      default: return Result(res,exprId);
    }
 
    jl_value_t *jl_res = 0;
@@ -61,7 +61,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args)
    {
       shared_ptr<Exception> ex = shared_ptr<Exception>(new JuliaMethodError(string("Julia method ") + funcName + " is undefined"));
   
-      return Result(ex);
+      return Result(ex,exprId);
    }
 
    bool rvalue_error = false;
@@ -119,12 +119,12 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args)
       {
          shared_ptr<Exception> ex = shared_ptr<Exception>(new InvalidException("can not convert RHS to a Julia value"));
 
-         return Result(ex);
+         return Result(ex,exprId);
       }
    }
    catch(JuliaException e)
    {
-      return Result(e.err);
+      return Result(e.err,exprId);
    }
 
    jl_value_t *jl_ex = jl_exception_occurred();
@@ -136,7 +136,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args)
      shared_ptr<Exception> ex = genJuliaError(jl_ex);
 
      JL_GC_POP();
-     return Result(ex);
+     return Result(ex,exprId);
    }
    else
    {
@@ -145,12 +145,12 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args)
          JL_GC_PUSH1(&jl_res);
          res = lvalue(jl_res);
          JL_GC_POP();
-         return Result(res);
+         return Result(res,exprId);
       }
       catch(JuliaException e)
       {
         JL_GC_POP();
-        return Result(e.err);
+        return Result(e.err,exprId);
       }
    }
 }

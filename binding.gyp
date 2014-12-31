@@ -29,12 +29,14 @@
       [ 
         "src/Call.cpp",
         "src/Exception.cpp",
+        "src/Expr.cpp",
         "src/Immediate.cpp",
         "src/JMain.cpp",
         "src/JuliaExecEnv.cpp",
         "src/JuliaHandle.cpp",
         "src/Kernel.cpp",
         "src/Script.cpp",
+        "src/Trampoline.cpp",
         "src/Type.cpp",
         "src/Types.cpp",
         "src/Value.cpp",
@@ -83,19 +85,15 @@
               "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
               "OTHER_CPLUSPLUSFLAGS":
               [
-                 #"-DOS=<(OS)",
                  "-std=c++11",
                  "-stdlib=libc++",
-                 #'-DNJ_LIB="<(njLib)"',
-                 #'-DJULIA_LIB="<(juliaLib)"',
-                 #"-I<(juliaInclude)"
               ],
               "OTHER_LDFLAGS":
               [
                 "-stdlib=libc++",
                 "-L<(juliaLib)",
                 "-Wl,-rpath,<(juliaLib)",
-                "-ljulia"
+                "-Wl,-flat_namespace"
               ]
             }
           }
@@ -118,8 +116,10 @@
           {
             "sources":
             [ 
+              "src/Callback-v10.cpp",
               "src/JRef-v10.cpp",
               "src/ScriptEncapsulated-v10.cpp",
+              "src/dispatch-v10.cpp",
               "src/nj-v10.cpp"
             ]
           }
@@ -128,8 +128,10 @@
           {
             "sources":
             [ 
+              "src/Callback-v11.cpp",
               "src/JRef-v11.cpp",
               "src/ScriptEncapsulated-v11.cpp",
+              "src/dispatch-v11.cpp",
               "src/nj-v11.cpp"
             ]
           }

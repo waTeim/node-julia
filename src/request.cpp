@@ -6,6 +6,8 @@
 #include "NativeArray.h"
 #include "JuliaHandle.h"
 #include "request.h"
+#include "JMain.h"
+#include "Trampoline.h"
 
 #if NODE_MINOR_VERSION == 10
 #include "JRef-v10.h"

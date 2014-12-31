@@ -1,8 +1,10 @@
 #include <iostream>
 #include <node.h>
 #include "ScriptEncapsulated-v11.h"
+#include "JMain.h"
 #include "JuliaExecEnv.h"
 #include "request.h"
+#include "Callback.h"
 #include "nj-v11.h"
 
 using namespace std;
@@ -12,7 +14,8 @@ Persistent<Function> nj::ScriptEncapsulated::constructor;
 
 nj::ScriptEncapsulated::ScriptEncapsulated(string path):path(path)
 {
-   if(!J) J = new JuliaExecEnv();
+   JuliaExecEnv *J = JuliaExecEnv::getSingleton();
+
    if(J)
    {
       JMain *engine = J->getEngine();
@@ -20,11 +23,11 @@ nj::ScriptEncapsulated::ScriptEncapsulated(string path):path(path)
       if(engine)
       {
          engine->compileScript(path);
-         compile_res = engine->resultQueueGet();
+         compile_res = engine->syncQueueGet();
 
-         int exId = compile_res->exId();
+         int exceptionId = compile_res->exceptionId();
 
-         if(exId == nj::Exception::no_exception)
+         if(exceptionId == nj::Exception::no_exception)
          {
             Primitive &moduleName_r = static_cast<Primitive&>(*compile_res->results()[0]);
 
@@ -58,9 +61,9 @@ void nj::ScriptEncapsulated::New(const FunctionCallbackInfo<v8::Value>& args)
       if(unwrapped->compile_res.get())
       {
          shared_ptr<nj::Result> cruw = unwrapped->compile_res;
-         int exId = cruw->exId();
+         int exceptionId = cruw->exceptionId();
 
-         if(exId != nj::Exception::no_exception) raiseException(args,scope,cruw);
+         if(exceptionId != nj::Exception::no_exception) raiseException(args,scope,cruw);
          else
          {  
             unwrapped->Wrap(args.This());
@@ -103,7 +106,7 @@ void nj::ScriptEncapsulated::exec(const FunctionCallbackInfo<v8::Value> &args)
    Isolate *I = Isolate::GetCurrent();
    HandleScope scope(I);
    ScriptEncapsulated *obj = ObjectWrap::Unwrap<ScriptEncapsulated>(args.Holder());
-   JMain *engine = J->getEngine();
+   JMain *engine = JuliaExecEnv::getSingleton()->getEngine();
 
    if(engine)
    {
@@ -126,11 +129,21 @@ void nj::ScriptEncapsulated::exec(const FunctionCallbackInfo<v8::Value> &args)
 
          if(reqElement.get()) req.push_back(reqElement);
       }
-      engine->exec(obj->compile_res->results()[1],funcName,req);
-      shared_ptr<nj::Result> res = engine->resultQueueGet();
 
-      if(useCallback) callbackWithResult(args,scope,cb,res);
-      else returnResult(args,scope,res);
+      if(!useCallback)
+      {
+         engine->exec(obj->compile_res->results()[1],funcName,req);
+
+         shared_ptr<nj::Result> res = engine->syncQueueGet();
+
+         returnResult(args,scope,res);
+      }
+      else
+      {
+         nj::Callback *c = new nj::Callback(cb);
+
+         engine->exec(obj->compile_res->results()[1],funcName,req,c);
+      }
    }
    else args.GetReturnValue().SetUndefined();
 }

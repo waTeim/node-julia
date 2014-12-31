@@ -3,22 +3,29 @@
 
 #include <string>
 #include <thread>
-#include "JMain.h"
+
+class Trampoline;
+class JMain;
 
 class JuliaExecEnv
 {
    protected:
   
-      std::thread *j_main_thread;
-      JMain *engine;
+      static JuliaExecEnv *singleton;
 
+      std::thread *j_main_thread;
+      std::thread *trampoline_thread;
+      JMain *engine;
+      Trampoline *trampoline;
+
+      JuliaExecEnv();
+  
    public:
 
-      JuliaExecEnv(const std::string &installDir = "");
-  
-      JMain *getEngine() {  return engine;  }
-};
+      static JuliaExecEnv *getSingleton();
 
-extern JuliaExecEnv *J;
+      JMain *getEngine() { return engine; }
+      Trampoline *getTrampoline() { return trampoline; }
+};
 
 #endif

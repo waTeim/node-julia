@@ -9,7 +9,7 @@ namespace nj
    {
       public:
 
-         virtual Result eval(std::vector<std::shared_ptr<Value>> &args);
+         virtual Result eval(std::vector<std::shared_ptr<Value>> &args,int64_t exprId);
    };
 };
 
