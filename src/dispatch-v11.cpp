@@ -35,4 +35,5 @@ void nj::dispatch_init()
 {
   dchan.data = 0;
   uv_async_init(uv_default_loop(),&dchan,doDispatch);
+  uv_unref((uv_handle_t*)&dchan);
 }
