@@ -35,6 +35,7 @@ before_install:
       export PATH=$PATH:~/julia/bin;
     fi
   - node --version
+  - julia -e 'versioninfo()'
 script:
   - npm install
   - npm test
