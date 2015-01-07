@@ -226,7 +226,7 @@ template <typename V,typename E,V (&accessor)(const Local<Value>&)> static void 
       vector<size_t> strides;
 
       strides.push_back(1);
-      for(size_t idxNum = 1;idxNum < a.dims().size();idxNum++) strides.push_back(a.dims()[idxNum]*strides[idxNum - 1]);
+      for(size_t idxNum = 1;idxNum < a.dims().size();idxNum++) strides.push_back(a.dims()[idxNum - 1]*strides[idxNum - 1]);
       fillSubArray<V,accessor>(a.dims(),strides,0,0,a.ptr(),from);
    }
 }

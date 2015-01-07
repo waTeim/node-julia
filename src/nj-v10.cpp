@@ -9,12 +9,22 @@
 #include "ScriptEncapsulated-v10.h"
 #include "JRef-v10.h"
 #include "JMain.h"
+#include "NativeArray.h"
 #include "Callback.h"
 #include "nj-v10.h"
 #include "dispatch.h"
 
 using namespace std;
 using namespace v8;
+
+const char Float64Array[] = "Float64Array";
+const char Float32Array[] = "Float32Array";
+const char Int32Array[] = "Int32Array";
+const char Int16Array[] = "Int16Array";
+const char Int8Array[] = "Int8Array";
+const char Uint32Array[] = "Uint32Array";
+const char Uint16Array[] = "Uint16Array";
+const char Uint8Array[] = "Uint8Array";
 
 Handle<Value> callback(HandleScope &scope,const Local<Function> &cb,int argc,Local<Value> *argv)
 {
@@ -124,7 +134,6 @@ Local<Value> getNullValue(const unsigned char &val)
    return Local<Value>::New(Null());
 }
 
-
 template<typename V,Local<Value> getElement(const V &val)> static void connectSubArrays(const vector<size_t> &dims,const vector<size_t> &strides,size_t ixNum,size_t offset,const Local<Array> &to,V *from)
 {
    size_t numElements = dims[ixNum];
@@ -188,28 +197,107 @@ template<typename V,typename E,Local<Value> getElement(const V &val)> Local<Arra
       Local<Array> dest = Array::New(size0);
 
       strides.push_back(1);
-      for(size_t idxNum = 1;idxNum < array.dims().size();idxNum++) strides.push_back(array.dims()[idxNum]*strides[idxNum - 1]);
+      for(size_t idxNum = 1;idxNum < array.dims().size();idxNum++) strides.push_back(array.dims()[idxNum - 1]*strides[idxNum - 1]);
       connectSubArrays<V,getElement>(array.dims(),strides,0,0,dest,array.ptr());
       return dest;
    }
    return Array::New(0);
 }
 
-Local<Array> createArrayRes(HandleScope &scope,const shared_ptr<nj::Value> &value,const nj::Type *elementType)
+template<typename V,char const *N,typename Nv> static void connectSubArrays(const vector<size_t> &dims,const vector<size_t> &strides,size_t ixNum,size_t offset,const Local<Value> &to,V *from)
+{
+   size_t numElements = dims[ixNum];
+   size_t stride = strides[ixNum];
+
+   if(ixNum == dims.size() - 1)
+   {
+      nj::NativeArray<Nv> arr(Local<Object>::Cast(to));
+      Nv *dptr = arr.dptr();
+
+      for(size_t elementNum = 0;elementNum < numElements;elementNum++)
+      {
+         *dptr++ = from[offset];
+         offset += stride;
+      }
+   }
+   else
+   {
+      Local<Array> arr = Local<Array>::Cast(to);
+
+      for(size_t elementNum = 0;elementNum < numElements;elementNum++)
+      {
+         Local<Value> subArray;
+
+         if(ixNum == dims.size() - 2)
+         {
+            Local<String> constructorName = String::New(N);
+            Handle<Value> constructor_val = Context::GetCurrent()->Global()->Get(constructorName);
+            Handle<Function> constructor = Handle<Function>::Cast(constructor_val);
+            const unsigned argc = 1;
+            Local<Value> argv[argc] = { Uint32::New(dims[ixNum + 1]) };
+
+            subArray = constructor->NewInstance(argc,argv);
+         }
+         else subArray = Array::New(dims[ixNum + 1]);
+
+         arr->Set(elementNum,subArray);
+         connectSubArrays<V,N,Nv>(dims,strides,ixNum + 1,offset,subArray,from);
+         offset += stride;
+      }
+   }
+}
+
+template<typename V,typename E,char const *N,typename Nv> Local<Value> createArrayRes(HandleScope &scope,const shared_ptr<nj::Value> &value)
+{
+   const nj::Array<V,E> &array = static_cast<const nj::Array<V,E>&>(*value);
+
+   if(array.size() == 0) return Local<Array>();
+   if(array.dims().size() == 1)
+   {
+      size_t size0 = array.dims()[0];
+      Local<String> constructorName = String::New(N);
+      Handle<Value> constructor_val = Context::GetCurrent()->Global()->Get(constructorName);
+      Handle<Function> constructor = Handle<Function>::Cast(constructor_val);
+      const unsigned argc = 1;
+      Local<Value> argv[argc] = { Uint32::New(size0) };
+      Local<Object> dest = constructor->NewInstance(argc,argv);
+      nj::NativeArray<Nv> arr(dest);
+      V *p = array.ptr();
+      Nv *dptr = arr.dptr();
+
+      for(size_t i = 0;i < size0;i++) *dptr++ = *p++;
+      return dest;
+   }
+   else
+   {
+      vector<size_t> strides;
+      size_t size0 = array.dims()[0];
+      Local<Array> dest = Array::New(size0);
+
+      strides.push_back(1);
+      for(size_t idxNum = 1;idxNum < array.dims().size();idxNum++) strides.push_back(array.dims()[idxNum - 1]*strides[idxNum - 1]);
+      connectSubArrays<V,N,Nv>(array.dims(),strides,0,0,dest,array.ptr());
+
+      return dest;
+   }
+   return Array::New(0);
+}
+
+Local<Value> createArrayRes(HandleScope &scope,const shared_ptr<nj::Value> &value,const nj::Type *elementType)
 {
    switch(elementType->id())
    {
       case nj::null_type: return createArrayRes<unsigned char,nj::Null_t,getNullValue>(scope,value); break;
-      case nj::float64_type: return createArrayRes<double,nj::Float64_t,getNumberFromValue<double>>(scope,value); break;
-      case nj::float32_type: return createArrayRes<float,nj::Float32_t,getNumberFromValue<float>>(scope,value); break;
-      case nj::int64_type: return createArrayRes<int64_t,nj::Int64_t,getNumberFromValue<int64_t>>(scope,value); break;
-      case nj::int32_type: return createArrayRes<int,nj::Int32_t,getNumberFromValue<int>>(scope,value); break;
-      case nj::int16_type: return createArrayRes<short,nj::Int16_t,getNumberFromValue<short>>(scope,value); break;
-      case nj::int8_type: return createArrayRes<char,nj::Int8_t,getNumberFromValue<char>>(scope,value); break;
-      case nj::uint64_type: return createArrayRes<uint64_t,nj::UInt64_t,getNumberFromValue<uint64_t>>(scope,value); break;
-      case nj::uint32_type: return createArrayRes<unsigned,nj::UInt32_t,getNumberFromValue<unsigned>>(scope,value); break;
-      case nj::uint16_type: return createArrayRes<unsigned short,nj::UInt16_t,getNumberFromValue<unsigned short>>(scope,value); break;
-      case nj::uint8_type: return createArrayRes<unsigned char,nj::UInt8_t,getNumberFromValue<unsigned char>>(scope,value); break;
+      case nj::float64_type: return createArrayRes<double,nj::Float64_t,Float64Array,double>(scope,value); break;
+      case nj::float32_type: return createArrayRes<float,nj::Float32_t,Float32Array,float>(scope,value); break;
+      case nj::int64_type: return createArrayRes<int64_t,nj::Int64_t,Float64Array,double>(scope,value); break;
+      case nj::int32_type: return createArrayRes<int,nj::Int32_t,Int32Array,int>(scope,value); break;
+      case nj::int16_type: return createArrayRes<short,nj::Int16_t,Int16Array,short>(scope,value); break;
+      case nj::int8_type: return createArrayRes<char,nj::Int8_t,Int8Array,char>(scope,value); break;
+      case nj::uint64_type: return createArrayRes<uint64_t,nj::UInt64_t,Float64Array,double>(scope,value); break;
+      case nj::uint32_type: return createArrayRes<unsigned,nj::UInt32_t,Uint32Array,unsigned>(scope,value); break;
+      case nj::uint16_type: return createArrayRes<unsigned short,nj::UInt16_t,Uint16Array,unsigned short>(scope,value); break;
+      case nj::uint8_type: return createArrayRes<unsigned char,nj::UInt8_t,Uint8Array,unsigned char>(scope,value); break;
       case nj::ascii_string_type: return createArrayRes<string,nj::ASCIIString_t,getStringFromValue>(scope,value); break;
       case nj::utf8_string_type: return createArrayRes<string,nj::UTF8String_t,getStringFromValue>(scope,value); break;
       case nj::date_type: return createArrayRes<double,nj::Date_t,getDateFromValue>(scope,value); break;

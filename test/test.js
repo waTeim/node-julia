@@ -218,7 +218,7 @@ describe('Regression Tests',function()
    {
       var script = julia.newScript("test/inc3.jl");
 
-      expect(script.exec(5,6)).to.eql(julia.exec('eye',5,6));
+      expect(script.exec(5,3)).to.eql(julia.exec('eye',5,3));
    });
 
    it('loading array type tests',function(done)
@@ -331,7 +331,7 @@ describe('Regression Tests',function()
       });
    });
 
-   it('Prevent widening String elements',function(done)
+   it('prevent widening String elements',function(done)
    {
       julia.exec('typecheckArray',[true,"x",1,1.1],function(err,res)
       {
@@ -341,7 +341,7 @@ describe('Regression Tests',function()
       });
    });
 
-   it('Prevent widening Null elements',function(done)
+   it('prevent widening Null elements',function(done)
    {
       julia.exec('typecheckArray',[true,null,1,1.1],function(err,res)
       {
@@ -351,7 +351,7 @@ describe('Regression Tests',function()
       });
    });
 
-   it('Simple Integer array input',function(done)
+   it('simple Integer array input',function(done)
    {
       julia.exec('sum',[1,2,3],function(err,res)
       {
@@ -361,7 +361,7 @@ describe('Regression Tests',function()
       });
    });
 
-   it('Simple Float array input',function(done)
+   it('simple Float array input',function(done)
    {
       julia.exec('sum',[1.5,2.6,3.7],function(err,res)
       {
@@ -371,7 +371,7 @@ describe('Regression Tests',function()
       });
    });
 
-   it('Simple String array input',function(done)
+   it('simple String array input',function(done)
    {
       julia.exec('concat',['a','b','c'],function(err,res)
       {
@@ -381,17 +381,17 @@ describe('Regression Tests',function()
       });
    });
 
-   it('Array of null',function()
+   it('array of null',function()
    {
       expect(julia.eval('Array(Void,2,2)')).to.eql([[null,null],[null,null]]);
    });
 
-   it('Array of elementwise conversion from SubString to String',function()
+   it('array of elementwise conversion from SubString to String',function()
    {
       expect(julia.exec('split','a b c',' ')).to.eql(['a','b','c']);
    });
 
-   it('Native Int8Array to Array{Int8,1}',function()
+   it('native Int8Array to Array{Int8,1}',function()
    {
       var a = new Int8Array(256);
 
@@ -400,7 +400,7 @@ describe('Regression Tests',function()
       expect(julia.exec('sum',a)).to.equal(-128);
    });
 
-   it('Native Uint8Array to Array{Uint8,1}',function()
+   it('native Uint8Array to Array{Uint8,1}',function()
    {
       var a = new Uint8Array(256);
 
@@ -409,7 +409,7 @@ describe('Regression Tests',function()
       expect(julia.exec('sum',a)).to.equal(32640);
    });
 
-   it('Native Int16Array to Array{Int16,1}',function()
+   it('native Int16Array to Array{Int16,1}',function()
    {
       var a = new Int16Array(65536);
 
@@ -418,7 +418,7 @@ describe('Regression Tests',function()
       expect(julia.exec('sum',a)).to.equal(-32768);
    });
 
-   it('Native Uint16Array to Array{Uint16,1}',function()
+   it('native Uint16Array to Array{Uint16,1}',function()
    {
       var a = new Uint16Array(65536);
 
@@ -427,7 +427,7 @@ describe('Regression Tests',function()
       expect(julia.exec('sum',a)).to.equal(2147450880);
    });
 
-   it('Native Int32Array to Array{Int32,1}',function()
+   it('native Int32Array to Array{Int32,1}',function()
    {
       var a = new Int32Array(100000);
 
@@ -440,7 +440,7 @@ describe('Regression Tests',function()
       expect(julia.exec('sum',a)).to.equal(-100000);
    });
 
-   it('Native Uint32Array to Array{Uint32,1}',function()
+   it('native Uint32Array to Array{Uint32,1}',function()
    {
       var a = new Uint32Array(100000);
 
@@ -449,7 +449,7 @@ describe('Regression Tests',function()
       expect(julia.exec('sum',a)).to.equal(429491729550000);
    });
 
-   it('Native Float32Array to Array{Float32,1}',function()
+   it('native Float32Array to Array{Float32,1}',function()
    {
       var a = new Float32Array(10000);
 
@@ -458,7 +458,7 @@ describe('Regression Tests',function()
       expect(Math.abs(julia.exec('sum',a) - 1.2345678E6)).to.be.below(50);
    });
 
-   it('Native Float64Array to Array{Float64,1}',function()
+   it('native Float64Array to Array{Float64,1}',function()
    {
       var a = new Float64Array(10000);
 
@@ -467,7 +467,7 @@ describe('Regression Tests',function()
       expect(Math.abs(julia.exec('sum',a) - 1.2345678E43)).to.be.below(1E30);
    });
 
-   it('Buffer to Array{Uint8,1} and back as Buffer',function()
+   it('buffer to Array{Uint8,1} and back as Buffer',function()
    {
       var b = new Buffer(400000);
 
@@ -475,31 +475,50 @@ describe('Regression Tests',function()
       expect(julia.exec('identity',b)).to.eql(b);
    });
 
-   it('Buffer to Array{Uint8,1} and back as reshaped Array',function()
+   it('buffer to Array{Uint8,1} and back as reshaped Array',function()
    {
       var b = new Buffer(6);
+      var a1 = new Uint8Array([0,2,4]);
+      var a2 = new Uint8Array([1,3,5]);
 
       for(var i = 0;i < b.length;i++) b[i] = i;
-      expect(julia.exec('reshape',b,2,3)).to.eql([[0,2,4],[1,3,5]]);
-   });
 
-   it('Multidimensional Array',function()
+      var res = julia.exec('reshape',b,2,3);
+
+      expect(res).to.eql([a1,a2]);
+   });
+   
+   it('multidimensional Array',function()
    {
-      var a = [ [ [1,2], [3,4] ], [ [5,6], [7,8] ] ]
+      var a = [ [[1,2],[3,4]], [[5,6],[7,8]], [[9,10],[11,12]] ];
+      var a1 = new Float64Array([1,2]);
+      var a2 = new Float64Array([3,4]);
+      var a3 = new Float64Array([5,6]);
+      var a4 = new Float64Array([7,8]);
+      var a5 = new Float64Array([9,10]);
+      var a6 = new Float64Array([11,12]);
 
-      expect(julia.exec('identity',a)).to.eql(a);
+      expect(julia.exec('identity',a)).to.eql([[a1,a2],[a3,a4],[a5,a6]]);
    });
 
-   it('Buffer to Multidimensional Array',function()
+   it('buffer to Multidimensional Array',function()
    {
       var b = new Buffer(16);
+      var a1 = new Uint8Array([0,8]);
+      var a2 = new Uint8Array([4,12]);
+      var a3 = new Uint8Array([2,10]);
+      var a4 = new Uint8Array([6,14]);
+      var a5 = new Uint8Array([1,9]);
+      var a6 = new Uint8Array([5,13]);
+      var a7 = new Uint8Array([3,11]);
+      var a8 = new Uint8Array([7,15]);
 
       for(var i = 0;i < b.length;i++) b[i] = i;
 
-      expect(julia.exec('reshape',b,2,2,2,2)).to.eql([ [[[0, 8], [4, 12]], [[2, 10], [6, 14]]],[[[1, 9], [5, 13]], [[3, 11], [7, 15]]]]);
+      expect(julia.exec('reshape',b,2,2,2,2)).to.eql([[[a1,a2],[a3,a4]],[[a5,a6],[a7,a8]]]);
    });
 
-   it('Simplistic Regex',function()
+   it('simplistic Regex',function()
    {
       var re = /a/;
 
@@ -511,7 +530,7 @@ describe('Regression Tests',function()
     * Kind of a workaround here
     *
     */
-   it('Date (Julia version 0.4+ only)',function()
+   it('date (Julia version 0.4+ only)',function()
    {
       var now = new Date();
       var version = julia.eval('VERSION.minor');
@@ -519,7 +538,7 @@ describe('Regression Tests',function()
       if(version == 4) expect(julia.exec('identity',now)).to.eql(now);
    });
 
-   it('Array of Date (Julia version 0.4+ only)',function()
+   it('array of Date (Julia version 0.4+ only)',function()
    {
       var now = new Date();
       var nowMinus20 = new Date(now - 20);
@@ -529,7 +548,7 @@ describe('Regression Tests',function()
       if(version == 4) expect(julia.exec('identity',a)).to.eql([now,nowMinus20]);
    });
 
-   it('Array of Regex',function()
+   it('array of Regex',function()
    {
       var reArray = [ /a/, /b/, /c/ ];
 
@@ -542,13 +561,13 @@ describe('Regression Tests',function()
       
       var juliaObj = julia.eval('T1(5,[3,4,5,6,7,8])');
 
-      expect(julia.exec('t1Mult',juliaObj)).to.eql([15,20,25,30,35,40]);
+      expect(julia.exec('t1Mult',juliaObj)).to.eql(new Float64Array([15,20,25,30,35,40]));
    });
 
    it('JRef from exec',function()
    {
       var juliaObj = julia.exec('t1Cons',5,[1,2,3]);
 
-      expect(julia.exec('t1Mult',juliaObj)).to.eql([5,10,15]);
+      expect(julia.exec('t1Mult',juliaObj)).to.eql(new Float64Array([5,10,15]));
    });
 });

@@ -55,7 +55,7 @@ namespace nj
 
 #endif
 
-         const V *dptr() const { return _dptr; }
+         V *dptr() const { return _dptr; }
          unsigned int len() { return _len; }
    };
 };
