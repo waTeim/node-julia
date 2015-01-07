@@ -17,14 +17,14 @@
 using namespace std;
 using namespace v8;
 
-const char Float64Array[] = "Float64Array";
-const char Float32Array[] = "Float32Array";
-const char Int32Array[] = "Int32Array";
-const char Int16Array[] = "Int16Array";
-const char Int8Array[] = "Int8Array";
-const char Uint32Array[] = "Uint32Array";
-const char Uint16Array[] = "Uint16Array";
-const char Uint8Array[] = "Uint8Array";
+constexpr char Float64Array[] = "Float64Array";
+constexpr char Float32Array[] = "Float32Array";
+constexpr char Int32Array[] = "Int32Array";
+constexpr char Int16Array[] = "Int16Array";
+constexpr char Int8Array[] = "Int8Array";
+constexpr char Uint32Array[] = "Uint32Array";
+constexpr char Uint16Array[] = "Uint16Array";
+constexpr char Uint8Array[] = "Uint8Array";
 
 Handle<Value> callback(HandleScope &scope,const Local<Function> &cb,int argc,Local<Value> *argv)
 {
