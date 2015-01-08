@@ -11,7 +11,7 @@ function verifyIdentityMatrix(X,expectedLength)
 
    for(var i = 0;i < X.length;i++)
    {
-      if(X[i].length != X.length) 
+      if(X[i].length != X.length)
       {
          passed = false;
          break;
@@ -396,7 +396,7 @@ describe('Regression Tests',function()
       var a = new Int8Array(256);
 
       for(var i = 0;i < 256;i++) a[i] = i - 128;
-      
+
       expect(julia.exec('sum',a)).to.equal(-128);
    });
 
@@ -423,7 +423,7 @@ describe('Regression Tests',function()
       var a = new Uint16Array(65536);
 
       for(var i = 0;i < 65536;i++) a[i] = i;
-      
+
       expect(julia.exec('sum',a)).to.equal(2147450880);
    });
 
@@ -432,11 +432,11 @@ describe('Regression Tests',function()
       var a = new Int32Array(100000);
 
       for(var i = 0;i < 100000;i++)
-      {  
+      {
          if(i % 2 == 0) a[i] = i - 2147483648;
          else a[i] = 2147483647 - i;
       }
-      
+
       expect(julia.exec('sum',a)).to.equal(-100000);
    });
 
@@ -487,7 +487,7 @@ describe('Regression Tests',function()
 
       expect(res).to.eql([a1,a2]);
    });
-   
+
    it('multidimensional Array',function()
    {
       var a = [ [[1,2],[3,4]], [[5,6],[7,8]], [[9,10],[11,12]] ];
@@ -554,11 +554,11 @@ describe('Regression Tests',function()
 
       expect(julia.exec('identity',reArray)).to.eql(reArray);
    });
-     
+
    it('JRef from eval',function()
    {
       julia.exec('include','test/inc5.jl');
-      
+
       var juliaObj = julia.eval('T1(5,[3,4,5,6,7,8])');
 
       expect(julia.exec('t1Mult',juliaObj)).to.eql(new Float64Array([15,20,25,30,35,40]));

@@ -23,7 +23,7 @@ function topExpr(mod::Module,paths::Array{ASCIIString,1})
    for path in paths
       push!(res.args,:(include($path)))
    end
-   return res
+   return res;
 end
 
 include(mod::Module,path,args::Vector) = include(mod,path,UTF8String[args...])
@@ -34,7 +34,7 @@ function scriptify(mod::Module,filename::ASCIIString)
     paths = Array(ASCIIString,0);
 
     for astNode in ast.args[2].args
-       if(typeof(astNode) == Expr && astNode.head == :call && astNode.args[1] == :include) 
+       if(typeof(astNode) == Expr && astNode.head == :call && astNode.args[1] == :include)
           push!(paths,astNode.args[2]);
        else
           push!(args2,astNode);
@@ -42,7 +42,7 @@ function scriptify(mod::Module,filename::ASCIIString)
     end
     res = topExpr(mod,paths);
     push!(res.args,Expr(ast.head,ast.args[1],Expr(ast.args[2].head,args2...)));
-    res
+    return res;
 end
 
 newRegex(pattern) = Regex(pattern)
