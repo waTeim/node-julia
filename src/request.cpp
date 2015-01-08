@@ -11,7 +11,7 @@
 
 #if NODE_MINOR_VERSION == 10
 #include "JRef-v10.h"
-#elif NODE_MINOR_VERSION == 11
+#else
 #include "JRef-v11.h"
 #endif
 
@@ -19,7 +19,7 @@ using namespace std;
 using namespace v8;
 
 static nj::Type *getPrimitiveType(const Local<Value> &prim)
-{   
+{
    if(prim->IsNull()) return nj::Null_t::instance();
    else if(prim->IsBoolean()) return nj::Boolean_t::instance();
    else if(prim->IsNumber())
@@ -44,7 +44,7 @@ static shared_ptr<nj::Value> createPrimitiveReq(const Local<Value> &prim)
    else if(prim->IsNumber())
    {
       double v_d = prim->NumberValue();
- 
+
       if(trunc(v_d) == v_d) v.reset(new nj::Int64(prim->IntegerValue()));
       else v.reset(new nj::Float64(v_d));
    }
@@ -168,7 +168,7 @@ double getFloat64Value(const Local<Value> &val)
 string getStringValue(const Local<Value> &val)
 {
    String::Utf8Value text(val);
-   
+
    return string(*text);
 }
 
@@ -324,7 +324,7 @@ template <typename V,typename E> static shared_ptr<nj::Value> createArrayReqFrom
    shared_ptr<nj::Value> to;
    nj::NativeArray<V> nat(array);
    const V *data = nat.dptr();
-  
+
    if(data)
    {
       vector<size_t> dims;

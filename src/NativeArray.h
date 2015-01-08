@@ -34,7 +34,7 @@ namespace nj
             _dptr = (V*)(((char*)bufferObject->GetIndexedPropertiesExternalArrayData()) + offset);
          }
 
-#elif NODE_MINOR_VERSION == 11
+#else
 
          NativeArray(const v8::Local<v8::Object> &array)
          {
