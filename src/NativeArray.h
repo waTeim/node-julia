@@ -1,12 +1,17 @@
 #ifndef __nj_NativeArray
 #define __nj_NativeArray
 
+#include <string>
+#include <v8.h>
 #include <node_version.h>
 
 namespace nj
 {
    template <typename V> class NativeArray
    {
+      public:
+
+
       protected:
 
          V *_dptr;
@@ -57,7 +62,23 @@ namespace nj
 
          V *dptr() const { return _dptr; }
          unsigned int len() { return _len; }
+
    };
+
+   enum NativeArrayType
+   {
+      none,
+      Int8Array,
+      Uint8Array,
+      Int16Array,
+      Uint16Array,
+      Int32Array,
+      Uint32Array,
+      Float32Array,
+      Float64Array
+   };
+
+   NativeArrayType toType(const std::string &name);
 };
 
 #endif

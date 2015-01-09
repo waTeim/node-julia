@@ -18,15 +18,15 @@
          "conditions":
          [
             [ "gcc=='4.6'", { "std":"c++0x" } , { "std":"c++11" } ],
-            [ "OS=='linux' and juliaBase=='/usr'", 
+            [ "OS=='linux' and juliaBase=='/usr'",
                { "juliaLib":"<(juliaBase)/lib/x86_64-linux-gnu/julia" , "juliaInclude":"<(juliaBase)/include/julia" },
                { "juliaLib":"<(juliaBase)/lib/julia" , "juliaInclude":"<(juliaBase)/include/julia" }
             ]
          ]
       },
       "target_name": "nj",
-      "sources":     
-      [ 
+      "sources":
+      [
         "src/Call.cpp",
         "src/Exception.cpp",
         "src/Expr.cpp",
@@ -35,6 +35,7 @@
         "src/JuliaExecEnv.cpp",
         "src/JuliaHandle.cpp",
         "src/Kernel.cpp",
+        "src/NativeArray.cpp",
         "src/Script.cpp",
         "src/Trampoline.cpp",
         "src/Type.cpp",
@@ -49,7 +50,7 @@
       ],
       "cflags!":     [ "-fno-exceptions" ],
       "cflags":
-      [ 
+      [
          "-std=<(std)",
       ],
       "defines":
@@ -77,10 +78,10 @@
       },
       "conditions":
       [
-        [ "OS=='mac'", 
-          { 
+        [ "OS=='mac'",
+          {
             "xcode_settings":
-            { 
+            {
               "MACOSX_DEPLOYMENT_TARGET":"10.7",
               "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
               "OTHER_CPLUSPLUSFLAGS":
@@ -115,7 +116,7 @@
         [ "version=='0.10.x'",
           {
             "sources":
-            [ 
+            [
               "src/Callback-v10.cpp",
               "src/JRef-v10.cpp",
               "src/ScriptEncapsulated-v10.cpp",
@@ -127,7 +128,7 @@
         [ "version=='0.11.x'",
           {
             "sources":
-            [ 
+            [
               "src/Callback-v11.cpp",
               "src/JRef-v11.cpp",
               "src/ScriptEncapsulated-v11.cpp",

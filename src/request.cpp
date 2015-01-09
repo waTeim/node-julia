@@ -96,7 +96,48 @@ static shared_ptr<nj::Value> createJRefReq(const Local<Object> &obj)
    return handle;
 }
 
-static void examineArray(Local<Array> &a,size_t level,vector<size_t> &dims,nj::Type *&maxType,bool &determineDimensions) throw(nj::InvalidException)
+template <typename V,typename E> static nj::Type *nativeArrayProperties(const Local<Value> &val,int &len)
+{
+   Local<Object> obj = Local<Object>::Cast(val);
+   nj::NativeArray<V> nat(obj);
+
+   len = nat.len();
+   return E::instance();
+}
+
+static nj::Type *examineNativeArray(const Local<Value> &val,vector<size_t> &dims,bool &determineDimensions)
+{
+   Local<Object> obj = val->ToObject();
+   String::Utf8Value utf(obj->GetConstructorName());
+   string cname(*utf);
+   nj::NativeArrayType naType = nj::toType(cname);
+   nj::Type *etype = 0;
+   int len = 0;
+
+   if(naType != nj::NativeArrayType::none)
+   {
+      switch(naType)
+      {
+         case nj::NativeArrayType::Int8Array: etype = nativeArrayProperties<char,nj::Int8_t>(val,len); break;
+         case nj::NativeArrayType::Uint8Array: etype = nativeArrayProperties<unsigned char,nj::UInt8_t>(val,len); break;
+         case nj::NativeArrayType::Int16Array: etype = nativeArrayProperties<short,nj::Int16_t>(val,len); break;
+         case nj::NativeArrayType::Uint16Array: etype = nativeArrayProperties<unsigned short,nj::UInt16_t>(val,len); break;
+         case nj::NativeArrayType::Int32Array: etype = nativeArrayProperties<int,nj::Int32_t>(val,len); break;
+         case nj::NativeArrayType::Uint32Array: etype = nativeArrayProperties<unsigned,nj::UInt32_t>(val,len); break;
+         case nj::NativeArrayType::Float32Array: etype = nativeArrayProperties<float,nj::Float32_t>(val,len); break;
+         case nj::NativeArrayType::Float64Array: etype = nativeArrayProperties<double,nj::Float64_t>(val,len); break;
+         default: break;
+      }
+      if(determineDimensions)
+      {
+         dims.push_back(len);
+         determineDimensions = false;
+      }
+   }
+   return etype;
+}
+
+static void examineArray(const Local<Array> &a,size_t level,vector<size_t> &dims,nj::Type *&maxType,bool &determineDimensions) throw(nj::InvalidException)
 {
    size_t len = a->Length();
 
@@ -107,7 +148,6 @@ static void examineArray(Local<Array> &a,size_t level,vector<size_t> &dims,nj::T
       if(determineDimensions)
       {
          dims.push_back(len);
-
          if(!el->IsArray()) determineDimensions = false;
       }
       else
@@ -124,7 +164,10 @@ static void examineArray(Local<Array> &a,size_t level,vector<size_t> &dims,nj::T
       }
       else
       {
-         nj::Type *etype = getPrimitiveType(el);
+         nj::Type *etype = 0;
+
+         if(el->IsObject() && !el->IsDate() && !el->IsRegExp()) etype = examineNativeArray(el,dims,determineDimensions);
+         else etype = getPrimitiveType(el);
 
          if(!etype) throw(nj::InvalidException("unknown array element type"));
          if(!maxType || *maxType < *etype) maxType = etype;
