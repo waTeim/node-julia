@@ -7,11 +7,6 @@
 
 using namespace std;
 
-extern "C"
-{
-DLLEXPORT jl_value_t *jl_f_new_module(jl_sym_t *name);
-};
-
 static nj::Result exceptionResult(jl_value_t *jl_ex,int64_t exprId)
 {
    JL_GC_PUSH1(&jl_ex);
@@ -46,13 +41,16 @@ nj::Result nj::Script::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
       string isolatingModName = string("njIsoMod") + to_string(modNum++);
       jl_value_t *filenameToInclude = jl_cstr_to_string(text.toString().c_str());
       jl_sym_t *isolatingModSym = jl_symbol(isolatingModName.c_str());
-      jl_module_t *isolatingMod = (jl_module_t*)jl_f_new_module(isolatingModSym);
+      jl_module_t *isolatingMod = (jl_module_t*)jl_new_module(isolatingModSym);
 
       jl_ex = jl_exception_occurred();
       if(jl_ex) return exceptionResult(jl_ex,exprId);
 
-      jl_set_global(jl_main_module,isolatingModSym,(jl_value_t*)isolatingMod);
+      (void)jl_add_standard_imports(isolatingMod);
+      jl_ex = jl_exception_occurred();
+      if(jl_ex) return exceptionResult(jl_ex,exprId);
 
+      jl_set_global(jl_main_module,isolatingModSym,(jl_value_t*)isolatingMod);
       jl_ex = jl_exception_occurred();
       if(jl_ex) return exceptionResult(jl_ex,exprId);
 
@@ -64,7 +62,6 @@ nj::Result nj::Script::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
       JL_GC_PUSH2(isolatingMod,ast);
       (void)jl_call2(func,(jl_value_t*)isolatingMod,ast);
       JL_GC_POP();
-
       jl_ex = jl_exception_occurred();
       if(jl_ex) return exceptionResult(jl_ex,exprId);
 
