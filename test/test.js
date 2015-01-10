@@ -570,16 +570,18 @@ describe('Regression Tests',function()
 
       expect(julia.exec('t1Mult',juliaObj)).to.eql(new Float64Array([5,10,15]));
    });
-/*
+
    it('2D Array Request with Native Arrays ',function()
    {
       var a = julia.exec('rand',10,10);
 
-      julia.exec('println',a);
+      expect(julia.exec('identity',a)).to.eql(a);
+   });
+
+   it('Multidimensional Array Request with Native Arrays ',function()
+   {
+      var a = julia.exec('rand',3,2,7,5,6,4);
 
       expect(julia.exec('identity',a)).to.eql(a);
    });
-*/
-
-   
 });

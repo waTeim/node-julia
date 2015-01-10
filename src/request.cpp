@@ -96,7 +96,7 @@ static shared_ptr<nj::Value> createJRefReq(const Local<Object> &obj)
    return handle;
 }
 
-template <typename V,typename E> static nj::Type *nativeArrayProperties(const Local<Value> &val,int &len)
+template <typename V,typename E> static nj::Type *nativeArrayProperties(const Local<Value> &val,size_t &len)
 {
    Local<Object> obj = Local<Object>::Cast(val);
    nj::NativeArray<V> nat(obj);
@@ -105,14 +105,14 @@ template <typename V,typename E> static nj::Type *nativeArrayProperties(const Lo
    return E::instance();
 }
 
-static nj::Type *examineNativeArray(const Local<Value> &val,vector<size_t> &dims,bool &determineDimensions)
+static nj::Type *examineNativeArray(const Local<Value> &val,size_t level,vector<size_t> &dims,bool &determineDimensions) throw(nj::InvalidException)
 {
    Local<Object> obj = val->ToObject();
    String::Utf8Value utf(obj->GetConstructorName());
    string cname(*utf);
    nj::NativeArrayType naType = nj::toType(cname);
    nj::Type *etype = 0;
-   int len = 0;
+   size_t len = 0;
 
    if(naType != nj::NativeArrayType::none)
    {
@@ -133,6 +133,7 @@ static nj::Type *examineNativeArray(const Local<Value> &val,vector<size_t> &dims
          dims.push_back(len);
          determineDimensions = false;
       }
+      else if(level == dims.size() || len != dims[level]) throw(nj::InvalidException("malformed array"));
    }
    return etype;
 }
@@ -145,15 +146,10 @@ static void examineArray(const Local<Array> &a,size_t level,vector<size_t> &dims
    {
       Local<Value> el = a->Get(i);
 
-      if(determineDimensions)
-      {
-         dims.push_back(len);
-         if(!el->IsArray()) determineDimensions = false;
-      }
+      if(determineDimensions) dims.push_back(len);
       else
       {
          if(level == dims.size() || len != dims[level]) throw(nj::InvalidException("malformed array"));
-         if(!el->IsArray() && level != dims.size() - 1) throw(nj::InvalidException("malformed array"));
          if(el->IsArray() && level == dims.size() - 1) throw(nj::InvalidException("malformed array"));
       }
       if(el->IsArray())
@@ -166,9 +162,13 @@ static void examineArray(const Local<Array> &a,size_t level,vector<size_t> &dims
       {
          nj::Type *etype = 0;
 
-         if(el->IsObject() && !el->IsDate() && !el->IsRegExp()) etype = examineNativeArray(el,dims,determineDimensions);
-         else etype = getPrimitiveType(el);
-
+         if(el->IsObject() && !el->IsDate() && !el->IsRegExp()) etype = examineNativeArray(el,level + 1,dims,determineDimensions);
+         else
+         {
+            etype = getPrimitiveType(el);
+            if(determineDimensions) determineDimensions = false;
+            if(level != dims.size() - 1) throw(nj::InvalidException("malformed array"));
+         }
          if(!etype) throw(nj::InvalidException("unknown array element type"));
          if(!maxType || *maxType < *etype) maxType = etype;
          if((maxType->id() == nj::int64_type || maxType->id() == nj::uint64_type) && etype->id() == nj::float64_type) maxType = etype;
@@ -215,6 +215,43 @@ string getStringValue(const Local<Value> &val)
    return string(*text);
 }
 
+template <typename V,typename N> static void fillFromNativeArray(size_t stride,size_t offset,V *to,const Local<Object> &from)
+{
+   nj::NativeArray<N> arr(from);
+   N *dptr =  arr.dptr();
+
+   for(size_t elementNum = 0;elementNum < arr.len();elementNum++)
+   {
+      *(to + offset) = *dptr++;
+      offset += stride;
+   }
+}
+
+
+template <typename V> static void fillFromNativeArray(size_t stride,size_t offset,V *to,const Local<Value> &from)
+{
+   Local<Object> obj = from->ToObject();
+   String::Utf8Value utf(obj->GetConstructorName());
+   string cname(*utf);
+   nj::NativeArrayType naType = nj::toType(cname);
+
+   if(naType != nj::NativeArrayType::none)
+   {
+      switch(naType)
+      {
+         case nj::NativeArrayType::Int8Array: fillFromNativeArray<V,char>(stride,offset,to,obj); break;
+         case nj::NativeArrayType::Uint8Array: fillFromNativeArray<V,unsigned char>(stride,offset,to,obj); break;
+         case nj::NativeArrayType::Int16Array: fillFromNativeArray<V,short>(stride,offset,to,obj); break;
+         case nj::NativeArrayType::Uint16Array: fillFromNativeArray<V,unsigned short>(stride,offset,to,obj); break;
+         case nj::NativeArrayType::Int32Array: fillFromNativeArray<V,int>(stride,offset,to,obj); break;
+         case nj::NativeArrayType::Uint32Array: fillFromNativeArray<V,unsigned>(stride,offset,to,obj); break;
+         case nj::NativeArrayType::Float32Array: fillFromNativeArray<V,float>(stride,offset,to,obj); break;
+         case nj::NativeArrayType::Float64Array: fillFromNativeArray<V,double>(stride,offset,to,obj); break;
+         default: break;
+      }
+   }
+}
+
 template <typename V,V (&accessor)(const Local<Value>&)> static void fillSubArray(const vector<size_t> &dims,const vector<size_t> &strides,size_t ixNum,size_t offset,V *to,const Local<Array> &from)
 {
    size_t numElements = dims[ixNum];
@@ -240,7 +277,6 @@ template <typename V,V (&accessor)(const Local<Value>&)> static void fillSubArra
    }
 }
 
-
 template <typename V,typename E,V (&accessor)(const Local<Value>&)> static void fillArray(shared_ptr<nj::Value> &to,const Local<Array> &from)
 {
    nj::Array<V,E> &a = static_cast<nj::Array<V,E>&>(*to);
@@ -259,9 +295,15 @@ template <typename V,typename E,V (&accessor)(const Local<Value>&)> static void 
 
       for(size_t row = 0;row < rows;row++)
       {
-         Local<Array> rowVector = Local<Array>::Cast(from->Get(row));
+         Local<Value> val = from->Get(row);
 
-         for(size_t col = 0;col < cols;col++) p[col*rows + row] = accessor(rowVector->Get(col));
+         if(val->IsArray())
+         {
+            Local<Array> rowVector = Local<Array>::Cast(val);
+
+            for(size_t col = 0;col < cols;col++) p[col*rows + row] = accessor(rowVector->Get(col));
+         }
+         else fillFromNativeArray<V>(rows,row,p,val);
       }
    }
    else
