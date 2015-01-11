@@ -7,6 +7,6 @@
 #include "Expr.h"
 #include "JuliaExecEnv.h"
 
-std::shared_ptr<nj::Value> createRequest(const v8::Local<v8::Value> &value);
+std::shared_ptr<nj::Value> createRequest(const v8::Local<v8::Value> &value) throw(nj::InvalidException);
 
 #endif

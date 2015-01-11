@@ -526,26 +526,40 @@ void doExec(const FunctionCallbackInfo<Value> &args)
       vector<shared_ptr<nj::Value>> req;
       int numExecArgs = numArgs - 1;
 
-      for(int i = 0;i < numExecArgs;i++)
+      try
       {
-         shared_ptr<nj::Value> reqElement = createRequest(args[i + 1]);
+         for(int i = 0;i < numExecArgs;i++)
+         {
+            shared_ptr<nj::Value> reqElement = createRequest(args[i + 1]);
 
-         if(reqElement.get()) req.push_back(reqElement);
+            if(reqElement.get()) req.push_back(reqElement);
+         }
+
+         if(!useCallback)
+         {
+            engine->exec(*funcName,req);
+
+            shared_ptr<nj::Result> res = engine->syncQueueGet();
+
+            returnResult(args,scope,res);
+         }
+         else
+         {
+            nj::Callback *c = new nj::Callback(cb);
+
+            engine->exec(*funcName,req,c);
+         }
       }
-
-      if(!useCallback)
+      catch(nj::InvalidException e)
       {
-         engine->exec(*funcName,req);
+         if(!useCallback) I->ThrowException(Exception::Error(String::NewFromUtf8(I,e.what().c_str())));
+         else
+         {
+            const unsigned argc = 1;
+            Local<Value> argv[argc] = { String::NewFromUtf8(I,e.what().c_str()) };
 
-         shared_ptr<nj::Result> res = engine->syncQueueGet();
-
-         returnResult(args,scope,res);
-      }
-      else
-      {
-         nj::Callback *c = new nj::Callback(cb);
-
-         engine->exec(*funcName,req,c);
+            callback(I,cb,argc,argv);
+         }
       }
    }
    else
@@ -580,4 +594,3 @@ void init(Handle<Object> exports)
 }
 
 NODE_MODULE(nj,init)
-

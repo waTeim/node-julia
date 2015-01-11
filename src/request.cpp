@@ -133,7 +133,7 @@ static nj::Type *examineNativeArray(const Local<Value> &val,size_t level,vector<
          dims.push_back(len);
          determineDimensions = false;
       }
-      else if(level == dims.size() || len != dims[level]) throw(nj::InvalidException("malformed array"));
+      else if(level == dims.size() || len != dims[level]) throw(nj::InvalidException("Malformed input array"));
    }
    return etype;
 }
@@ -149,8 +149,8 @@ static void examineArray(const Local<Array> &a,size_t level,vector<size_t> &dims
       if(determineDimensions) dims.push_back(len);
       else
       {
-         if(level == dims.size() || len != dims[level]) throw(nj::InvalidException("malformed array"));
-         if(el->IsArray() && level == dims.size() - 1) throw(nj::InvalidException("malformed array"));
+         if(level == dims.size() || len != dims[level]) throw(nj::InvalidException("Malformed input array"));
+         if(el->IsArray() && level == dims.size() - 1) throw(nj::InvalidException("Malformed input array"));
       }
       if(el->IsArray())
       {
@@ -167,9 +167,9 @@ static void examineArray(const Local<Array> &a,size_t level,vector<size_t> &dims
          {
             etype = getPrimitiveType(el);
             if(determineDimensions) determineDimensions = false;
-            if(level != dims.size() - 1) throw(nj::InvalidException("malformed array"));
+            if(level != dims.size() - 1) throw(nj::InvalidException("Malformed input array"));
          }
-         if(!etype) throw(nj::InvalidException("unknown array element type"));
+         if(!etype) throw(nj::InvalidException("Unknown array element type"));
          if(!maxType || *maxType < *etype) maxType = etype;
          if((maxType->id() == nj::int64_type || maxType->id() == nj::uint64_type) && etype->id() == nj::float64_type) maxType = etype;
          if(maxType->id() == nj::float64_type && (etype->id() == nj::int64_type || etype->id() == nj::uint64_type)) continue;
@@ -316,7 +316,7 @@ template <typename V,typename E,V (&accessor)(const Local<Value>&)> static void 
    }
 }
 
-static shared_ptr<nj::Value> createArrayReqFromArray(const Local<Value> &from)
+static shared_ptr<nj::Value> createArrayReqFromArray(const Local<Value> &from) throw(nj::InvalidException)
 {
    shared_ptr<nj::Value> to;
 
@@ -327,61 +327,57 @@ static shared_ptr<nj::Value> createArrayReqFromArray(const Local<Value> &from)
       bool determineDimensions = true;
       nj::Type *etype = 0;
 
-      try
+      examineArray(a,0,dims,etype,determineDimensions);
+
+      if(dims[0] == 0)
       {
-         examineArray(a,0,dims,etype,determineDimensions);
+         to.reset(new nj::Array<char,nj::Any_t>(dims));
+         return to;
+      }
 
-         if(dims[0] == 0)
+      if(etype)
+      {
+         switch(etype->id())
          {
-            to.reset(new nj::Array<char,nj::Any_t>(dims));
-            return to;
-         }
-
-         if(etype)
-         {
-            switch(etype->id())
-            {
-               case nj::null_type:
-                  to.reset(new nj::Array<unsigned char,nj::Null_t>(dims));
-                  fillArray<unsigned char,nj::Null_t,getNullValue>(to,a);
-               break;
-               case nj::boolean_type:
-                  to.reset(new nj::Array<unsigned char,nj::Boolean_t>(dims));
-                  fillArray<unsigned char,nj::Boolean_t,getBooleanValue>(to,a);
-               break;
-               case nj::int32_type:
-                  to.reset(new nj::Array<int,nj::Int32_t>(dims));
-                  fillArray<int,nj::Int32_t,getInt32Value>(to,a);
-               break;
-               case nj::uint32_type:
-                  to.reset(new nj::Array<unsigned int,nj::UInt32_t>(dims));
-                  fillArray<unsigned int,nj::UInt32_t,getUInt32Value>(to,a);
-               break;
-               case nj::int64_type:
-                  to.reset(new nj::Array<int64_t,nj::Int64_t>(dims));
-                  fillArray<int64_t,nj::Int64_t,getInt64Value>(to,a);
-               break;
-               case nj::float64_type:
-                  to.reset(new nj::Array<double,nj::Float64_t>(dims));
-                  fillArray<double,nj::Float64_t,getFloat64Value>(to,a);
-               break;
-               case nj::ascii_string_type:
-               case nj::utf8_string_type:
-                  to.reset(new nj::Array<string,nj::UTF8String_t>(dims));
-                  fillArray<string,nj::UTF8String_t,getStringValue>(to,a);
-               break;
-               case nj::date_type:
-                  to.reset(new nj::Array<double,nj::Date_t>(dims));
-                  fillArray<double,nj::Date_t,getDateValue>(to,a);
-               break;
-               case nj::regex_type:
-                  to.reset(new nj::Array<string,nj::Regex_t>(dims));
-                  fillArray<string,nj::Regex_t,getRegexValue>(to,a);
-               break;
-            }
+            case nj::null_type:
+               to.reset(new nj::Array<unsigned char,nj::Null_t>(dims));
+               fillArray<unsigned char,nj::Null_t,getNullValue>(to,a);
+            break;
+            case nj::boolean_type:
+               to.reset(new nj::Array<unsigned char,nj::Boolean_t>(dims));
+               fillArray<unsigned char,nj::Boolean_t,getBooleanValue>(to,a);
+            break;
+            case nj::int32_type:
+               to.reset(new nj::Array<int,nj::Int32_t>(dims));
+               fillArray<int,nj::Int32_t,getInt32Value>(to,a);
+            break;
+            case nj::uint32_type:
+               to.reset(new nj::Array<unsigned int,nj::UInt32_t>(dims));
+               fillArray<unsigned int,nj::UInt32_t,getUInt32Value>(to,a);
+            break;
+            case nj::int64_type:
+               to.reset(new nj::Array<int64_t,nj::Int64_t>(dims));
+               fillArray<int64_t,nj::Int64_t,getInt64Value>(to,a);
+            break;
+            case nj::float64_type:
+               to.reset(new nj::Array<double,nj::Float64_t>(dims));
+               fillArray<double,nj::Float64_t,getFloat64Value>(to,a);
+            break;
+            case nj::ascii_string_type:
+            case nj::utf8_string_type:
+               to.reset(new nj::Array<string,nj::UTF8String_t>(dims));
+               fillArray<string,nj::UTF8String_t,getStringValue>(to,a);
+            break;
+            case nj::date_type:
+               to.reset(new nj::Array<double,nj::Date_t>(dims));
+               fillArray<double,nj::Date_t,getDateValue>(to,a);
+            break;
+            case nj::regex_type:
+               to.reset(new nj::Array<string,nj::Regex_t>(dims));
+               fillArray<string,nj::Regex_t,getRegexValue>(to,a);
+            break;
          }
       }
-      catch(nj::InvalidException e) {}
    }
    return to;
 }
@@ -425,7 +421,7 @@ template <typename V,typename E> static shared_ptr<nj::Value> createArrayReqFrom
    return to;
 }
 
-shared_ptr<nj::Value> createRequest(const Local<Value> &value)
+shared_ptr<nj::Value> createRequest(const Local<Value> &value) throw(nj::InvalidException)
 {
    if(value->IsArray()) return createArrayReqFromArray(value);
    else if(value->IsDate()) return createDateReq(value);

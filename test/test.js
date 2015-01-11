@@ -584,4 +584,28 @@ describe('Regression Tests',function()
 
       expect(julia.exec('identity',a)).to.eql(a);
    });
+
+   it('Ill defined matrix via exception',function()
+   {
+      var error;
+
+      try
+      {
+         julia.exec('transpose',[[ 1, 2, 3 ], [ 4, 5 ]]);
+      }
+      catch(e)
+      {
+         error = e;
+      }
+      expect(error).to.eql(Error('Malformed input array'));
+   });
+
+   it('Ill defined matrix via err in callback',function(done)
+   {
+      julia.exec('identity',[[ 1, 2, 3 ], [[ 4, 5 ,6], [2]]],function(err,res)
+      {
+         expect(err).to.equal('Malformed input array');
+         done();
+      });
+   });
 });
