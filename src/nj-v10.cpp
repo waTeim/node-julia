@@ -518,35 +518,53 @@ Handle<Value> doExec(const Arguments &args)
 
       if(useCallback) numExecArgs--;
 
-      for(int i = 0;i < numExecArgs;i++)
+      try
       {
-         shared_ptr<nj::Value> reqElement = createRequest(args[i + 1]);
+         for(int i = 0;i < numExecArgs;i++)
+         {
+            shared_ptr<nj::Value> reqElement = createRequest(args[i + 1]);
 
-         if(reqElement.get()) req.push_back(reqElement);
+            if(reqElement.get()) req.push_back(reqElement);
+         }
+
+         if(!useCallback)
+         {
+            engine->exec(*funcName,req);
+
+            shared_ptr<nj::Result> res = engine->syncQueueGet();
+
+            return returnResult(scope,res);
+         }
+         else
+         {
+            nj::Callback *c = new nj::Callback(cb);
+
+            engine->exec(*funcName,req,c);
+            return scope.Close(Undefined());
+         }
       }
-
-      if(!useCallback)
+      catch(nj::InvalidException e)
       {
-         engine->exec(*funcName,req);
-
-         shared_ptr<nj::Result> res = engine->syncQueueGet();
-
-         return returnResult(scope,res);
-      }
-      else
-      {
-         nj::Callback *c = new nj::Callback(cb);
-
-         engine->exec(*funcName,req,c);
-         return scope.Close(Undefined());
+         if(!useCallback)
+         {
+            ThrowException(Exception::Error(String::New(e.what().c_str())));
+            return scope.Close(Undefined());
+         }
+         else
+         {
+            const unsigned argc = 1;
+            Local<Value> argv[argc] = { String::New(e.what().c_str()) };
+            
+            return callback(scope,cb,argc,argv);
+         }
       }
    }
    else
    {
       if(useCallback)
-      {  
+      {
          const unsigned argc = 1;
-         Local<Value> argv[argc] = { String::New("could not execut") };
+         Local<Value> argv[argc] = { String::New("could not execute") };
 
          return callback(scope,cb,argc,argv);
       }
