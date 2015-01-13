@@ -44,13 +44,14 @@ namespace nj
          NativeArray(const v8::Local<v8::Object> &array)
          {
             v8::Isolate *I = v8::Isolate::GetCurrent();
+            v8::Local<v8::Value> buffer = array->Get(v8::String::NewFromUtf8(I,"buffer"));
             v8::Local<v8::Value> byteOffset = array->Get(v8::String::NewFromUtf8(I,"byteOffset"));
             v8::Local<v8::Value> byteLength = array->Get(v8::String::NewFromUtf8(I,"byteLength"));
 
             _dptr = 0;
             _len = 0;
 
-            if(byteOffset->IsUndefined() || byteLength->IsUndefined()) return;
+            if(byteOffset->IsUndefined() || byteLength->IsUndefined() || buffer->IsUndefined()) return;
 
             unsigned int offset = byteOffset->Uint32Value();
 

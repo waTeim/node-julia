@@ -578,14 +578,31 @@ describe('Regression Tests',function()
       expect(julia.exec('identity',a)).to.eql(a);
    });
 
-   it('Multidimensional Array Request with Native Arrays ',function()
+   it('multidimensional Array Request with Native Arrays ',function()
    {
       var a = julia.exec('rand',3,2,7,5,6,4);
 
       expect(julia.exec('identity',a)).to.eql(a);
    });
 
-   it('Ill defined matrix via exception',function()
+   it('manually creating arrays of NativeArray for linear algebra',function()
+   {
+      var e1 = new Float64Array(2);
+      var e2 = new Float64Array(2);
+      var a = [e1,e2];
+
+      e1[0] = e2[1] = 1;
+      e1[1] = e2[0] = 2;
+
+      var aInv = julia.exec('inv',a);
+      var b = julia.exec('*',a,aInv);
+      var eye = julia.exec('eye',2);
+
+      expect(b).to.eql(eye);
+   });
+
+
+   it('ill-defined matrix via exception',function()
    {
       var error;
 
@@ -600,7 +617,7 @@ describe('Regression Tests',function()
       expect(error).to.eql(Error('Malformed input array'));
    });
 
-   it('Ill defined matrix via err in callback',function(done)
+   it('ill-defined matrix via err in callback',function(done)
    {
       julia.exec('identity',[[ 1, 2, 3 ], [[ 4, 5 ,6], [2]]],function(err,res)
       {
