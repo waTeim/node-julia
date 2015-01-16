@@ -71,7 +71,7 @@ jl_module_t *nj::Kernel::load() throw(JuliaException)
 
    ex = jl_exception_occurred();
    if(ex) throw getJuliaException(ex);
-   
+
    return mod;
 }
 
@@ -82,7 +82,7 @@ nj::Kernel *nj::Kernel::getSingleton()
 }
 
 nj::Kernel::Kernel()
-{ 
+{
    nj_module = 0;
    preserve_array = 0;
    freelist_start = -1;
@@ -96,7 +96,7 @@ jl_value_t *nj::Kernel::scriptify(jl_module_t *isolatingMod,jl_value_t *filename
    jl_function_t *func = jl_get_function(nj_module,"scriptify");
 
    if(!func) throw getJuliaException("Could not locate function nj.scriptify");
-    
+
    JL_GC_PUSH2(&isolatingMod,&filenameToInclude);
 
    jl_value_t *ast = jl_call2(func,(jl_value_t*)isolatingMod,filenameToInclude);
@@ -149,7 +149,7 @@ int64_t nj::Kernel::preserve(jl_value_t *val) throw(JuliaException)
       free_index = freelist_start;
       freelist_start = freelist[free_index];
       freelist[free_index] = -1;
-      jl_cellset(preserve_array,free_index + 1,val);
+      jl_cellset(preserve_array,free_index,val);
    }
 
    jl_value_t *ex = jl_exception_occurred();
@@ -165,11 +165,11 @@ jl_value_t *nj::Kernel::free(int64_t valIndex) throw(JuliaException)
    freelist[valIndex] = freelist_start;
    freelist_start = valIndex;
 
-   jl_value_t *val = jl_cellref(preserve_array,valIndex + 1);
+   jl_value_t *val = jl_cellref(preserve_array,valIndex);
    jl_value_t *ex = jl_exception_occurred();
 
    if(ex) throw getJuliaException(ex);
-   jl_cellset(preserve_array,valIndex + 1,0);
+   jl_cellset(preserve_array,valIndex,0);
    ex = jl_exception_occurred();
    if(ex) throw getJuliaException(ex);
    return val;

@@ -571,6 +571,16 @@ describe('Regression Tests',function()
       expect(julia.exec('t1Mult',juliaObj)).to.eql(new Float64Array([5,10,15]));
    });
 
+   it('JRef random creation and deletion',function()
+   {
+      var juliaObj;
+      var a = [];
+      var i;
+
+      for(i = 0;i < 1000;i++) a[i] = julia.exec('t1Cons',julia.eval('rand(0:1000000)'),julia.exec('rand',5));
+      for(i = 0;i < 4000;i++) a[julia.eval('rand(1:999)')] = null;
+   });
+
    it('2D Array Request with Native Arrays ',function()
    {
       var a = julia.exec('rand',10,10);
