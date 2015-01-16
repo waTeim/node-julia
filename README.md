@@ -115,10 +115,10 @@ Tests run using npm
     npm test
 
 # Compatibility
-Tested with [node](http://nodejs.org/) 0.10.x, 0.11.x, [iojs](https://iojs.org/) 1.0.x, and [atom-shell](https://github.com/atom/atom-shell).  
+Tested with [node](http://nodejs.org/) 0.10.x, 0.11.x, [io.js](https://iojs.org/) 1.0.x, and [atom-shell](https://github.com/atom/atom-shell).  
 
 # Limitations
 
-* Julia's primary compilation method is to use gcc while gyp expects MSVS.
-Reconciling this is underway, but incomplete, so Windows is not currently
-supported.
+* Window is currently not supported.  Julia's primary compilation method
+is to use gcc while gyp expects MSVS. Reconciling this is underway, but
+incomplete.

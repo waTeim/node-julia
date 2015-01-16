@@ -1,6 +1,6 @@
 {
   "name": "node-julia",
-  "version": "0.2.3",
+  "version": "1.0.0",
   "description": "Fast and simple access to Julia embedded in node",
   "main": "lib/nj.js",
   "repository": {
@@ -12,7 +12,15 @@
   },
   "keywords": [
     "julia",
-    "embed"
+    "embed",
+    "matrix",
+    "vector",
+    "linear",
+    "algebra",
+    "numeric",
+    "regression",
+    "machine",
+    "learning"
   ],
   "author": "Jeff Waller <truthset@gmail.com>",
   "licenses": [
