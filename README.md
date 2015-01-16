@@ -12,9 +12,10 @@ First install Julia, then
     npm install node-julia
 
 When the module is built, the installer searches for Julia in several
-standard locations starting with *julia* located on the command path. 
+standard locations starting with **julia** located on the command path.
 Is is assumed that the julia lib directory is located in a standard location
-relative to where the julia executable is located.
+relative to where the julia executable is located [see here](http://node-julia.readme.io/)
+for full documentation and release notes.
 
 # Sample Syntax
 
@@ -27,7 +28,7 @@ linear algebra package.
     var b = julia.eval("[1 1 1]'");
     var c = julia.exec('\\',a,b);
 
-    console.log('Solution: ' + c[0] + 'x + ' + c[1] + 'y + ' + c[2] + 'z');
+    console.log('Solution: ' + c[0][0] + 'x + ' + c[1][0] + 'y + ' + c[2][0] + 'z');
 
 produces
 
@@ -35,36 +36,41 @@ produces
 
 # A Simple API
 
-There are 3 functions; **eval** **exec** and **Script**, [see here](http://node-julia.readme.io/)
-for full documentation and release notes.
+There are 3 functions; **eval** **exec** and **Script**.
 
 ## eval
 
 This function takes a single string argument and evaluates it like it was typed
-in the Julia *REPL* and returns the result
+in the Julia command line and returns the result *res* while *err* will be false if
+successful or contain a error message otherwise
 
-    julia.eval('e^10', function(x) {
-       console.log('exp(10) = ', x);
+    julia.eval('e^10', function(err,res) {
+       if(!err) console.log('exp(10) = ', res)
     });
 
-Calls to **eval** without a function callback are also supported. Matrices 
+Calls to **eval** without a function callback are also supported. Matrices
 are easily constructed using Julia's Matlab-like matrix syntax.
 
     console.log('2x2 matrix: ', julia.eval('[ 1 2; 3 4]'));
 
 ## exec
 
-This function takes a *String* the identifies the Julia function to
-use followed by any number of arguments for that function.  Like **eval**
-the last argument may be a function callback.
+This function takes a *String* naming the Julia function to use followed by any number of
+ arguments for that function.  Like **eval** the last argument may be a function callback.
 
 Calculate the inverse of a matrix and print the result.
 
     var a = julia.eval('[ 2 1; 1 1]');
-    
-    julia.exec('inv',a,function(xInv) {
-       console.log('Inverse: ', xInv);
+
+    julia.exec('inv',a,function(err,inv) {
+       if(!err) {
+          console.log("Inverse is:");
+          for(var i = 0;i < 2;i++)
+             console.log('[' + inv[i][0] + ', ' + inv[i][1] + ']');
+       }
+       else console.log(err);
     });
+
 
 ## Script
 
@@ -75,22 +81,34 @@ called using **Script.exec** which has the same semantics as **exec**.
 
     aScript.exec();
 
-## Error conditions
+# Synchronous and Asynchronous Calls
+Both synchronous and asynchronous calls are supported and the type used is
+indicated by the presence (or lack) of a callback function.
 
-Julia exceptions are caught and then re-thrown the in the node environment.
+    var a = julia.exec('rand',400,400);          // synchronous
+
+    julia.exec('svd',a,function(err,u,s,v) {     // asynchronous
+    ...
+    });
+
+
+# Error Conditions
+
+When executing a call synchronously, Julia errors are caught and then
+thrown as JavaScript exceptions.  Conversely, when Julia errors occur when
+processing asynchronously, the error code is returned as the first argument
+to the callback function.
 
 # Tests
 Tests run using npm
 
     npm test
 
+# Compatibility
+Tested with [node](http://nodejs.org/) 0.10.x, 0.11.x, [iojs](https://iojs.org/) 1.0.x, and [atom-shell](https://github.com/atom/atom-shell).  
+
 # Limitations
 
-* Julia invocations are currently synchronous.
-
-* Linux Julia installations must compile using -Bsymbolic-functions to avoid mismatched
-use of libuv, and is now the default.  However, builds of Julia prior to Dec 1, 2014 may
-still have this problem [see here](http://node-julia.readme.io/v0.2.3/docs/use-of-libuv)
-for more information.
-
-* Work on Windows support is in progress.
+* Julia's primary compilation method is to use gcc while gyp expects MSVS.
+Reconciling this is underway, but incomplete, so Windows is not currently
+supported.

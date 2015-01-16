@@ -573,12 +573,10 @@ describe('Regression Tests',function()
 
    it('JRef random creation and deletion',function()
    {
-      var juliaObj;
       var a = [];
       var i;
 
-      for(i = 0;i < 200;i++) a[i] = julia.exec('t1Cons',julia.eval('rand(0:1000000)'),julia.exec('rand',5));
-      for(i = 0;i < 600;i++) a[julia.eval('rand(1:999)')] = null;
+      for(i = 0;i < 400;i++) a[julia.eval('rand(1:999)')] = julia.exec('t1Cons',julia.eval('rand(0:1000000)'),julia.exec('rand',5));
    });
 
    it('2D Array Request with Native Arrays ',function()
