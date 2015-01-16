@@ -577,8 +577,8 @@ describe('Regression Tests',function()
       var a = [];
       var i;
 
-      for(i = 0;i < 1000;i++) a[i] = julia.exec('t1Cons',julia.eval('rand(0:1000000)'),julia.exec('rand',5));
-      for(i = 0;i < 4000;i++) a[julia.eval('rand(1:999)')] = null;
+      for(i = 0;i < 200;i++) a[i] = julia.exec('t1Cons',julia.eval('rand(0:1000000)'),julia.exec('rand',5));
+      for(i = 0;i < 600;i++) a[julia.eval('rand(1:999)')] = null;
    });
 
    it('2D Array Request with Native Arrays ',function()
