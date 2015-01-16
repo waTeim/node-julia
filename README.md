@@ -90,14 +90,24 @@ indicated by the presence (or lack) of a callback function.
     julia.exec('svd',a,function(err,u,s,v) {     // asynchronous
     ...
     });
-
-
 # Error Conditions
 
 When executing a call synchronously, Julia errors are caught and then
 thrown as JavaScript exceptions.  Conversely, when Julia errors occur when
 processing asynchronously, the error code is returned as the first argument
 to the callback function.
+
+# Use of JavaScript Typed Arrays
+Typed arrays are used when possible which will be whenever the element
+type is numeric in either single dimension or multidimensional arrays
+
+Additionally
+* Javascript **Buffer** will be mapped to Julia **UInt8** Arrays
+* Julia single dimension **UInt8** arrays will be mapped to **Buffer**, but
+Julia multidimensional **UInt8** arrays will be mapped to JavaScript Arrays
+of **UInt8Array**.
+* Julia **UInt64** and **Int64** arrays will be mapped to JavaScript
+**Float64Array**.
 
 # Tests
 Tests run using npm
