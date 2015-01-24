@@ -54,6 +54,25 @@ jl_value_t *nj::Kernel::invoke(const string &functionName,jl_value_t *arg) throw
    return res;
 }
 
+jl_value_t *nj::Kernel::invoke(const string &functionName,jl_value_t *arg1,jl_value_t *arg2) throw(JuliaException)
+{
+   if(!nj_module) nj_module = load();
+
+   jl_function_t *func = jl_get_function(nj_module,functionName.c_str());
+
+   if(!func) throw getJuliaException("Could not locate function nj." + functionName);
+
+   JL_GC_PUSH2(&arg1,&arg2);
+
+   jl_value_t *res = jl_call2(func,arg1,arg2);
+   jl_value_t *ex = jl_exception_occurred();
+
+   JL_GC_POP();
+
+   if(ex) throw getJuliaException(ex);
+   return res;
+}
+
 jl_module_t *nj::Kernel::load() throw(JuliaException)
 {
    string njPath = libDir + "/nj.jl";
@@ -131,6 +150,7 @@ jl_value_t *nj::Kernel::newRegex(jl_value_t *pattern) throw(JuliaException)
 jl_value_t *nj::Kernel::getPattern(jl_value_t *re) throw(JuliaException) { return invoke("getPattern",re); }
 jl_datatype_t *nj::Kernel::getDateTimeType() throw(JuliaException) { return (jl_datatype_t*)invoke("getDateTimeType"); }
 jl_datatype_t *nj::Kernel::getRegexType() throw(JuliaException) { return (jl_datatype_t*)invoke("getRegexType"); }
+jl_value_t *nj::Kernel::getError(jl_value_t *ex,jl_value_t *bt) throw(JuliaException) { return invoke("getError",ex,bt); }
 
 int64_t nj::Kernel::preserve(jl_value_t *val) throw(JuliaException)
 {

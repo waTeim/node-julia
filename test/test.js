@@ -609,7 +609,6 @@ describe('Regression Tests',function()
       expect(b).to.eql(eye);
    });
 
-
    it('ill-defined matrix via exception',function()
    {
       var error;
@@ -622,7 +621,7 @@ describe('Regression Tests',function()
       {
          error = e;
       }
-      expect(error).to.eql(Error('Malformed input array'));
+      expect(error.message).to.equal('Malformed input array');
    });
 
    it('ill-defined matrix via err in callback',function(done)
@@ -632,5 +631,19 @@ describe('Regression Tests',function()
          expect(err).to.equal('Malformed input array');
          done();
       });
+   });
+   it('eval syntax error',function()
+   {
+      var error;
+
+      try
+      {
+         julia.eval('lkasjdlkajsda');
+      }
+      catch(e)
+      {
+         error = e;
+      }
+      expect(error.message).to.equal('Julia undefined variable lkasjdlkajsda');
    });
 });

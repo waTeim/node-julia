@@ -7,7 +7,7 @@ Fast and simple access to Julia embedded in node.
 
 # Installation
 
-First install Julia, then
+First install [Julia](http://julialang.org/), then
 
     npm install node-julia
 
@@ -119,6 +119,6 @@ Tested with [node](http://nodejs.org/) 0.10.x, 0.11.x, [io.js](https://iojs.org/
 
 # Limitations
 
-* Window is currently not supported.  Julia's primary compilation method
+* Windows is currently not supported.  Julia's primary compilation method
 is to use gcc while gyp expects MSVS. Reconciling this is underway, but
 incomplete.

@@ -52,4 +52,11 @@ getRegexType() = Regex
 @vers04x_only getDateTimeType() = DateTime
 @vers03x_only getDateTimeType() = typeof(nothing)
 
+function getError(ex,bt)
+   io = IOBuffer();
+   Base.showerror(io,ex,bt);
+   s = takebuf_string(io);
+   return s;
+end
+
 end

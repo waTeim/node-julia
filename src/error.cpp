@@ -4,6 +4,13 @@
 #include <sstream>
 #include "error.h"
 #include "debug.h"
+#include "Kernel.h"
+#include "util.h"
+
+extern "C"
+{
+DLLEXPORT jl_value_t *jl_get_backtrace(void);
+};
 
 using namespace std;
 
@@ -23,7 +30,7 @@ static string errorExceptionMsg(jl_value_t *ex)
    stringstream ss;
 
    ss << jl_iostr_data(f0);
- 
+
    return ss.str();
 }
 
@@ -45,7 +52,7 @@ static string methodErrorMsg(jl_value_t *ex)
 
    ss << "unmatched method " << jl_gf_name(f0)->name << "(";
 
-   for(size_t i = 0;i < numArgs;i++) 
+   for(size_t i = 0;i < numArgs;i++)
    {
       jl_value_t *arg = jl_tupleref(f1,i);
 
@@ -137,23 +144,37 @@ static void initializeETypes()
 shared_ptr<nj::Exception> nj::genJuliaError(jl_value_t *ex)
 {
    stringstream ss;
+   shared_ptr<nj::Exception> njEx;
 
    if(!initialized) initializeETypes();
 
-   if(jl_typeis(ex,jl_errorexception_type)) return genJuliaErrorException(ex);
-   else if(jl_typeis(ex,jl_methoderror_type)) return genJuliaMethodError(ex);
-   else if(jl_typeis(ex,jl_undefvarerror_type)) return genJuliaUndefVarError(ex);
-   else if(jl_typeis(ex,jl_loaderror_type)) return genJuliaLoadError(ex);
-   else if(jl_typeis(ex,etypes["SystemError"])) return genJuliaSystemError(ex);
-   else
+   try
    {
-      if(jl_typeis(ex,jl_typeerror_type)) ss << "ex is jl_typeerror_type";
+      jl_value_t *bt = jl_get_backtrace();
+      nj::Kernel *kernel = nj::Kernel::getSingleton();
+      jl_value_t *stack = kernel->getError(ex,bt);
+      vector<string> trace = split(jl_string_data(stack),'\n');
+
+      if(jl_typeis(ex,jl_errorexception_type)) njEx = genJuliaErrorException(ex);
+      else if(jl_typeis(ex,jl_methoderror_type)) njEx = genJuliaMethodError(ex);
+      else if(jl_typeis(ex,jl_undefvarerror_type)) njEx = genJuliaUndefVarError(ex);
+      else if(jl_typeis(ex,jl_loaderror_type)) njEx = genJuliaLoadError(ex);
+      else if(jl_typeis(ex,etypes["SystemError"])) njEx = genJuliaSystemError(ex);
       else if(jl_is_ascii_string(ex) || jl_is_utf8_string(ex)) ss << jl_string_data(ex);
-      ss << "Julia " << jl_typeof_str(ex);
- 
-      return shared_ptr<Exception>(new InvalidException(ss.str()));
+      else njEx = shared_ptr<Exception>(new InvalidException(trace[0]));
+
+      for(size_t i = 1;i < trace.size();i++)
+      {
+         if(trace[i].substr(0,3) == " in") njEx->push(trace[i].substr(4));
+      }
    }
+   catch(JuliaException e)
+   {
+      njEx = e.err;
+   }
+   return njEx;
 }
+
 
 nj::JuliaException nj::getJuliaException(jl_value_t *jl_ex)
 {
@@ -169,4 +190,3 @@ nj::JuliaException nj::getJuliaException(const string &msg)
 {
    return JuliaException(shared_ptr<nj::Exception>(new nj::JuliaErrorException(msg)));
 }
-

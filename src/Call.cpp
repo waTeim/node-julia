@@ -24,7 +24,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
       case utf8_string_type:
       {
          Primitive &funcName_r = static_cast<Primitive&>(*args[0]);
-  
+
          funcName = funcName_r.toString();
          numArgs = args.size() - 1;
          argOffset = 1;
@@ -60,7 +60,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
    if(!func)
    {
       shared_ptr<Exception> ex = shared_ptr<Exception>(new JuliaMethodError(string("Julia method ") + funcName + " is undefined"));
-  
+
       return Result(ex,exprId);
    }
 
@@ -83,9 +83,9 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
             break;
             case 2:
             {
-	       jl_value_t *arg1 = rvalue(args[argOffset]);
+	            jl_value_t *arg1 = rvalue(args[argOffset]);
                jl_value_t *arg2 = rvalue(args[argOffset + 1]);
-   
+
                if(!arg1 || !arg2) rvalue_error = true;
                else jl_res = jl_call2(func,arg1,arg2);
             }
@@ -95,7 +95,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
 	       jl_value_t *arg1 = rvalue(args[argOffset]);
                jl_value_t *arg2 = rvalue(args[argOffset + 1]);
                jl_value_t *arg3 = rvalue(args[argOffset + 2]);
-   
+
                if(!arg1 || !arg2 || !arg3) rvalue_error = true;
                else jl_res = jl_call3(func,arg1,arg2,arg3);
             }
@@ -105,7 +105,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
       else
       {
          jl_value_t **jl_args = new jl_value_t*[numArgs];
-   
+
          for(int i = 0;i < numArgs && !rvalue_error;i++)
          {
             jl_args[i] = rvalue(args[i + argOffset]);
@@ -128,7 +128,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
    }
 
    jl_value_t *jl_ex = jl_exception_occurred();
-   
+
    if(jl_ex)
    {
      JL_GC_PUSH1(&jl_ex);

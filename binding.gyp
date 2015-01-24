@@ -46,7 +46,8 @@
         "src/error.cpp",
         "src/lvalue.cpp",
         "src/request.cpp",
-        "src/rvalue.cpp"
+        "src/rvalue.cpp",
+        "src/util.cpp"
       ],
       "cflags!":     [ "-fno-exceptions" ],
       "cflags":

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 namespace nj
 {
@@ -24,32 +25,34 @@ namespace nj
 
          int _id;
          std::string _what;
+         std::vector<std::string> _stack;
 
       public:
 
          Exception() {}
          Exception(int id,const std::string &what):_what(what) { _id = id; }
 
-         int id() const {  return _id;  }
-         std::string what() const {  return _what;  }
+         int id() const { return _id; }
+         std::string what() const { return _what; }
+         std::vector<std::string> stack() const { return _stack; }
+         void push(const std::string &desc) { _stack.push_back(desc); }
    };
 
-   class SystemException:public Exception {  public: SystemException(const std::string &what);  };
-   class InvalidException:public Exception {  public: InvalidException(const std::string &what):Exception(invalid_exception,what){}  };
-   class InitializationException:public Exception {  public: InitializationException(std::string what):Exception(initialization_exception,what){} };
-   class JuliaErrorException:public Exception {  public: JuliaErrorException(std::string what):Exception(julia_error_exception,what){} };
-   class JuliaMethodError:public Exception {  public: JuliaMethodError(std::string what):Exception(julia_method_error_exception,what){} };
-   class JuliaUndefVarError:public Exception {  public: JuliaUndefVarError(std::string what):Exception(julia_undef_var_error_exception,what){} };
-   class JuliaLoadError:public Exception {  public: JuliaLoadError(std::string what):Exception(julia_load_error_exception,what){} };
+   class SystemException:public Exception { public: SystemException(const std::string &what); };
+   class InvalidException:public Exception { public: InvalidException(const std::string &what):Exception(invalid_exception,what){} };
+   class InitializationException:public Exception { public: InitializationException(std::string what):Exception(initialization_exception,what){} };
+   class JuliaErrorException:public Exception { public: JuliaErrorException(std::string what):Exception(julia_error_exception,what){} };
+   class JuliaMethodError:public Exception { public: JuliaMethodError(std::string what):Exception(julia_method_error_exception,what){} };
+   class JuliaUndefVarError:public Exception { public: JuliaUndefVarError(std::string what):Exception(julia_undef_var_error_exception,what){} };
+   class JuliaLoadError:public Exception { public: JuliaLoadError(std::string what):Exception(julia_load_error_exception,what){} };
    class JuliaException:public Exception
-   {  
+   {
       public:
-      
+
          std::shared_ptr<nj::Exception> err;
-         
+
          JuliaException(std::shared_ptr<nj::Exception> err):Exception(julia_exception,"Julia Exception") { this->err = err; }
    };
 }
 
 #endif
-

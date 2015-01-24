@@ -13,6 +13,7 @@
 #include "Callback.h"
 #include "nj-v10.h"
 #include "dispatch.h"
+#include "util.h"
 
 using namespace std;
 using namespace v8;
@@ -367,17 +368,33 @@ Local<String> genError(HandleScope &scope,const shared_ptr<nj::Result> &res)
 Handle<Value> raiseException(HandleScope &scope,const shared_ptr<nj::Result> &res)
 {
    int exceptionId = res->exceptionId();
+   Local<Value> ex;
 
    switch(exceptionId)
    {
       case nj::Exception::julia_undef_var_error_exception:
       case nj::Exception::julia_method_error_exception:
-         ThrowException(Exception::ReferenceError(String::New(res->exceptionText().c_str())));
+         ex = Exception::ReferenceError(String::New(res->exceptionText().c_str()));
       break;
       default:
-         ThrowException(Exception::Error(String::New(res->exceptionText().c_str())));
+         ex = Exception::Error(String::New(res->exceptionText().c_str()));
       break;
    }
+
+   Local<Object> obj = Local<Object>::Cast(ex);
+   Local<String> stackElementKey = String::New("stack");
+   Local<Value> stack_v = obj->Get(stackElementKey);
+   String::Utf8Value stackText(stack_v);
+   vector<string> lines = nj::split(string(*stackText),'\n');
+   string stack_s = lines[0];
+
+   for(string line: res->exceptionStack()) stack_s += "\n    at " + line;
+   for(size_t i = 1;i < lines.size();i++) stack_s += "\n" + lines[i];
+
+   Local<String> message = String::New(stack_s.c_str());
+
+   obj->Set(v8::String::New("stack"),message);
+   ThrowException(ex);
    return scope.Close(Undefined());
 }
 
@@ -554,7 +571,7 @@ Handle<Value> doExec(const Arguments &args)
          {
             const unsigned argc = 1;
             Local<Value> argv[argc] = { String::New(e.what().c_str()) };
-            
+
             return callback(scope,cb,argc,argv);
          }
       }

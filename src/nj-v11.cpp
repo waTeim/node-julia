@@ -13,6 +13,7 @@
 #include "Callback.h"
 #include "nj-v11.h"
 #include "dispatch.h"
+#include "util.h"
 
 using namespace std;
 using namespace v8;
@@ -363,17 +364,33 @@ void raiseException(const FunctionCallbackInfo<Value> &args,HandleScope &scope,c
 {
    Isolate *I = Isolate::GetCurrent();
    int exceptionId = res->exceptionId();
+   Local<Value> ex;
 
    switch(exceptionId)
    {
       case nj::Exception::julia_undef_var_error_exception:
       case nj::Exception::julia_method_error_exception:
-         I->ThrowException(Exception::ReferenceError(String::NewFromUtf8(I,res->exceptionText().c_str())));
+         ex = Exception::ReferenceError(String::NewFromUtf8(I,res->exceptionText().c_str()));
       break;
       default:
-         I->ThrowException(Exception::Error(String::NewFromUtf8(I,res->exceptionText().c_str())));
+         ex = Exception::Error(String::NewFromUtf8(I,res->exceptionText().c_str()));
       break;
    }
+
+   Local<Object> obj = Local<Object>::Cast(ex);
+   Local<String> stackElementKey = String::NewFromUtf8(I,"stack");
+   Local<Value> stack_v = obj->Get(stackElementKey);
+   String::Utf8Value stackText(stack_v);
+   vector<string> lines = nj::split(string(*stackText),'\n');
+   string stack_s = lines[0];
+
+   for(string line: res->exceptionStack()) stack_s += "\n    at " + line;
+   for(size_t i = 1;i < lines.size();i++) stack_s += "\n" + lines[i];
+
+   Local<String> message = String::NewFromUtf8(I,stack_s.c_str());
+
+   obj->Set(v8::String::NewFromUtf8(I,"stack"),message);
+   I->ThrowException(ex);
    args.GetReturnValue().SetUndefined();
 }
 

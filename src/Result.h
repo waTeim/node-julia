@@ -15,7 +15,7 @@ namespace nj
          std::shared_ptr<nj::Exception> _ex;
          std::vector<std::shared_ptr<nj::Value>> _results;
          int64_t expr_id;
-     
+
       public:
 
          Result() { expr_id = -1; }
@@ -23,6 +23,7 @@ namespace nj
          Result(const std::vector<std::shared_ptr<nj::Value>> &results,int64_t exprId) { _results = results; expr_id = exprId; }
          const std::vector<std::shared_ptr<nj::Value>> &results() const { return _results; }
          std::string exceptionText() const { return _ex.get()?_ex->what():""; }
+         std::vector<std::string> exceptionStack() const { return _ex.get()?_ex->stack():std::vector<std::string>(); }
          int exceptionId() const { return _ex.get()?_ex->id():Exception::no_exception; }
          int exprId() const { return expr_id; }
    };
