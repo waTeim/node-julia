@@ -231,7 +231,12 @@ describe('Regression Tests',function()
       });
    });
 
-   it('typecheck Null array elements',function(done)
+   it('typecheck Null array elements (synchronously)',function()
+   {
+      expect(julia.exec('typecheckArray',[null])).to.equal('void');
+   });
+
+   it('typecheck Null array elements (asynchronously)',function(done)
    {
       julia.exec('typecheckArray',[null],function(err,res)
       {
@@ -241,7 +246,12 @@ describe('Regression Tests',function()
       });
    });
 
-   it('typecheck Boolean array elements',function(done)
+   it('typecheck Boolean array elements (synchronously)',function()
+   {
+      expect(julia.exec('typecheckArray',[true,false,true])).to.equal('boolean');
+   })
+
+   it('typecheck Boolean array elements (asynchronously)',function(done)
    {
       julia.exec('typecheckArray',[true,false,true],function(err,res)
       {
@@ -251,7 +261,12 @@ describe('Regression Tests',function()
       });
    });
 
-   it('typecheck Integer array elements',function(done)
+   it('typecheck Integer array elements (synchronously)',function()
+   {
+      expect(julia.exec('typecheckArray',[1.0,1234,-9000])).to.equal('int');
+   })
+
+   it('typecheck Integer array elements (asynchronously)',function(done)
    {
       julia.exec('typecheckArray',[1.0],function(err,res)
       {
@@ -261,7 +276,12 @@ describe('Regression Tests',function()
       });
    });
 
-   it('typecheck Float array elements',function(done)
+   it('typecheck Float array elements (synchronously)',function()
+   {
+      expect(julia.exec('typecheckArray',[1.1,6e26,0.000001])).to.equal('float');
+   })
+
+   it('typecheck Float array elements (asynchronously)',function(done)
    {
       julia.exec('typecheckArray',[1.1],function(err,res)
       {
@@ -271,7 +291,12 @@ describe('Regression Tests',function()
       });
    });
 
-   it('typecheck String array elements',function(done)
+   it('typecheck String array elements (synchronously)',function()
+   {
+      expect(julia.exec('typecheckArray',["abcd","000000",""])).to.equal('string');
+   })
+
+   it('typecheck String array elements (asynchronously)',function(done)
    {
       julia.exec('typecheckArray',[""],function(err,res)
       {
