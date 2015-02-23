@@ -671,4 +671,46 @@ describe('Regression Tests',function()
       }
       expect(error.message).to.equal('Julia undefined variable lkasjdlkajsda');
    });
+   it('function search (not found)',function(done)
+   {
+      julia.exec('a',function(err,res)
+      {
+         expect(err).to.equal('Julia method a is undefined');
+         done();
+      });
+   });
+   it('function deep search (not found)',function(done)
+   {
+      julia.exec('a.b',function(err,res)
+      {
+         expect(err).to.equal('Julia method a.b is undefined');
+         done();
+      });
+   });
+   it('function deep[1] search (found)',function(done)
+   {
+      julia.exec('Base.identity',10,function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal(10);
+         done();
+      });
+   });
+   it('function deep[3] search (found)',function(done)
+   {
+      var a = new Float64Array(2);
+      var b = new Float64Array(2);
+
+      a[0] = 1.0;
+      a[1] = 2.0;
+      b[0] = 3.0;
+      b[1] = 4.0;
+
+      julia.exec('Base.LinAlg.BLAS.dot',a,b,function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal(11);
+         done();
+      });
+   });
 });

@@ -1,20 +1,74 @@
 #include <iostream>
+#include <sstream>
 #include <julia.h>
 #include "Call.h"
 #include "JuliaHandle.h"
 #include "error.h"
 #include "rvalue.h"
 #include "lvalue.h"
+#include "util.h"
 
 using namespace std;
+
+jl_function_t *findFunction(jl_module_t *start,const vector<string> &funcNamePath)
+{
+   jl_module_t *mod = 0;
+   jl_function_t *func = 0;
+
+   if(funcNamePath.size() > 1)
+   {
+      jl_sym_t *sym = jl_symbol(funcNamePath[0].c_str());
+
+      if(!start)
+      {
+         mod = (jl_module_t*)jl_get_global(jl_core_module,sym);
+         if(mod && !jl_is_module(mod)) mod = 0;
+         if(!mod) mod = (jl_module_t*)jl_get_global(jl_base_module,sym);
+         if(mod && !jl_is_module(mod)) mod = 0;
+         if(!mod) mod = (jl_module_t*)jl_get_global(jl_main_module,sym);
+      }
+      else mod = (jl_module_t*)jl_get_global(start,sym);
+      if(mod && !jl_is_module(mod)) mod = 0;
+      if(mod)
+      {
+         for(size_t i = 1;mod && i < funcNamePath.size() - 1;i++)
+         {
+            sym = jl_symbol(funcNamePath[i].c_str());
+            mod  = (jl_module_t*)jl_get_global(mod,sym);
+            if(mod && !jl_is_module(mod)) mod = 0;
+         }
+         if(mod) func = jl_get_function(mod,funcNamePath[funcNamePath.size() - 1].c_str());
+      }
+   }
+   else
+   {
+      if(!start)
+      {
+         func = jl_get_function(jl_core_module,funcNamePath[0].c_str());
+         if(!func) func = jl_get_function(jl_base_module,funcNamePath[0].c_str());
+         if(!func) func = jl_get_function(jl_main_module,funcNamePath[0].c_str());
+      }
+      else func = jl_get_function(start,funcNamePath[0].c_str());
+   }
+   return func;
+}
+
+string getFuncName(const vector<string> &funcNamePath)
+{
+   stringstream ss;
+
+   ss << funcNamePath[0];
+   for(size_t i = 1;i < funcNamePath.size();i++) ss << "." << funcNamePath[i];
+   return ss.str();
+}
 
 nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
 {
    vector<shared_ptr<nj::Value>> res;
-   string funcName;
-   jl_module_t *mod = 0;
+   jl_module_t *start = 0;
    int numArgs;
    int argOffset;
+   vector<string> funcNamePath;
 
    if(args.size() == 0) return Result(res,exprId);
 
@@ -23,9 +77,9 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
       case ascii_string_type:
       case utf8_string_type:
       {
-         Primitive &funcName_r = static_cast<Primitive&>(*args[0]);
+         Primitive &id = static_cast<Primitive&>(*args[0]);
 
-         funcName = funcName_r.toString();
+         funcNamePath = split(id.toString(),'.');
          numArgs = args.size() - 1;
          argOffset = 1;
       }
@@ -35,10 +89,10 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
          if(args.size() < 2 || !args[1]->isPrimitive()) return Result(res,exprId);
 
          JuliaHandle &mod_h = static_cast<JuliaHandle&>(*args[0]);
-         Primitive &funcName_r = static_cast<Primitive&>(*args[1]);
+         Primitive &id = static_cast<Primitive&>(*args[1]);
 
-         mod = (jl_module_t*)mod_h.val();
-         funcName = funcName_r.toString();
+         start = (jl_module_t*)mod_h.val();
+         funcNamePath = split(id.toString(),'.');
          numArgs = args.size() - 2;
          argOffset = 2;
       }
@@ -47,19 +101,11 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
    }
 
    jl_value_t *jl_res = 0;
-   jl_function_t *func = 0;
-
-   if(!mod)
-   {
-      func = jl_get_function(jl_core_module,funcName.c_str());
-      if(!func) func = jl_get_function(jl_base_module,funcName.c_str());
-      if(!func) func = jl_get_function(jl_main_module,funcName.c_str());
-   }
-   else func = jl_get_function(mod,funcName.c_str());
+   jl_function_t *func = findFunction(start,funcNamePath);
 
    if(!func)
    {
-      shared_ptr<Exception> ex = shared_ptr<Exception>(new JuliaMethodError(string("Julia method ") + funcName + " is undefined"));
+      shared_ptr<Exception> ex = shared_ptr<Exception>(new JuliaMethodError(string("Julia method ") + getFuncName(funcNamePath) + " is undefined"));
 
       return Result(ex,exprId);
    }
@@ -92,7 +138,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
             break;
             case 3:
             {
-	       jl_value_t *arg1 = rvalue(args[argOffset]);
+               jl_value_t *arg1 = rvalue(args[argOffset]);
                jl_value_t *arg2 = rvalue(args[argOffset + 1]);
                jl_value_t *arg3 = rvalue(args[argOffset + 2]);
 
