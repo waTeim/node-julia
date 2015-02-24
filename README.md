@@ -90,6 +90,7 @@ indicated by the presence (or lack) of a callback function.
     julia.exec('svd',a,function(err,u,s,v) {     // asynchronous
     ...
     });
+    
 # Error Conditions
 
 When executing a call synchronously, Julia errors are caught and then
@@ -115,7 +116,8 @@ Tests run using npm
     npm test
 
 # Compatibility
-Tested with [node](http://nodejs.org/) 0.10.x, 0.11.x, [io.js](https://iojs.org/) 1.0.x, and [atom-shell](https://github.com/atom/atom-shell).  
+Tested with [node](http://nodejs.org/) 0.10.x, 0.12.x, [io.js](https://iojs.org/) 1.3,
+and [atom-shell](https://github.com/atom/atom-shell).  
 
 # Limitations
 
