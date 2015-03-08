@@ -5,6 +5,7 @@
 #include "Script.h"
 #include "Callback.h"
 #include "Immediate.h"
+#include "Import.h"
 #include "JuliaExecEnv.h"
 #include "Trampoline.h"
 
@@ -81,7 +82,7 @@ void JMain::operator()()
          else
          {
             shared_ptr<nj::Result> result;
-            
+
             enqueue_result(result,expr->dest);
          }
          {
@@ -95,7 +96,7 @@ void JMain::operator()()
 
 shared_ptr<nj::Result> JMain::asyncQueueGet()
 {
-   return dequeue<nj::Result>(async_queue,m_asyncq,c_asyncq); 
+   return dequeue<nj::Result>(async_queue,m_asyncq,c_asyncq);
 }
 
 void JMain::compileScript(const std::string &filename)
@@ -140,6 +141,16 @@ void JMain::exec(const shared_ptr<nj::Value> &module,const string &funcName,cons
    enqueue(expr,eval_queue,m_evalq,c_evalq);
 }
 
+void JMain::import(const string &text,nj::Callback *c)
+{
+   shared_ptr<nj::Expr> expr(new nj::Expr(c?nj::Expr::asyncQ:nj::Expr::syncQ));
+
+   expr->args.push_back(shared_ptr<nj::Value>(new nj::UTF8String(text)));
+   expr->F = shared_ptr<nj::EvalFunc>(new nj::Import);
+   if(c) trampoline->addJump(expr->id,shared_ptr<nj::Callback>(c));
+   enqueue(expr,eval_queue,m_evalq,c_evalq);
+}
+
 void JMain::stop()
 {
    unique_lock<mutex> lock(m_state);
@@ -153,7 +164,7 @@ void JMain::stop()
 
 shared_ptr<nj::Result> JMain::syncQueueGet()
 {
-   return dequeue<nj::Result>(sync_queue,m_syncq,c_syncq); 
+   return dequeue<nj::Result>(sync_queue,m_syncq,c_syncq);
 }
 
 JMain::~JMain() {}

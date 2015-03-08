@@ -194,3 +194,14 @@ jl_value_t *nj::Kernel::free(int64_t valIndex) throw(JuliaException)
    if(ex) throw getJuliaException(ex);
    return val;
 }
+
+jl_value_t *nj::Kernel::import(const string &moduleName) throw(JuliaException)
+{
+   if(moduleName.length() != 0)
+   {
+      jl_value_t *val = jl_cstr_to_string(moduleName.c_str());
+
+      return invoke("importModule",val);
+   }
+   return 0;
+}

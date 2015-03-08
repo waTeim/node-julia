@@ -45,6 +45,7 @@ class JMain:public ThreadedIO
       void eval(const std::string &expr,nj::Callback *c = 0);
       void exec(const std::string &funcName,const std::vector<std::shared_ptr<nj::Value>> &argv,nj::Callback *c = 0);
       void exec(const std::shared_ptr<nj::Value> &module,const std::string &funcName,const std::vector<std::shared_ptr<nj::Value>> &argv,nj::Callback *c = 0);
+      void import(const std::string &expr,nj::Callback *c = 0);
       void stop();
       std::shared_ptr<nj::Result> syncQueueGet();
       ~JMain();

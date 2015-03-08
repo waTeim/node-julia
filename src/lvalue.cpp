@@ -46,7 +46,7 @@ template <typename V,typename E> static shared_ptr<nj::Value> arrayFromBuffer(jl
    for(int dim = 0;dim < ndims;dim++) dims.push_back(jl_array_dim(jlA,dim));
 
    nj::Array<V,E> *array = new nj::Array<V,E>(dims);
-   
+
    value.reset(array);
    memcpy(array->ptr(),p,array->size()*sizeof(V));
    return value;
@@ -123,7 +123,7 @@ static jl_value_t *convertValue(jl_value_t *from,jl_datatype_t *destType)
    if(juliaConvert)
    {
       JL_GC_PUSH2(&from,&destType);
-  
+
       jl_value_t *to = jl_call2(juliaConvert,(jl_value_t*)destType,from);
 
       JL_GC_POP();
@@ -167,7 +167,7 @@ static jl_value_t *convertArray(jl_value_t *from,jl_datatype_t *destElementType)
       jl_value_t *atype = jl_apply_array_type(destElementType,jl_array_ndims(from));
 
       JL_GC_PUSH2(&from,&destElementType);
-   
+
       jl_value_t *to = jl_call2(juliaConvert,atype,from);
 
       JL_GC_POP();
@@ -177,19 +177,18 @@ static jl_value_t *convertArray(jl_value_t *from,jl_datatype_t *destElementType)
    return 0;
 }
 
-
 static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlA)
 {
    shared_ptr<nj::Value> value;
 
    jl_value_t *elementType = jl_tparam0(jl_typeof(jlA));
 
-   if(elementType == (jl_value_t*)jl_float64_type) value = arrayFromBuffer<double,nj::Float64_t>(jlA); 
+   if(elementType == (jl_value_t*)jl_float64_type) value = arrayFromBuffer<double,nj::Float64_t>(jlA);
    else if(elementType == (jl_value_t*)jl_int64_type) value = arrayFromBuffer<int64_t,nj::Int64_t>(jlA);
    else if(elementType == (jl_value_t*)jl_int32_type) value = arrayFromBuffer<int,nj::Int32_t>(jlA);
    else if(elementType == (jl_value_t*)jl_int8_type) value = arrayFromBuffer<char,nj::Int8_t>(jlA);
    else if(elementType == (jl_value_t*)jl_float32_type) value = arrayFromBuffer<float,nj::Float32_t>(jlA);
-   else if(elementType == (jl_value_t*)jl_uint64_type) value = arrayFromBuffer<uint64_t,nj::UInt64_t>(jlA); 
+   else if(elementType == (jl_value_t*)jl_uint64_type) value = arrayFromBuffer<uint64_t,nj::UInt64_t>(jlA);
    else if(elementType == (jl_value_t*)jl_uint32_type) value = arrayFromBuffer<unsigned,nj::UInt32_t>(jlA);
    else if(elementType == (jl_value_t*)jl_int16_type) value = arrayFromBuffer<short,nj::Int16_t>(jlA);
    else if(elementType == (jl_value_t*)jl_uint8_type) value = arrayFromBuffer<unsigned char,nj::UInt8_t>(jlA);
@@ -198,7 +197,7 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *jlA)
    else if(elementType == (jl_value_t*)jl_utf8_string_type) value = arrayFromElements<string,nj::UTF8String_t,getSTDStringFromJuliaString>(jlA);
    else if(elementType == (jl_value_t*)JVOID_T) value = arrayOfNull(jlA);
    else
-   { 
+   {
       const char *juliaTypename = jl_typename_str(elementType);
 
       if(juliaTypename == JuliaSubString)
@@ -230,7 +229,7 @@ void addLValueElements(jl_value_t *jlVal,vector<shared_ptr<nj::Value>> &res) thr
       jl_tuple_t *t = (jl_tuple_t*)jlVal;
       size_t tupleLen = jl_tuple_len(t);
 
-      for(size_t i = 0;i < tupleLen;i++) 
+      for(size_t i = 0;i < tupleLen;i++)
       {
          jl_value_t *element = jl_tupleref(t,i);
 
@@ -238,7 +237,7 @@ void addLValueElements(jl_value_t *jlVal,vector<shared_ptr<nj::Value>> &res) thr
       }
    }
    else
-   {   
+   {
       shared_ptr<nj::Value> value;
 
       if(jl_is_float64(jlVal)) value.reset(new nj::Float64(jl_unbox_float64(jlVal)));
@@ -263,7 +262,7 @@ void addLValueElements(jl_value_t *jlVal,vector<shared_ptr<nj::Value>> &res) thr
 vector<shared_ptr<nj::Value>> nj::lvalue(jl_value_t *jlVal) throw(JuliaException)
 {
    vector<shared_ptr<nj::Value>> res;
- 
+
    addLValueElements(jlVal,res);
 
    return res;

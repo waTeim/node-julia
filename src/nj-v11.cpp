@@ -435,6 +435,7 @@ void returnResult(const FunctionCallbackInfo<Value> &args,HandleScope &scope,sha
       else
       {
          int argc = res->results().size();
+
          Local<Value> *argv = new Local<Value>[argc];
 
          argc = createResponse(scope,res,argc,argv);
@@ -518,7 +519,9 @@ void doExec(const FunctionCallbackInfo<Value> &args)
    Isolate *I = Isolate::GetCurrent();
    HandleScope scope(I);
    int numArgs = args.Length();
+   int funcNameIndex = 0;
    bool useCallback = false;
+   shared_ptr<nj::Value> module;
 
    if(numArgs == 0)
    {
@@ -526,13 +529,33 @@ void doExec(const FunctionCallbackInfo<Value> &args)
       return;
    }
 
+   if(args[0]->IsObject())
+   {
+      Local<Object> obj = args[0]->ToObject();
+      String::Utf8Value utf(obj->GetConstructorName());
+      string cname(*utf);
+
+      if(cname == "JRef")
+      {
+         nj::JRef *src = node::ObjectWrap::Unwrap<nj::JRef>(obj);
+
+         funcNameIndex = 1;
+         module = dynamic_pointer_cast<nj::Value>(src->getHandle());
+      }
+      else
+      {
+         returnNull(I,args);
+         return;
+      }
+   }
+
    JuliaExecEnv *J = JuliaExecEnv::getSingleton();
-   Local<String> arg0 = Local<String>::Cast(args[0]);
-   String::Utf8Value funcName(arg0);
+   Local<String> text = Local<String>::Cast(args[funcNameIndex]);
+   String::Utf8Value funcName(text);
    Local<Function> cb;
    JMain *engine;
 
-   if(numArgs >= 2 && args[args.Length() - 1]->IsFunction())
+   if(numArgs >= (funcNameIndex + 2) && args[args.Length() - 1]->IsFunction())
    {
       useCallback = true;
       cb = Local<Function>::Cast(args[args.Length() - 1]);
@@ -541,20 +564,21 @@ void doExec(const FunctionCallbackInfo<Value> &args)
    if(funcName.length() > 0 && (engine = J->getEngine()))
    {
       vector<shared_ptr<nj::Value>> req;
-      int numExecArgs = numArgs - 1;
+      int numExecArgs = numArgs - (funcNameIndex + 1);
 
       try
       {
          for(int i = 0;i < numExecArgs;i++)
          {
-            shared_ptr<nj::Value> reqElement = createRequest(args[i + 1]);
+            shared_ptr<nj::Value> reqElement = createRequest(args[i + funcNameIndex + 1]);
 
             if(reqElement.get()) req.push_back(reqElement);
          }
 
          if(!useCallback)
          {
-            engine->exec(*funcName,req);
+            if(funcNameIndex == 0) engine->exec(*funcName,req);
+            else engine->exec(module,*funcName,req);
 
             shared_ptr<nj::Result> res = engine->syncQueueGet();
 
@@ -564,7 +588,8 @@ void doExec(const FunctionCallbackInfo<Value> &args)
          {
             nj::Callback *c = new nj::Callback(cb);
 
-            engine->exec(*funcName,req,c);
+            if(funcNameIndex == 0) engine->exec(*funcName,req,c);
+            else engine->exec(module,*funcName,req,c);
          }
       }
       catch(nj::InvalidException e)
@@ -592,6 +617,61 @@ void doExec(const FunctionCallbackInfo<Value> &args)
    }
 }
 
+void doImport(const FunctionCallbackInfo<Value> &args)
+{
+   Isolate *I = Isolate::GetCurrent();
+   HandleScope scope(I);
+   int numArgs = args.Length();
+
+   if(numArgs  == 0 || numArgs > 2 || (numArgs == 2 && !args[1]->IsFunction()))
+   {
+      returnNull(I,args);
+      return;
+   }
+
+   JuliaExecEnv *J = JuliaExecEnv::getSingleton();
+   Local<String> arg0 = args[0]->ToString();
+   Local<Function> cb;
+   String::Utf8Value text(arg0);
+   JMain *engine;
+   bool useCallback = false;
+
+   if(numArgs >= 2 && args[args.Length() - 1]->IsFunction())
+   {
+      useCallback = true;
+      cb = Local<Function>::Cast(args[args.Length() - 1]);
+   }
+
+   if(text.length() > 0 && (engine = J->getEngine()))
+   {
+      if(!useCallback)
+      {
+         engine->import(*text);
+
+         shared_ptr<nj::Result> res = engine->syncQueueGet();
+
+         returnResult(args,scope,res);
+      }
+      else
+      {
+         nj::Callback *c = new nj::Callback(cb);
+
+         engine->import(*text,c);
+      }
+   }
+   else
+   {
+      if(useCallback)
+      {
+         const unsigned argc = 1;
+         Local<Value> argv[argc] = { String::NewFromUtf8(I,"missing module name") };
+
+         callback(I,cb,argc,argv);
+      }
+      else returnNull(I,args);
+   }
+}
+
 void newScript(const FunctionCallbackInfo<Value> &args)
 {
    Isolate *I = Isolate::GetCurrent();
@@ -606,6 +686,7 @@ void init(Handle<Object> exports)
   nj::JRef::Init(exports);
   NODE_SET_METHOD(exports,"eval",doEval);
   NODE_SET_METHOD(exports,"exec",doExec);
+  NODE_SET_METHOD(exports,"import",doImport);
   NODE_SET_METHOD(exports,"newScript",newScript);
   nj::dispatch_init();
 }

@@ -31,6 +31,7 @@
         "src/Exception.cpp",
         "src/Expr.cpp",
         "src/Immediate.cpp",
+        "src/Import.cpp",
         "src/JMain.cpp",
         "src/JuliaExecEnv.cpp",
         "src/JuliaHandle.cpp",

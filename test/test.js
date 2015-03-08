@@ -713,4 +713,26 @@ describe('Regression Tests',function()
          done();
       });
    });
+   it('Import (synchronous)',function()
+   {
+      testMod = julia.import('test/testMod');
+      expect(testMod.test(100)).to.equal(5050);
+   });
+   it('Import (asynchronous)',function(done)
+   {
+      julia.import('test/testMod',function(err,testMod)
+      {
+         expect(err).to.equal(null);
+         expect(testMod.test(100)).to.equal(5050);
+         done();
+      });
+   });
+   it('Import non existant module attempt',function(done)
+   {
+      julia.import('x',function(err,testMod)
+      {
+         expect(err).to.equal('ArgumentError: x not found in path');
+         done();
+      });
+   });
 });

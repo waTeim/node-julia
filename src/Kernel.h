@@ -39,6 +39,7 @@ namespace nj
          jl_value_t *getError(jl_value_t *ex,jl_value_t *bt) throw(JuliaException);
          int64_t preserve(jl_value_t *val) throw(JuliaException);
          jl_value_t *free(int64_t valIndex) throw(JuliaException);
+         jl_value_t *import(const std::string &moduleName) throw(JuliaException);
    };
 };
 
