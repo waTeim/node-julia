@@ -23,7 +23,7 @@ string nj::getTypeName(jl_value_t *v)
      if(jl_is_symbol(v)) ss << "value is jl_is_symbol";
      if(jl_is_lambda_info(v)) ss << "value is jl_is_lambda_info";
      if(jl_is_vararg_type(v)) ss << "value is jl_is_vararg_type";
-     if(jl_is_getfieldnode(v)) ss << "value is jl_is_getfieldnode";
+     //if(jl_is_getfieldnode(v)) ss << "value is jl_is_getfieldnode";
      if(jl_is_datatype(jl_typeof(v))) ss << "value is a data type";
 
      string tmp = ss.str();
