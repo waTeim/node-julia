@@ -729,9 +729,12 @@ describe('Regression Tests',function()
    });
    it('Import non existant module attempt',function(done)
    {
+      var version = julia.eval('VERSION.minor');
+
       julia.import('x',function(err,testMod)
       {
-         expect(err).to.equal('ArgumentError: x not found in path');
+         if(version == 3) expect(err).to.equal('ArgumentError("x not found in path")');
+         else expect(err).to.equal('ArgumentError: x not found in path');
          done();
       });
    });
