@@ -20,7 +20,6 @@ nj::Result nj::Import::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
       string modulePath = text.toString();
       Kernel *kernel = Kernel::getSingleton();
       jl_value_t *val = kernel->import(modulePath);
-
       vector<shared_ptr<Value>> unfiltered = lvalue(val);
       JuliaHandle &handle = static_cast<JuliaHandle&>(*unfiltered[0]);
       jl_module_t *module = (jl_module_t*)handle.val();
@@ -28,13 +27,12 @@ nj::Result nj::Import::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
       vector<string> filteredNames;
 
       res.push_back(unfiltered[0]);
-
       for(size_t i = 0;i < unfilteredNames.dims()[0];i++)
       {
          string *s = unfilteredNames.ptr() + i;
          jl_value_t *val = jl_get_global(module,jl_symbol(s->c_str()));
 
-         if(jl_is_function(val)) filteredNames.push_back(*s);
+         if(val && jl_is_function(val)) filteredNames.push_back(*s);
       }
 
       vector<size_t> dims;
