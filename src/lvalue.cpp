@@ -217,24 +217,51 @@ void addLValueElements(jl_value_t *jlVal,vector<shared_ptr<nj::Value>> &res) thr
 {
    if(!jlVal) return;
 
-   if(jl_is_null(jlVal))
+   if(JL_IS_NULL(jlVal))
    {
       shared_ptr<nj::Value> value(new nj::Null);
 
       res.push_back(value);
    }
    else if(jl_is_array(jlVal)) res.push_back(getArrayValue(jlVal));
+#ifdef USES_SVEC
+   else if(jl_is_svec(jlVal))
+   {
+      jl_svec_t *t = (jl_svec_t*)jlVal;
+      size_t len = jl_svec_len(t);
+
+      for(size_t i = 0;i < len;i++)
+      {
+         jl_value_t *element = jl_svecref(t,i);
+
+         addLValueElements(element,res);
+      }
+   }
+#endif
    else if(jl_is_tuple(jlVal))
    {
-      jl_tuple_t *t = (jl_tuple_t*)jlVal;
-      size_t tupleLen = jl_tuple_len(t);
+      jl_value_t *t = jlVal;
 
-      for(size_t i = 0;i < tupleLen;i++)
+#if defined(USES_SVEC)
+      size_t len = jl_nfields(t);
+
+      for(size_t i = 0;i < len;i++)
+      {
+         jl_value_t *element = jl_fieldref(t,i);
+
+         addLValueElements(element,res);
+      }
+#else
+      size_t len = jl_tuple_len(t);
+
+      for(size_t i = 0;i < len;i++)
       {
          jl_value_t *element = jl_tupleref(t,i);
 
          addLValueElements(element,res);
       }
+#endif
+
    }
    else
    {

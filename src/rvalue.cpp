@@ -51,7 +51,7 @@ static jl_value_t *rPrimitive(const nj::Primitive &prim) throw(nj::JuliaExceptio
 
    switch(prim.type()->id())
    {
-      case nj::null_type: res = (jl_value_t*)jl_null; break;
+      case nj::null_type: res = (jl_value_t*)JL_NULL; break;
       case nj::boolean_type:
       {
          const nj::Boolean &v = static_cast<const nj::Boolean&>(prim);
@@ -163,16 +163,18 @@ static jl_value_t *rPrimitive(const nj::Primitive &prim) throw(nj::JuliaExceptio
    return res;
 }
 
-template<typename V,typename E> static jl_array_t *arrayFromBuffer(const shared_ptr<nj::Value> &val,jl_datatype_t *jl_element_type)
+template<typename V,typename E> jl_array_t *arrayFromBuffer(const shared_ptr<nj::Value> &val,jl_datatype_t *jl_element_type) throw(nj::JuliaException)
 {
    const nj::Array<V,E> &A = static_cast<nj::Array<V,E>&>(*val);
    jl_value_t *atype = jl_apply_array_type(jl_element_type,A.dims().size());
-   jl_tuple_t *dims = jl_alloc_tuple(A.dims().size());
-   int i = 0;
+   vector<jl_value_t*> argv;
+   nj::Kernel *kernel = nj::Kernel::getSingleton();
 
-   for(size_t dim: A.dims()) jl_tupleset(dims,i++,jl_box_long(dim));
+   for(size_t dim: A.dims()) argv.push_back(jl_box_long(dim));
 
-   return jl_ptr_to_array(atype,A.ptr(),dims,0);
+   jl_value_t *dims = kernel->newTuple(argv);
+
+   return jl_ptr_to_array(atype,A.ptr(),TUPLE_CAST(dims),0);
 }
 
 jl_value_t *getJuliaNullElement(const unsigned char &c)
@@ -185,16 +187,17 @@ jl_value_t *getJuliaStringFromSTDString(const string &s)
    return jl_cstr_to_string(s.c_str());
 }
 
-template <typename V,typename E,jl_value_t *(&getElement)(const V&)> static jl_array_t *arrayFromElements(const shared_ptr<nj::Value> &val,jl_datatype_t *jl_element_type)
+template <typename V,typename E,jl_value_t *(&getElement)(const V&)> jl_array_t *arrayFromElements(const shared_ptr<nj::Value> &val,jl_datatype_t *jl_element_type)
 {
    const nj::Array<V,E> &A = static_cast<nj::Array<V,E>&>(*val);
    jl_value_t *atype = jl_apply_array_type(jl_element_type,A.dims().size());
-   jl_tuple_t *dims = jl_alloc_tuple(A.dims().size());
-   int i = 0;
+   vector<jl_value_t*> argv;
+   nj::Kernel *kernel = nj::Kernel::getSingleton();
 
-   for(size_t dim: A.dims()) jl_tupleset(dims,i++,jl_box_long(dim));
+   for(size_t dim: A.dims()) argv.push_back(jl_box_long(dim));
 
-   jl_array_t *A_jl = jl_new_array(atype,dims);
+   jl_value_t *dims = kernel->newTuple(argv);
+   jl_array_t *A_jl = jl_new_array(atype,TUPLE_CAST(dims));
    V *A_p = A.ptr();
    jl_value_t **Ajl_p = (jl_value_t**)A_jl->data;
     
@@ -203,7 +206,7 @@ template <typename V,typename E,jl_value_t *(&getElement)(const V&)> static jl_a
    return A_jl;
 }
 
-static jl_array_t *rArray(const shared_ptr<nj::Value> &array)
+jl_array_t *rArray(const shared_ptr<nj::Value> &array) throw(nj::JuliaException)
 {
    jl_array_t *res = 0;
    const nj::Array_t *atype = static_cast<const nj::Array_t*>(array->type());

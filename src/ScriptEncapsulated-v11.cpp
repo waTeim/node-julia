@@ -63,14 +63,15 @@ void nj::ScriptEncapsulated::New(const FunctionCallbackInfo<v8::Value>& args)
          shared_ptr<nj::Result> cruw = unwrapped->compile_res;
          int exceptionId = cruw->exceptionId();
 
-         if(exceptionId != nj::Exception::no_exception) raiseException(args,scope,cruw);
+         if(exceptionId != nj::Exception::no_exception) raiseException(scope,cruw);
          else
          {  
             unwrapped->Wrap(args.This());
             args.GetReturnValue().Set(args.This());
+            return;
          }
       }
-      else args.GetReturnValue().SetUndefined();
+      args.GetReturnValue().SetUndefined();
    }
    else
    {

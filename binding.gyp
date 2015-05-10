@@ -30,6 +30,7 @@
         "src/Call.cpp",
         "src/Exception.cpp",
         "src/Expr.cpp",
+        "src/Convert.cpp",
         "src/Immediate.cpp",
         "src/Import.cpp",
         "src/JMain.cpp",

@@ -23,6 +23,7 @@ namespace nj
          jl_value_t *invoke(const std::string &functionName) throw(JuliaException);
          jl_value_t *invoke(const std::string &functionName,jl_value_t *arg) throw(JuliaException);
          jl_value_t *invoke(const std::string &functionName,jl_value_t *arg1,jl_value_t *arg2) throw(JuliaException);
+         jl_value_t *invoke(const std::string &functionName,std::vector<jl_value_t*> &args) throw(JuliaException);
          jl_module_t *load() throw(JuliaException);
 
       public:
@@ -40,6 +41,7 @@ namespace nj
          int64_t preserve(jl_value_t *val) throw(JuliaException);
          jl_value_t *free(int64_t valIndex) throw(JuliaException);
          jl_value_t *import(const std::string &moduleName) throw(JuliaException);
+         jl_value_t *newTuple(std::vector<jl_value_t*> &elements) throw(JuliaException);
    };
 };
 

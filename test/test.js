@@ -42,6 +42,16 @@ describe('Regression Tests',function()
       expect(julia.eval('()')).to.equal(null);
    });
 
+   it('eval Null return (async)',function(done)
+   {
+      julia.eval('()',function(err,res)
+      {
+         expect(err).to.equal(null);
+         expect(res).to.equal(null);
+         done();
+      });
+   });
+
    it('eval Boolean return',function()
    {
       expect(julia.eval('true')).to.equal(true);
@@ -550,7 +560,7 @@ describe('Regression Tests',function()
       expect(julia.exec('identity',re)).to.eql(re);
    });
 
-   /***
+  /***
     *
     * Kind of a workaround here
     *
@@ -596,13 +606,13 @@ describe('Regression Tests',function()
       expect(julia.exec('t1Mult',juliaObj)).to.eql(new Float64Array([5,10,15]));
    });
 
-   it('JRef random creation and deletion',function()
-   {
-      var a = [];
-      var i;
-
-      for(i = 0;i < 400;i++) a[julia.eval('rand(1:999)')] = julia.exec('t1Cons',julia.eval('rand(0:1000000)'),julia.exec('rand',5));
-   });
+//   it('JRef random creation and deletion',function()
+//   {
+//      var a = [];
+//      var i;
+//
+//      for(i = 0;i < 400;i++) a[julia.eval('rand(1:999)')] = julia.exec('t1Cons',julia.eval('rand(0:1000000)'),julia.exec('rand',5));
+//   });
 
    it('2D Array Request with Native Arrays ',function()
    {
@@ -657,6 +667,7 @@ describe('Regression Tests',function()
          done();
       });
    });
+
    it('eval syntax error',function()
    {
       var error;
@@ -671,6 +682,7 @@ describe('Regression Tests',function()
       }
       expect(error.message).to.equal('Julia undefined variable lkasjdlkajsda');
    });
+
    it('function search (not found)',function(done)
    {
       julia.exec('a',function(err,res)
@@ -679,6 +691,7 @@ describe('Regression Tests',function()
          done();
       });
    });
+
    it('function deep search (not found)',function(done)
    {
       julia.exec('a.b',function(err,res)
@@ -687,6 +700,7 @@ describe('Regression Tests',function()
          done();
       });
    });
+
    it('function deep[1] search (found)',function(done)
    {
       julia.exec('Base.identity',10,function(err,res)
@@ -696,6 +710,7 @@ describe('Regression Tests',function()
          done();
       });
    });
+
    it('function deep[3] search (found)',function(done)
    {
       var a = new Float64Array(2);
@@ -713,11 +728,13 @@ describe('Regression Tests',function()
          done();
       });
    });
+
    it('Import (synchronous)',function()
    {
       testMod = julia.import('test/testMod');
       expect(testMod.test(100)).to.equal(5050);
    });
+
    it('Import (asynchronous)',function(done)
    {
       julia.import('test/testMod',function(err,testMod)
@@ -727,6 +744,7 @@ describe('Regression Tests',function()
          done();
       });
    });
+
    it('Import non existant module attempt',function(done)
    {
       var version = julia.eval('VERSION.minor');
@@ -737,5 +755,13 @@ describe('Regression Tests',function()
          else expect(err).to.equal('ArgumentError: x not found in path');
          done();
       });
+   });
+   
+   it('JuliaHandle of struct type',function()
+   {
+      var juliaObj = julia.exec('t1Cons',5,[1,2,3]);
+
+      expect(juliaObj.f1).to.equal(5);
+      expect(juliaObj.f2).to.eql(new Float64Array([1,2,3]));
    });
 });

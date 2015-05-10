@@ -18,6 +18,7 @@ namespace nj
 
          static v8::Handle<v8::Value> New(const v8::Arguments& args);
          static v8::Handle<v8::Value> getHIndex(const v8::Arguments& args);
+         static v8::Handle<v8::Value> getProperty(v8::Local<v8::String> property,const v8::AccessorInfo &info);
 
          int64_t h_index;
          JRef *next;

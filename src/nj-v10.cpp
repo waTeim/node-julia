@@ -365,7 +365,7 @@ Local<String> genError(HandleScope &scope,const shared_ptr<nj::Result> &res)
    return String::New(res->exceptionText().c_str());
 }
 
-Handle<Value> raiseException(HandleScope &scope,const shared_ptr<nj::Result> &res)
+void raiseException(HandleScope &scope,const shared_ptr<nj::Result> &res)
 {
    int exceptionId = res->exceptionId();
    Local<Value> ex;
@@ -395,7 +395,6 @@ Handle<Value> raiseException(HandleScope &scope,const shared_ptr<nj::Result> &re
 
    obj->Set(v8::String::New("stack"),message);
    ThrowException(ex);
-   return scope.Close(Undefined());
 }
 
 Handle<Value> callbackWithResult(HandleScope &scope,const Local<Function> &cb,const shared_ptr<nj::Result> &res)
@@ -425,36 +424,38 @@ Handle<Value> callbackWithResult(HandleScope &scope,const Local<Function> &cb,co
    else return callback(scope,cb,0,0);
 }
 
+Local<Value> mapResult(HandleScope &scope,shared_ptr<nj::Result> &res)
+{
+   int argc = res->results().size();
+   Local<Value> *argv = new Local<Value>[argc];
+
+   argc = createResponse(scope,res,argc,argv);
+
+   if(argc != 0)
+   {
+      if(argc > 1)
+      {
+         Local<Array> rV = Array::New(argc);
+
+         for(int i = 0;i < argc;i++) rV->Set(i,argv[i]);
+
+         return rV;
+      }
+      else return argv[0];
+   }
+   else return Local<Value>();
+}
+
 Handle<Value> returnResult(HandleScope &scope,shared_ptr<nj::Result> &res)
 {
    if(res.get())
    {
       int exceptionId = res->exceptionId();
 
-      if(exceptionId != nj::Exception::no_exception) return raiseException(scope,res);
-      else
-      {
-         int argc = res->results().size();
-         Local<Value> *argv = new Local<Value>[argc];
-
-         argc = createResponse(scope,res,argc,argv);
-
-         if(argc != 0)
-         {
-            if(argc > 1)
-            {
-               Local<Array> rV = Array::New(argc);
-
-               for(int i = 0;i < argc;i++) rV->Set(i,argv[i]);
-
-               return scope.Close(rV);
-            }
-            else return scope.Close(argv[0]);
-         }
-         else return scope.Close(Null());
-      }
+      if(exceptionId != nj::Exception::no_exception) raiseException(scope,res);
+      else return scope.Close(mapResult(scope,res));
    }
-   else return scope.Close(Undefined());
+   return scope.Close(Undefined());
 }
 
 Handle<Value> doEval(const Arguments &args)

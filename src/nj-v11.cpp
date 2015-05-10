@@ -316,39 +316,42 @@ Local<Object> createBufferRes(HandleScope &scope,const shared_ptr<nj::Value> &va
    return buffer;
 }
 
+Local<Value> createResponse(HandleScope &scope,const shared_ptr<nj::Value> &value)
+{
+   Isolate *I = Isolate::GetCurrent();
+
+   if(value->type()->id() == nj::julia_handle_type)
+   {
+      nj::JuliaHandle *handle = static_cast<nj::JuliaHandle*>(value.get());
+      int64_t hIndex = handle->intern();
+      Handle<Value> arguments[1] = { Number::New(I,hIndex) };
+      Local<Function> cons = Local<Function>::New(I,nj::JRef::constructor);
+
+      return cons->NewInstance(1,arguments);
+   }
+   else if(value->isPrimitive())
+   {
+      const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
+
+      return createPrimitiveRes(scope,primitive);
+   }
+   else
+   {
+      const nj::Array_t *array_type = static_cast<const nj::Array_t*>(value->type());
+      const nj::Type *etype = array_type->etype();
+
+      if(etype == nj::UInt8_t::instance()  && value->dims().size() == 1) return createBufferRes(scope,value);
+      else return createArrayRes(scope,value,etype);
+   }
+}
+
 int createResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc,Local<Value> *argv)
 {
    int index = argc - res->results().size();
-   Isolate *I = Isolate::GetCurrent();
 
    for(shared_ptr<nj::Value> value: res->results())
    {
-      if(value.get())
-      {
-         if(value->type()->id() == nj::julia_handle_type)
-         {
-            nj::JuliaHandle *handle = static_cast<nj::JuliaHandle*>(value.get());
-            int64_t hIndex = handle->intern();
-            Handle<Value> arguments[1] = { Number::New(I,hIndex) };
-            Local<Function> cons = Local<Function>::New(I,nj::JRef::constructor);
-
-            argv[index++] = cons->NewInstance(1,arguments);
-         }
-         else if(value->isPrimitive())
-         {
-            const nj::Primitive &primitive = static_cast<const nj::Primitive&>(*value);
-
-            argv[index++] = createPrimitiveRes(scope,primitive);
-         }
-         else
-         {
-            const nj::Array_t *array_type = static_cast<const nj::Array_t*>(value->type());
-            const nj::Type *etype = array_type->etype();
-
-            if(etype == nj::UInt8_t::instance()  && value->dims().size() == 1) argv[index++] = createBufferRes(scope,value);
-            else argv[index++] = createArrayRes(scope,value,etype);
-         }
-      }
+      if(value.get()) argv[index++] = createResponse(scope,value);
    }
    return index;
 }
@@ -360,7 +363,7 @@ Local<String> genError(HandleScope &scope,const shared_ptr<nj::Result> &res)
    return String::NewFromUtf8(I,res->exceptionText().c_str());
 }
 
-void raiseException(const FunctionCallbackInfo<Value> &args,HandleScope &scope,const shared_ptr<nj::Result> &res)
+void raiseException(HandleScope &scope,const shared_ptr<nj::Result> &res)
 {
    Isolate *I = Isolate::GetCurrent();
    int exceptionId = res->exceptionId();
@@ -391,7 +394,6 @@ void raiseException(const FunctionCallbackInfo<Value> &args,HandleScope &scope,c
 
    obj->Set(v8::String::NewFromUtf8(I,"stack"),message);
    I->ThrowException(ex);
-   args.GetReturnValue().SetUndefined();
 }
 
 void callbackWithResult(HandleScope &scope,const Local<Function> &cb,const shared_ptr<nj::Result> &res)
@@ -423,41 +425,44 @@ void callbackWithResult(HandleScope &scope,const Local<Function> &cb,const share
    else callback(I,cb,0,0);
 }
 
-void returnResult(const FunctionCallbackInfo<Value> &args,HandleScope &scope,shared_ptr<nj::Result> &res)
+Local<Value> mapResult(HandleScope &scope,shared_ptr<nj::Result> &res)
 {
    Isolate *I = Isolate::GetCurrent();
+   int argc = res->results().size();
+   Local<Value> *argv = new Local<Value>[argc];
 
+   argc = createResponse(scope,res,argc,argv);
+
+   if(argc != 0)
+   {
+      if(argc > 1)
+      {
+         Local<Array> rV = Array::New(I,argc);
+
+         for(int i = 0;i < argc;i++) rV->Set(i,argv[i]);
+
+         return rV;
+      }
+      else return argv[0];
+   }
+   else return Local<Value>();
+}
+
+void returnResult(const FunctionCallbackInfo<Value> &args,HandleScope &scope,shared_ptr<nj::Result> &res)
+{
    if(res.get())
    {
       int exceptionId = res->exceptionId();
 
-      if(exceptionId != nj::Exception::no_exception) raiseException(args,scope,res);
+      if(exceptionId != nj::Exception::no_exception) raiseException(scope,res);
       else
       {
-         int argc = res->results().size();
-
-         Local<Value> *argv = new Local<Value>[argc];
-
-         argc = createResponse(scope,res,argc,argv);
-
-         if(argc != 0)
-         {
-            if(argc > 1)
-            {
-               Local<Array> rV = Array::New(I,argc);
-
-               for(int i = 0;i < argc;i++) rV->Set(i,argv[i]);
-
-               args.GetReturnValue().Set(rV);
-            }
-            else args.GetReturnValue().Set(argv[0]);
-         }
-         else returnNull(I,args);
+         args.GetReturnValue().Set(mapResult(scope,res));
+         return;
       }
    }
-   else args.GetReturnValue().SetUndefined();
+   args.GetReturnValue().SetUndefined();
 }
-
 
 void doEval(const FunctionCallbackInfo<Value> &args)
 {

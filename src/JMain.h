@@ -9,6 +9,7 @@
 namespace nj
 {
    class Callback;
+   class JuliaHandle;
 };
 
 class Trampoline;
@@ -42,6 +43,7 @@ class JMain:public ThreadedIO
       void operator()();
       std::shared_ptr<nj::Result> asyncQueueGet();
       void compileScript(const std::string &filename);
+      void convert(const std::shared_ptr<nj::JuliaHandle> &val);
       void eval(const std::string &expr,nj::Callback *c = 0);
       void exec(const std::string &funcName,const std::vector<std::shared_ptr<nj::Value>> &argv,nj::Callback *c = 0);
       void exec(const std::shared_ptr<nj::Value> &module,const std::string &funcName,const std::vector<std::shared_ptr<nj::Value>> &argv,nj::Callback *c = 0);

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <julia.h>
 #include "JMain.h"
 #include "Call.h"
@@ -6,6 +7,8 @@
 #include "Callback.h"
 #include "Immediate.h"
 #include "Import.h"
+#include "Convert.h"
+#include "JuliaHandle.h"
 #include "JuliaExecEnv.h"
 #include "Trampoline.h"
 
@@ -60,6 +63,7 @@ void JMain::operator()()
 
    if(!deactivated)
    {
+
       if(install_directory == "") jl_init(0);
       else jl_init_with_image((char*)install_directory.c_str(),(char*)"sys.ji");
 
@@ -91,6 +95,11 @@ void JMain::operator()()
             if(deactivated) done = true;
          }
       }
+
+#if defined(JULIA_VERSION_MINOR) && JULIA_VERSION_MINOR == 4
+      jl_atexit_hook();
+#endif
+
    }
 }
 
@@ -105,6 +114,15 @@ void JMain::compileScript(const std::string &filename)
 
    expr->args.push_back(shared_ptr<nj::Value>(new nj::UTF8String(filename)));
    expr->F = shared_ptr<nj::EvalFunc>(new nj::Script);
+   enqueue(expr,eval_queue,m_evalq,c_evalq);
+}
+
+void JMain::convert(const std::shared_ptr<nj::JuliaHandle> &val)
+{
+   shared_ptr<nj::Expr> expr(new nj::Expr(nj::Expr::syncQ));
+
+   expr->args.push_back(val);
+   expr->F = shared_ptr<nj::EvalFunc>(new nj::Convert);
    enqueue(expr,eval_queue,m_evalq,c_evalq);
 }
 

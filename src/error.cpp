@@ -6,6 +6,7 @@
 #include "debug.h"
 #include "Kernel.h"
 #include "util.h"
+#include "juliav.h"
 
 extern "C"
 {
@@ -48,13 +49,23 @@ static string methodErrorMsg(jl_value_t *ex)
    stringstream ss;
    jl_value_t *f0 = jl_get_nth_field(ex,0);
    jl_value_t *f1 = jl_get_nth_field(ex,1);
+
+#if defined(USES_SVEC)
+   size_t numArgs = jl_nfields(f1);
+#else
    size_t numArgs = jl_tuple_len(f1);
+#endif
 
    ss << "unmatched method " << jl_gf_name(f0)->name << "(";
 
    for(size_t i = 0;i < numArgs;i++)
    {
+
+#if defined(USES_SVEC)
+      jl_value_t *arg = jl_fieldref(f1,i);
+#else
       jl_value_t *arg = jl_tupleref(f1,i);
+#endif
 
       if(i != 0) ss << ",";
       ss << jl_typename_str(jl_typeof(arg));

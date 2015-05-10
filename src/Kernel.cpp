@@ -73,6 +73,32 @@ jl_value_t *nj::Kernel::invoke(const string &functionName,jl_value_t *arg1,jl_va
    return res;
 }
 
+jl_value_t *nj::Kernel::invoke(const std::string &functionName,std::vector<jl_value_t*> &args) throw(JuliaException)
+{
+   size_t numArgs = args.size();
+
+   if(numArgs == 0) return invoke(functionName);
+   if(!nj_module) nj_module = load();
+
+   jl_function_t *func = jl_get_function(nj_module,functionName.c_str());
+
+   if(!func) throw getJuliaException("Could not locate function nj." + functionName);
+
+   jl_value_t **jlArgs;
+
+   JL_GC_PUSHARGS(jlArgs,numArgs);
+
+   for(size_t i = 0;i < numArgs;i++) jlArgs[i] = args[i];
+
+   jl_value_t *res = jl_call(func,jlArgs,numArgs);
+   jl_value_t *ex = jl_exception_occurred();
+
+   JL_GC_POP();
+
+   if(ex) throw getJuliaException(ex);
+   return res;
+}
+
 jl_module_t *nj::Kernel::load() throw(JuliaException)
 {
    string njPath = libDir + "/nj.jl";
@@ -204,4 +230,9 @@ jl_value_t *nj::Kernel::import(const string &moduleName) throw(JuliaException)
       return invoke("importModule",val);
    }
    return 0;
+}
+
+jl_value_t *nj::Kernel::newTuple(std::vector<jl_value_t*> &elements) throw(JuliaException)
+{
+   return invoke("newTuple",elements);
 }

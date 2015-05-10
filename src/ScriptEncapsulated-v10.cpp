@@ -62,7 +62,7 @@ Handle<Value> nj::ScriptEncapsulated::New(const Arguments& args)
          shared_ptr<nj::Result> cruw = unwrapped->compile_res;
          int exceptionId = cruw->exceptionId();
 
-         if(exceptionId != nj::Exception::no_exception) return raiseException(scope,cruw);
+         if(exceptionId != nj::Exception::no_exception) raiseException(scope,cruw);
          else
          {  
             unwrapped->Wrap(args.This());

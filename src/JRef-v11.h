@@ -20,6 +20,8 @@ namespace nj
 
          static void New(const v8::FunctionCallbackInfo<v8::Value> &args);
          static void getHIndex(const v8::FunctionCallbackInfo<v8::Value> &args);
+         static void getProperty(v8::Local<v8::String> property,const v8::PropertyCallbackInfo<v8::Value> &info);
+
 
          int64_t h_index;
          JRef *next;

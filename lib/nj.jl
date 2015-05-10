@@ -260,4 +260,6 @@ function importModule(modulePath::ASCIIString)
    return m,functionNames;
 end
 
+newTuple(args...)=tuple(args...)
+
 end

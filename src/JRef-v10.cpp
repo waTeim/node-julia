@@ -1,13 +1,47 @@
 #include <iostream>
 #include <node.h>
+#include "nj-v10.h"
 #include "JRef-v10.h"
 #include "JuliaHandle.h"
+#include "JuliaExecEnv.h"
+#include "JMain.h"
 
 using namespace std;
 using namespace v8;
 
 Persistent<Function> nj::JRef::constructor;
 map<int64_t,nj::JRef*> nj::JRef::obj_chain;
+
+Handle<Value> nj::JRef::getProperty(Local<String> property,const AccessorInfo &info)
+{
+   HandleScope scope;
+
+   String::Utf8Value text(property);
+   JuliaExecEnv *J = JuliaExecEnv::getSingleton();
+   JMain *engine;
+
+   if(text.length() > 0 && (engine = J->getEngine()))
+   {
+      JRef *obj = ObjectWrap::Unwrap<JRef>(info.This());
+      shared_ptr<JuliaHandle> element = obj->handle->getElement(*text);
+
+      if(element.get())
+      {
+         engine->convert(element);
+
+         shared_ptr<nj::Result> res = engine->syncQueueGet();
+
+         if(res.get())
+         {
+            int exceptionId = res->exceptionId();
+
+            if(exceptionId != nj::Exception::no_exception) raiseException(scope,res);
+            else return mapResult(scope,res);
+         }
+      }
+   }
+   return Undefined();
+}
 
 Handle<Value> nj::JRef::New(const Arguments& args)
 {
@@ -36,6 +70,12 @@ Handle<Value> nj::JRef::New(const Arguments& args)
       }
 
       JRef *unwrapped = new JRef(hIndex);
+      vector<string> properties = unwrapped->handle->properties();
+
+      for(string property: properties)
+      {
+         args.This()->SetAccessor(String::NewSymbol(property.c_str()),&getProperty);
+      }
 
       unwrapped->Wrap(args.This());
       return args.This();

@@ -1,13 +1,53 @@
 #include <iostream>
 #include <node.h>
+#include "nj-v11.h"
 #include "JRef-v11.h"
 #include "JuliaHandle.h"
+#include "JuliaExecEnv.h"
+#include "JMain.h"
 
 using namespace std;
 using namespace v8;
 
 Persistent<Function> nj::JRef::constructor;
 map<int64_t,nj::JRef*> nj::JRef::obj_chain;
+
+void nj::JRef::getProperty(Local<String> property,const PropertyCallbackInfo<v8::Value> &info)
+{
+   Isolate *I = info.GetIsolate();
+   HandleScope scope(I);
+
+   String::Utf8Value text(property);
+   JuliaExecEnv *J = JuliaExecEnv::getSingleton();
+   JMain *engine;
+
+   if(text.length() > 0 && (engine = J->getEngine()))
+   {
+      JRef *obj = ObjectWrap::Unwrap<JRef>(info.This());
+      shared_ptr<JuliaHandle> element = obj->handle->getElement(*text);
+
+      if(element.get())
+      {
+         engine->convert(element);
+
+         shared_ptr<nj::Result> res = engine->syncQueueGet();
+
+         if(res.get())
+         {
+            int exceptionId = res->exceptionId();
+
+            if(exceptionId != nj::Exception::no_exception) raiseException(scope,res);
+            else
+            {
+               info.GetReturnValue().Set(mapResult(scope,res));
+               return;
+            }
+         }
+         info.GetReturnValue().SetUndefined();
+      }
+   }
+   info.GetReturnValue().SetUndefined();
+}
 
 void nj::JRef::New(const FunctionCallbackInfo<v8::Value>& args)
 {
@@ -28,15 +68,23 @@ void nj::JRef::New(const FunctionCallbackInfo<v8::Value>& args)
 
             if(cname == "JRef") 
             {
-               JRef *source = ObjectWrap::Unwrap<JRef>(arg0);
+               JRef *obj = ObjectWrap::Unwrap<JRef>(arg0);
               
-               hIndex = source->h_index;
+               hIndex = obj->h_index;
             }
          }
          else if(args[0]->IsNumber()) hIndex = args[0]->IntegerValue();
       }
 
       JRef *unwrapped = new JRef(hIndex);
+      vector<string> properties = unwrapped->handle->properties();
+
+      for(string property: properties)
+      {
+         Local<String> propertyName = String::NewFromUtf8(I,property.c_str());
+
+         args.This()->SetAccessor(propertyName,&getProperty);
+      }
 
       unwrapped->Wrap(args.This());
       args.GetReturnValue().Set(args.This());

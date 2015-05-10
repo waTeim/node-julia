@@ -5,8 +5,6 @@ os:
 env:
   - NODE_VERSION="0.10"
     JULIA_VERSION="juliareleases" 
-  - NODE_VERSION="0.10"
-    JULIA_VERSION="julianightlies"
   - NODE_VERSION="0.12"
     JULIA_VERSION="juliareleases" 
   - NODE_VERSION="0.12"
