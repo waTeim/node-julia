@@ -163,6 +163,19 @@ static jl_value_t *rPrimitive(const nj::Primitive &prim) throw(nj::JuliaExceptio
    return res;
 }
 
+jl_array_t *zeroLengthArray(jl_datatype_t *jl_element_type) throw(nj::JuliaException)
+{
+   jl_value_t *atype = jl_apply_array_type(jl_element_type,1);
+   vector<jl_value_t*> argv;
+   nj::Kernel *kernel = nj::Kernel::getSingleton();
+
+   argv.push_back(jl_box_long(0));
+
+   jl_value_t *dims = kernel->newTuple(argv);
+
+   return jl_new_array(atype,TUPLE_CAST(dims));
+}
+
 template<typename V,typename E> jl_array_t *arrayFromBuffer(const shared_ptr<nj::Value> &val,jl_datatype_t *jl_element_type) throw(nj::JuliaException)
 {
    const nj::Array<V,E> &A = static_cast<nj::Array<V,E>&>(*val);
@@ -241,6 +254,11 @@ jl_array_t *rArray(const shared_ptr<nj::Value> &array) throw(nj::JuliaException)
          jl_datatype_t *regexType = kernel->getRegexType();
 
          res = arrayFromElements<string,nj::Regex_t,getJuliaRegexFromString>(array,regexType);
+      }
+      break;
+      case nj::any_type:
+      {
+          if(array->dims().size() == 0) res = zeroLengthArray(jl_any_type);
       }
       break;
    }

@@ -386,6 +386,11 @@ describe('Regression Tests',function()
       });
    });
 
+   it('0 length array input',function()
+   {
+      expect(julia.exec('size',[])).to.equal(0);
+   });
+
    it('simple Integer array input',function(done)
    {
       julia.exec('sum',[1,2,3],function(err,res)

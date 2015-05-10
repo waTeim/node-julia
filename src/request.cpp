@@ -329,7 +329,7 @@ static shared_ptr<nj::Value> createArrayReqFromArray(const Local<Value> &from) t
 
       examineArray(a,0,dims,etype,determineDimensions);
 
-      if(dims[0] == 0)
+      if(dims.size() == 0 || dims[0] == 0)
       {
          to.reset(new nj::Array<char,nj::Any_t>(dims));
          return to;

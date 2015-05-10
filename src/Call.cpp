@@ -129,7 +129,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
             break;
             case 2:
             {
-	            jl_value_t *arg1 = rvalue(args[argOffset]);
+               jl_value_t *arg1 = rvalue(args[argOffset]);
                jl_value_t *arg2 = rvalue(args[argOffset + 1]);
 
                if(!arg1 || !arg2) rvalue_error = true;
