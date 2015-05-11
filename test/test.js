@@ -784,4 +784,11 @@ describe('Regression Tests',function()
       expect(juliaObj.f1).to.equal(5);
       expect(juliaObj.f2).to.eql(new Float64Array([1,2,3]));
    });
+
+   it('Eval quote',function()
+   {
+      var juliaObj = julia.eval(':(a + b)')
+
+      expect(juliaObj.getHIndex).to.exist;
+   });
 });

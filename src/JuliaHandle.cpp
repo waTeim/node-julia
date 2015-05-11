@@ -40,8 +40,7 @@ nj::JuliaHandle::JuliaHandle(jl_value_t *val,bool preserve) throw(JuliaException
 
    jl_value_t *vtype = jl_typeof(val);
 
-   if((jl_is_structtype(vtype) || jl_is_bitstype(vtype)) && !jl_is_module(val))
-   if((jl_is_structtype(vtype) || jl_is_bitstype(vtype)) && !jl_is_module(val) && !jl_is_tuple(val))
+   if((jl_is_structtype(vtype) || jl_is_bitstype(vtype)) && !jl_is_module(val) && !jl_is_tuple(val) && !jl_is_expr(val))
    {
 #if defined(USES_SVEC)
       size_t numFields = jl_datatype_nfields(vtype);
