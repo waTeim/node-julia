@@ -791,4 +791,15 @@ describe('Regression Tests',function()
 
       expect(juliaObj.getHIndex).to.exist;
    });
+
+// Keep it around but commented for now.
+//
+//   it('JuMP',function()
+//   {
+//      this.timeout(6000);
+//      var JuMP = julia.import('JuMP');
+//      var m = julia.eval('JuMP.Model()');
+//
+//      expect(m.getHIndex).to.exist;
+//   });
 });
