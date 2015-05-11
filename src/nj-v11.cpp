@@ -165,7 +165,7 @@ template<typename V,typename E,Local<Value> getElement(Isolate *I,const V &val)>
    Isolate *I = Isolate::GetCurrent();
    const nj::Array<V,E> &array = static_cast<const nj::Array<V,E>&>(*value);
 
-   if(array.size() == 0) return Local<Array>();
+   if(array.size() == 0) return Array::New(I,0);
    if(array.dims().size() == 1)
    {
       size_t size0 = array.dims()[0];
@@ -250,7 +250,7 @@ template<typename V,typename E,typename N,typename Nv> Local<Value> createArrayR
    Isolate *I = Isolate::GetCurrent();
    const nj::Array<V,E> &array = static_cast<const nj::Array<V,E>&>(*value);
 
-   if(array.size() == 0) return Local<Array>();
+   if(array.size() == 0) return Array::New(I,0);
    if(array.dims().size() == 1)
    {
       size_t size0 = array.dims()[0];

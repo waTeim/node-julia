@@ -61,7 +61,7 @@ namespace nj
          virtual bool isPrimitive() const {  return false;  }
          virtual const std::vector<size_t> &dims() const {  return dimensions;  }
          virtual const Type *type() const {  return Array_t::instance(E::instance());  }
-         virtual V *ptr() const {  return data.get()->data();  }
+         virtual V *ptr() const {  return data.get()?data.get()->data():0;  }
          virtual size_t size() const {  return num_elements;  }
          virtual ~Array() throw(JuliaException) {}
    };

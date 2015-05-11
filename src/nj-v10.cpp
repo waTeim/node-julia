@@ -165,7 +165,7 @@ template<typename V,typename E,Local<Value> getElement(const V &val)> Local<Arra
 {
    const nj::Array<V,E> &array = static_cast<const nj::Array<V,E>&>(*value);
 
-   if(array.size() == 0) return Local<Array>();
+   if(array.size() == 0) return Array::New(0);
    if(array.dims().size() == 1)
    {
       size_t size0 = array.dims()[0];
@@ -252,7 +252,7 @@ template<typename V,typename E,char const *N,typename Nv> Local<Value> createArr
 {
    const nj::Array<V,E> &array = static_cast<const nj::Array<V,E>&>(*value);
 
-   if(array.size() == 0) return Local<Array>();
+   if(array.size() == 0) return Array::New(0);
    if(array.dims().size() == 1)
    {
       size_t size0 = array.dims()[0];

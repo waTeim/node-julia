@@ -391,6 +391,21 @@ describe('Regression Tests',function()
       expect(julia.exec('size',[])).to.equal(0);
    });
 
+   it('0 length typed array output',function()
+   {
+      expect(julia.eval('Float64[]')).to.eql([]);
+   });
+
+   it('0 length array of Any',function()
+   {
+      expect(julia.eval('[]')).to.eql([]);
+   });
+
+   it('0 length array to 0 length array',function()
+   {
+      expect(julia.exec('identity',[])).to.eql([]);
+   });
+
    it('simple Integer array input',function(done)
    {
       julia.exec('sum',[1,2,3],function(err,res)
