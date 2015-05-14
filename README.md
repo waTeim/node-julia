@@ -36,7 +36,7 @@ produces
 
 # A Simple API
 
-There are 3 functions; **eval** **exec** and **Script**.
+There are 4 base functions; **eval** **exec** and **Script**, and *import*.
 
 ## eval
 
@@ -44,14 +44,17 @@ This function takes a single string argument and evaluates it like it was typed
 in the Julia command line and returns the result *res* while *err* will be false if
 successful or contain a error message otherwise
 
-    julia.eval('e^10', function(err,res) {
-       if(!err) console.log('exp(10) = ', res)
+    julia.eval('e^10',function(err,res) {
+       if(!err) console.log('exp(10) = ',res)
     });
+
+    // simple prevention of premature exit
+    setTimeout(function(){ console.log('done.'); },1000);
 
 Calls to **eval** without a function callback are also supported. Matrices
 are easily constructed using Julia's Matlab-like matrix syntax.
 
-    console.log('2x2 matrix: ', julia.eval('[ 1 2; 3 4]'));
+    console.log('2x2 matrix: ',julia.eval('[1 2; 3 4]'));
 
 ## exec
 
@@ -60,7 +63,7 @@ This function takes a *String* naming the Julia function to use followed by any 
 
 Calculate the inverse of a matrix and print the result.
 
-    var a = julia.eval('[ 2 1; 1 1]');
+    var a = julia.eval('[2 1; 1 1]');
 
     julia.exec('inv',a,function(err,inv) {
        if(!err) {
@@ -70,16 +73,42 @@ Calculate the inverse of a matrix and print the result.
        }
        else console.log(err);
     });
+    setTimeout(function(){ console.log('done.'); },1000);
 
+
+
+
+## import
+
+Julia modules may be imported using import and the functions exported by
+the module will be mapped to Javascript functions. For example,
+[JuMP](http://jump.readthedocs.org/en/latest) can conveniently be
+used to solve a linear programming problem in the following way:
+
+    var julia = require('node-julia');
+    var JuMP = julia.import('JuMP');
+    var m = julia.eval('m = JuMP.Model()');
+    var m = julia.eval('m = JuMP.Model()');
+    var x = julia.eval('JuMP.@defVar(m,0 <= x <= 2)');
+    var y = julia.eval('JuMP.@defVar(m,0 <= y <= 30)');
+
+    julia.eval('JuMP.@setObjective(m,Max, 5x + 3*y)');
+    julia.eval('JuMP.@addConstraint(m,1x + 5y <= 3.0)');
+
+    var status = JuMP.solve(m);
+
+    console.log('Objective value: ',JuMP.getObjectiveValue(m));
+    console.log('X value: ',JuMP.getValue(x));
+    console.log('Y value: ',JuMP.getValue(y));
 
 ## Script
 
 Julia scripts can be functionalized and compiled and then subsequently
 called using **Script.exec** which has the same semantics as **exec**.
 
-    var aScript = julia.Script('ascript.jl');
+        var aScript = julia.Script('ascript.jl');
 
-    aScript.exec();
+        aScript.exec();
 
 # Synchronous and Asynchronous Calls
 Both synchronous and asynchronous calls are supported and the type used is
@@ -90,7 +119,7 @@ indicated by the presence (or lack) of a callback function.
     julia.exec('svd',a,function(err,u,s,v) {     // asynchronous
     ...
     });
-    
+
 # Error Conditions
 
 When executing a call synchronously, Julia errors are caught and then
@@ -116,11 +145,12 @@ Tests run using npm
     npm test
 
 # Compatibility
-Tested with [node](http://nodejs.org/) 0.10.x, 0.12.x, [io.js](https://iojs.org/) 1.3,
-and [atom-shell](https://github.com/atom/atom-shell).  
+Tested with [node](http://nodejs.org/) 0.10.x, 0.12.x, [io.js](https://iojs.org/) 2.0.x
 
 # Limitations
 
 * Windows is currently not supported.  Julia's primary compilation method
 is to use gcc while gyp expects MSVS. Reconciling this is underway, but
 incomplete.
+* Recent changes to the development version of Julia have caused an
+incompatibility between Julia v0.4 and node 0.10.x on OS/X
