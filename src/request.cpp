@@ -222,7 +222,7 @@ template <typename V,typename N> static void fillFromNativeArray(size_t stride,s
 
    for(size_t elementNum = 0;elementNum < arr.len();elementNum++)
    {
-      *(to + offset) = V(*dptr++);
+      *(to + offset) = *dptr++;
       offset += stride;
    }
 }

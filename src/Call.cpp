@@ -152,7 +152,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
       {
          jl_value_t **jl_args = new jl_value_t*[numArgs];
 
-         for(int i = 0;i < numArgs && !rvalue_error;i++)
+         for(size_t i = 0;i < numArgs && !rvalue_error;i++)
          {
             jl_args[i] = rvalue(args[i + argOffset]);
             if(!jl_args[i]) rvalue_error = true;
