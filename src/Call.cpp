@@ -66,7 +66,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
 {
    vector<shared_ptr<nj::Value>> res;
    jl_module_t *start = 0;
-   int numArgs;
+   size_t numArgs;
    int argOffset;
    vector<string> funcNamePath;
 
@@ -157,7 +157,7 @@ nj::Result nj::Call::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
             jl_args[i] = rvalue(args[i + argOffset]);
             if(!jl_args[i]) rvalue_error = true;
          }
-         if(!rvalue_error) jl_res = jl_call(func,jl_args,numArgs);
+         if(!rvalue_error) jl_res = jl_call(func,jl_args,(int)numArgs);
          delete jl_args;
       }
 

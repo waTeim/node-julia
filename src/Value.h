@@ -53,7 +53,7 @@ namespace nj
             else
             {
                num_elements = 1;
-               for(int dimension: dimensions) num_elements *= dimension;
+               for(size_t dimension: dimensions) num_elements *= dimension;
                if(num_elements) data = std::shared_ptr<std::vector<V>>(new std::vector<V>(num_elements));
             }
          }

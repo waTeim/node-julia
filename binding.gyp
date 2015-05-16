@@ -106,6 +106,15 @@
           {
             "msvs_settings":
             {
+              "VCCLCompilerTool":
+              {
+                "AdditionalOptions": [ "/EHa" ],
+                "DisableSpecificWarnings": 
+                [
+                  4290,
+                  4200
+                ]
+              },
               "VCLinkerTool":
               {
                 "AdditionalLibraryDirectories":

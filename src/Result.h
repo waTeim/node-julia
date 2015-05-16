@@ -25,7 +25,7 @@ namespace nj
          std::string exceptionText() const { return _ex.get()?_ex->what():""; }
          std::vector<std::string> exceptionStack() const { return _ex.get()?_ex->stack():std::vector<std::string>(); }
          int exceptionId() const { return _ex.get()?_ex->id():Exception::no_exception; }
-         int exprId() const { return expr_id; }
+         int64_t exprId() const { return expr_id; }
    };
 };
 

@@ -144,7 +144,7 @@ static void examineArray(const Local<Array> &a,size_t level,vector<size_t> &dims
 
    for(size_t i = 0;i < len;i++)
    {
-      Local<Value> el = a->Get(i);
+      Local<Value> el = a->Get((unsigned)i);
 
       if(determineDimensions) dims.push_back(len);
       else
@@ -222,7 +222,7 @@ template <typename V,typename N> static void fillFromNativeArray(size_t stride,s
 
    for(size_t elementNum = 0;elementNum < arr.len();elementNum++)
    {
-      *(to + offset) = *dptr++;
+      *(to + offset) = V(*dptr++);
       offset += stride;
    }
 }
@@ -261,7 +261,7 @@ template <typename V,V (&accessor)(const Local<Value>&)> static void fillSubArra
    {
       for(size_t elementNum = 0;elementNum < numElements;elementNum++)
       {
-         *(to + offset) = accessor(from->Get(elementNum));
+         *(to + offset) = accessor(from->Get((unsigned)elementNum));
          offset += stride;
       }
    }
@@ -269,7 +269,7 @@ template <typename V,V (&accessor)(const Local<Value>&)> static void fillSubArra
    {
       for(size_t elementNum = 0;elementNum < numElements;elementNum++)
       {
-         Local<Array> subArray = Local<Array>::Cast(from->Get(elementNum));
+         Local<Array> subArray = Local<Array>::Cast(from->Get((unsigned)elementNum));
 
          fillSubArray<V,accessor>(dims,strides,ixNum + 1,offset,to,subArray);
          offset += stride;
@@ -284,16 +284,16 @@ template <typename V,typename E,V (&accessor)(const Local<Value>&)> static void 
 
    if(a.dims().size() == 1)
    {
-      size_t length = a.dims()[0];
+      unsigned length = (unsigned)a.dims()[0];
 
-      for(size_t index = 0;index < length;index++) *p++ = accessor(from->Get(index));
+      for(unsigned index = 0;index < length;index++) *p++ = accessor(from->Get(index));
    }
    else if(a.dims().size() == 2)
    {
-      size_t rows = a.dims()[0];
-      size_t cols = a.dims()[1];
+      unsigned rows = (unsigned)a.dims()[0];
+      unsigned cols = (unsigned)a.dims()[1];
 
-      for(size_t row = 0;row < rows;row++)
+      for(unsigned row = 0;row < rows;row++)
       {
          Local<Value> val = from->Get(row);
 
@@ -301,7 +301,7 @@ template <typename V,typename E,V (&accessor)(const Local<Value>&)> static void 
          {
             Local<Array> rowVector = Local<Array>::Cast(val);
 
-            for(size_t col = 0;col < cols;col++) p[col*rows + row] = accessor(rowVector->Get(col));
+            for(unsigned col = 0;col < cols;col++) p[col*rows + row] = accessor(rowVector->Get(col));
          }
          else fillFromNativeArray<V>(rows,row,p,val);
       }

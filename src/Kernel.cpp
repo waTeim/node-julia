@@ -90,7 +90,7 @@ jl_value_t *nj::Kernel::invoke(const std::string &functionName,std::vector<jl_va
 
    for(size_t i = 0;i < numArgs;i++) jlArgs[i] = args[i];
 
-   jl_value_t *res = jl_call(func,jlArgs,numArgs);
+   jl_value_t *res = jl_call(func,jlArgs,(int)numArgs);
    jl_value_t *ex = jl_exception_occurred();
 
    JL_GC_POP();

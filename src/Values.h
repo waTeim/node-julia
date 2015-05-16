@@ -56,10 +56,10 @@ namespace nj
          Int64(int64_t i):PValue(i) {}
          virtual const Type *type() const {  return Int64_t::instance();  }
          virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
-         virtual char toChar() const throw(InvalidException) {  return val();  }
+         virtual char toChar() const throw(InvalidException) {  return (char)val();  }
          virtual int64_t toInt() const throw(InvalidException) {  return val();  }
          virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
-         virtual double toFloat() const throw(InvalidException) {  return val();  }
+         virtual double toFloat() const throw(InvalidException) {  return (double)val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~Int64() throw(JuliaException) {}
    }; 
@@ -71,10 +71,10 @@ namespace nj
          UInt64(uint64_t i):PValue(i) {}
          virtual const Type *type() const {  return UInt64_t::instance();  }
          virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
-         virtual char toChar() const throw(InvalidException) {  return val();  }
+         virtual char toChar() const throw(InvalidException) {  return (char)val();  }
          virtual int64_t toInt() const throw(InvalidException) {  return val();  }
          virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
-         virtual double toFloat() const throw(InvalidException) {  return val();  }
+         virtual double toFloat() const throw(InvalidException) {  return (double)val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~UInt64() throw(JuliaException) {}
    }; 
@@ -116,7 +116,7 @@ namespace nj
          Int16(short s):PValue(s) {}
          virtual const Type *type() const {  return Int16_t::instance();  }
          virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
-         virtual char toChar() const throw(InvalidException) {  return val();  }
+         virtual char toChar() const throw(InvalidException) {  return (char)val();  }
          virtual int64_t toInt() const throw(InvalidException) {  return val();  }
          virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
@@ -131,7 +131,7 @@ namespace nj
          UInt16(unsigned int s):PValue(s) {}
          virtual const Type *type() const {  return UInt16_t::instance();  }
          virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
-         virtual char toChar() const throw(InvalidException) {  return val();  }
+         virtual char toChar() const throw(InvalidException) {  return (char)val();  }
          virtual int64_t toInt() const throw(InvalidException) {  return val();  }
          virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
@@ -177,8 +177,8 @@ namespace nj
          virtual const Type *type() const {  return Float64_t::instance();  }
          virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
          virtual char toChar() const throw(InvalidException)  {  throw InvalidException("is float");  }
-         virtual int64_t toInt() const throw(InvalidException) {  return val();  }
-         virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
+         virtual int64_t toInt() const throw(InvalidException) {  return (int64_t)val();  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return (uint64_t)val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~Float64() throw(JuliaException) {}
@@ -192,8 +192,8 @@ namespace nj
          virtual const Type *type() const {  return Float32_t::instance();  }
          virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
          virtual char toChar() const throw(InvalidException)  {  throw InvalidException("is float");  }
-         virtual int64_t toInt() const throw(InvalidException) {  return val();  }
-         virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
+         virtual int64_t toInt() const throw(InvalidException) {  return (int64_t)val();  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return (uint64_t)val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~Float32() throw(JuliaException) {}
@@ -236,9 +236,9 @@ namespace nj
          Date(double d):PValue(d) {}
          virtual const Type *type() const {  return Date_t::instance();  }
          virtual bool toBoolean() const throw(InvalidException) {  return val() != 0;  }
-         virtual char toChar() const throw(InvalidException) {  return val();  }
-         virtual int64_t toInt() const throw(InvalidException) {  return val();  }
-         virtual uint64_t toUInt() const throw(InvalidException) {  return val();  }
+         virtual char toChar() const throw(InvalidException) {  return (char)val();  }
+         virtual int64_t toInt() const throw(InvalidException) {  return (int64_t)val();  }
+         virtual uint64_t toUInt() const throw(InvalidException) {  return (uint64_t)val();  }
          virtual double toFloat() const throw(InvalidException) {  return val();  }
          virtual std::string toString() const throw(InvalidException) {  return std::to_string(val());  }
          virtual ~Date() throw(JuliaException) {}
