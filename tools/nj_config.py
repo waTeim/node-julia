@@ -59,12 +59,16 @@ def find_julia(platform):
 def node_version():
    version = subprocess.Popen(["node","--version"],stdout=subprocess.PIPE).communicate()[0];
    if len(version) > 0:
-      version = re.sub("^v([0-9]*\.[0-9]*\.)([0-9]*).*$", "\g<1>x", version).rstrip(os.linesep)
+      version = re.sub(r"^v([0-9]*\.[0-9]*\.)([0-9]*).*$","\g<1>x",version).rstrip(os.linesep)
    return version
+
+def get_nj_lib():
+   path = os.path.abspath("lib")
+   return re.sub(r"\\","\\\\",path)
 
 if sys.argv[2] == "version": print node_version()
 elif sys.argv[2] == "find":
    path = find_julia(sys.argv[1])
    if not path == "": print path
-elif sys.argv[2] == "cwd":
-   print os.path.abspath('')
+elif sys.argv[2] == "nj_lib":
+   print get_nj_lib()
