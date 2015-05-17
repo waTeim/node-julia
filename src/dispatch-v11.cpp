@@ -1,4 +1,3 @@
-#include <unistd.h>
 #include <iostream>
 #include <uv.h>
 #include "nj-v11.h"

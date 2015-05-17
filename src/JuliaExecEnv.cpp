@@ -1,3 +1,7 @@
+#if defined(WIN32)
+#pragma warning(disable:4200)
+#endif
+
 #if !win
 #include <dlfcn.h>
 #endif

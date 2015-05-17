@@ -1,3 +1,7 @@
+#if defined(WIN32)
+#pragma warning(disable:4200)
+#endif
+
 #include <iostream>
 #include "juliav.h"
 #include "Kernel.h"

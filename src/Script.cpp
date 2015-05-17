@@ -1,5 +1,9 @@
-#include <julia.h>
+#if defined(WIN32)
+#pragma warning(disable:4200)
+#endif
+
 #include <iostream>
+#include <julia.h>
 #include "Kernel.h"
 #include "Script.h"
 #include "JuliaHandle.h"
