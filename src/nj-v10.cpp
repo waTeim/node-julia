@@ -57,7 +57,7 @@ Local<Value> createPrimitiveRes(HandleScope &scope,const nj::Primitive &primitiv
       case nj::int16_type:
       case nj::int8_type:
       {
-         Local<Value> dest = Number::New(primitive.toInt());
+         Local<Value> dest = Number::New((int)primitive.toInt());
 
          return dest;
       }
@@ -67,7 +67,7 @@ Local<Value> createPrimitiveRes(HandleScope &scope,const nj::Primitive &primitiv
       case nj::uint16_type:
       case nj::uint8_type:
       {
-         Local<Value> dest = Number::New(primitive.toUInt());
+         Local<Value> dest = Number::New((int)primitive.toUInt());
 
          return dest;
       }
@@ -144,7 +144,7 @@ template<typename V,Local<Value> getElement(const V &val)> static void connectSu
    {
       for(size_t elementNum = 0;elementNum < numElements;elementNum++)
       {
-         to->Set(elementNum,getElement(*(from + offset)));
+         to->Set((int)elementNum,getElement(*(from + offset)));
          offset += stride;
       }
    }
@@ -152,9 +152,9 @@ template<typename V,Local<Value> getElement(const V &val)> static void connectSu
    {
       for(size_t elementNum = 0;elementNum < numElements;elementNum++)
       {
-         Local<Array> subArray = Array::New(dims[ixNum + 1]);
+         Local<Array> subArray = Array::New((int)dims[ixNum + 1]);
 
-         to->Set(elementNum,subArray);
+         to->Set((int)elementNum,subArray);
          connectSubArrays<V,getElement>(dims,strides,ixNum + 1,offset,subArray,from);
          offset += stride;
       }
@@ -168,34 +168,37 @@ template<typename V,typename E,Local<Value> getElement(const V &val)> Local<Arra
    if(array.size() == 0) return Array::New(0);
    if(array.dims().size() == 1)
    {
+      // #TODO do more than simply cast to int
       size_t size0 = array.dims()[0];
       V *p = array.ptr();
-      Local<Array> dest = Array::New(size0);
+      Local<Array> dest = Array::New((int)size0);
 
-      for(size_t i = 0;i < size0;i++) dest->Set(i,getElement(p[i]));
+      for(size_t i = 0;i < size0;i++) dest->Set((int)i,getElement(p[i]));
       return dest;
    }
    else if(array.dims().size() == 2)
    {
+      // #TODO do more than simply cast to int
       size_t size0 = array.dims()[0];
       size_t size1 = array.dims()[1];
       V *p = array.ptr();
-      Local<Array> dest = Array::New(size0);
+      Local<Array> dest = Array::New((int)size0);
 
       for(size_t i = 0;i < size0;i++)
       {
-         Local<Array> row  = Array::New(size1);
+         Local<Array> row  = Array::New((int)size1);
 
-         dest->Set(i,row);
-         for(size_t j = 0;j < size1;j++) row->Set(j,getElement(p[size0*j + i]));
+         dest->Set((int)i,row);
+         for(size_t j = 0;j < size1;j++) row->Set((int)j,getElement(p[size0*j + i]));
       }
       return dest;
    }
    else
    {
+      // #TODO do more than simply cast to int
       vector<size_t> strides;
       size_t size0 = array.dims()[0];
-      Local<Array> dest = Array::New(size0);
+      Local<Array> dest = Array::New((int)size0);
 
       strides.push_back(1);
       for(size_t idxNum = 1;idxNum < array.dims().size();idxNum++) strides.push_back(array.dims()[idxNum - 1]*strides[idxNum - 1]);
@@ -217,7 +220,7 @@ template<typename V,char const *N,typename Nv> static void connectSubArrays(cons
 
       for(size_t elementNum = 0;elementNum < numElements;elementNum++)
       {
-         *dptr++ = from[offset];
+         *dptr++ = Nv(from[offset]);
          offset += stride;
       }
    }
@@ -239,9 +242,9 @@ template<typename V,char const *N,typename Nv> static void connectSubArrays(cons
 
             subArray = constructor->NewInstance(argc,argv);
          }
-         else subArray = Array::New(dims[ixNum + 1]);
+         else subArray = Array::New((int)dims[ixNum + 1]);
 
-         arr->Set(elementNum,subArray);
+         arr->Set((int)elementNum,subArray);
          connectSubArrays<V,N,Nv>(dims,strides,ixNum + 1,offset,subArray,from);
          offset += stride;
       }
@@ -266,14 +269,15 @@ template<typename V,typename E,char const *N,typename Nv> Local<Value> createArr
       V *p = array.ptr();
       Nv *dptr = arr.dptr();
 
-      for(size_t i = 0;i < size0;i++) *dptr++ = *p++;
+      for(size_t i = 0;i < size0;i++) *dptr++ = Nv(*p++);
       return dest;
    }
    else
    {
+      // #TODO do more than simply cast to int
       vector<size_t> strides;
       size_t size0 = array.dims()[0];
-      Local<Array> dest = Array::New(size0);
+      Local<Array> dest = Array::New((int)size0);
 
       strides.push_back(1);
       for(size_t idxNum = 1;idxNum < array.dims().size();idxNum++) strides.push_back(array.dims()[idxNum - 1]*strides[idxNum - 1]);
@@ -327,7 +331,7 @@ Local<Object> createBufferRes(HandleScope &scope,const shared_ptr<nj::Value> &va
 
 int createResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc,Local<Value> *argv)
 {
-   int index = argc - res->results().size();
+   int index = argc - (int)res->results().size();
 
    for(shared_ptr<nj::Value> value: res->results())
    {
@@ -337,7 +341,7 @@ int createResponse(HandleScope &scope,const shared_ptr<nj::Result> &res,int argc
          {
             nj::JuliaHandle *handle = static_cast<nj::JuliaHandle*>(value.get());
             int64_t hIndex = handle->intern();
-            Local<Value> arguments[1] = { Number::New(hIndex) };
+            Local<Value> arguments[1] = { Number::New((int)hIndex) };
 
             argv[index++] = nj::JRef::constructor->Call(Context::GetCurrent()->Global(),1,arguments);
          }
@@ -413,7 +417,7 @@ Handle<Value> callbackWithResult(HandleScope &scope,const Local<Function> &cb,co
       }
       else
       {
-         int argc = res->results().size() + 1;
+         int argc = (int)res->results().size() + 1;
          Local<Value> *argv = new Local<Value>[argc];
 
          argv[0] = Local<Value>::New(Null());
@@ -426,7 +430,7 @@ Handle<Value> callbackWithResult(HandleScope &scope,const Local<Function> &cb,co
 
 Local<Value> mapResult(HandleScope &scope,shared_ptr<nj::Result> &res)
 {
-   int argc = res->results().size();
+   int argc = (int)res->results().size();
    Local<Value> *argv = new Local<Value>[argc];
 
    argc = createResponse(scope,res,argc,argv);

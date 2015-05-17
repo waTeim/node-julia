@@ -94,7 +94,7 @@ Handle<Value> nj::JRef::getHIndex(const Arguments &args)
    HandleScope scope;
    JRef *obj = ObjectWrap::Unwrap<JRef>(args.This());
 
-   return scope.Close(Number::New(obj->h_index));
+   return scope.Close(Number::New((int)obj->h_index));
 }
 
 nj::JRef::JRef(int64_t hIndex)
