@@ -105,7 +105,7 @@ void nj::JRef::getHIndex(const FunctionCallbackInfo<v8::Value>& args)
    HandleScope scope(I);
    JRef *obj = ObjectWrap::Unwrap<JRef>(args.This());
 
-   args.GetReturnValue().Set(Number::New(I,obj->h_index));
+   args.GetReturnValue().Set(Number::New(I,(int)obj->h_index));
 }
 
 nj::JRef::JRef(int64_t hIndex)
