@@ -215,6 +215,25 @@ string getStringValue(const Local<Value> &val)
    return string(*text);
 }
 
+template <typename V,typename N> inline void assign(V &to,const N &from) { to = V(from); }
+
+/******************************************************************************/
+/*                                                                            */
+/*  The following decls are to primarily avoid compiler warnings and          */
+/*  compilation failure.  There will not be a case of a source Native Array   */
+/*  being assigned to a array of String.  Nevertheless, these must be defined */
+/*  to satisfy the compiler.                                                  */
+/*                                                                            */
+/******************************************************************************/
+template <> inline void assign<string,char>(string &to,const char &from) {}
+template <> inline void assign<string,unsigned char>(string &to,const unsigned char &from) {}
+template <> inline void assign<string,short>(string &to,const short &from) {}
+template <> inline void assign<string,unsigned short>(string &to,const unsigned short &from) {}
+template <> inline void assign<string,int>(string &to,const int &from) {}
+template <> inline void assign<string,unsigned int>(string &to,const unsigned int &from) {}
+template <> inline void assign<string,float>(string &to,const float &from) {}
+template <> inline void assign<string,double>(string &to,const double &from) {}
+
 template <typename V,typename N> static void fillFromNativeArray(size_t stride,size_t offset,V *to,const Local<Object> &from)
 {
    nj::NativeArray<N> arr(from);
@@ -222,7 +241,7 @@ template <typename V,typename N> static void fillFromNativeArray(size_t stride,s
 
    for(size_t elementNum = 0;elementNum < arr.len();elementNum++)
    {
-      *(to + offset) = *dptr++;
+      assign<V,N>(to[offset],*dptr++);
       offset += stride;
    }
 }
