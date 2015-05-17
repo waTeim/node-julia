@@ -57,7 +57,7 @@ Local<Value> createPrimitiveRes(HandleScope &scope,const nj::Primitive &primitiv
       case nj::int16_type:
       case nj::int8_type:
       {
-         Local<Value> dest = Number::New((int)primitive.toInt());
+         Local<Value> dest = Number::New((double)primitive.toInt());
 
          return dest;
       }
@@ -67,7 +67,7 @@ Local<Value> createPrimitiveRes(HandleScope &scope,const nj::Primitive &primitiv
       case nj::uint16_type:
       case nj::uint8_type:
       {
-         Local<Value> dest = Number::New((int)primitive.toUInt());
+         Local<Value> dest = Number::New((double)primitive.toUInt());
 
          return dest;
       }
