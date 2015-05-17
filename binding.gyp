@@ -13,7 +13,7 @@
             "juliaBase":"<!(python tools/nj_config.py <(OS) find)",
          },
          "version":"<!(python tools/nj_config.py <(OS) version)",
-         "njLib":"<!(python tools/nj_config.py <(OS) cwd)/lib",
+         "NJ_LIB":"<!(python tools/nj_config.py <(OS) nj_lib)",
          "juliaBin":"<(juliaBase)/bin",
          "conditions":
          [
@@ -59,7 +59,7 @@
       "defines":
       [
          '<(OS)',
-         'NJ_LIB="<(njLib)"',
+         'NJ_LIB="<(NJ_LIB)"',
          'JULIA_LIB="<(juliaLib)"'
       ],
       "cflags_cc!":  [ "-fno-exceptions" ],
