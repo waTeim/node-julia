@@ -62,13 +62,20 @@ def node_version():
       version = re.sub(r"^v([0-9]*\.[0-9]*\.)([0-9]*).*$","\g<1>x",version).rstrip(os.linesep)
    return version
 
-def get_nj_lib():
+def get_nj_lib_define_variable():
    path = os.path.abspath("lib")
-   return re.sub(r"\\","\\\\",path)
+   return re.sub(r"\\","\\\\\\\\",path)
+
+def get_julia_lib_define_variable(platform):
+   if platform == "win": path = find_julia(platform) + "\\bin"
+   else: path = find_julia(platform) + "/julia/lib" 
+   return re.sub(r"\\","\\\\\\\\",path)
 
 if sys.argv[2] == "version": print node_version()
 elif sys.argv[2] == "find":
    path = find_julia(sys.argv[1])
    if not path == "": print path
-elif sys.argv[2] == "nj_lib":
-   print get_nj_lib()
+elif sys.argv[2] == "nj_lib_define":
+   print get_nj_lib_define_variable()
+elif sys.argv[2] == "julia_lib_define":
+   print get_julia_lib_define_variable(sys.argv[1])

@@ -4,25 +4,40 @@
     {
       "variables":
       {
-         "variables":
-         {
-            "conditions":
-            [
-               [ "OS=='linux'", { "gcc":"<!(gcc --version 2>&1 | head -1 | sed -e 's/^.*(.*) \(.*\)\..*$/\\1/')" } , { "gcc":"" } ]
-            ],
-            "juliaBase":"<!(python tools/nj_config.py <(OS) find)",
-         },
-         "version":"<!(python tools/nj_config.py <(OS) version)",
-         "NJ_LIB":"<!(python tools/nj_config.py <(OS) nj_lib)",
-         "juliaBin":"<(juliaBase)/bin",
-         "conditions":
-         [
-            [ "gcc=='4.6'", { "std":"c++0x" } , { "std":"c++11" } ],
-            [ "OS=='linux' and juliaBase=='/usr'",
-               { "juliaLib":"<(juliaBase)/lib/x86_64-linux-gnu/julia" , "juliaInclude":"<(juliaBase)/include/julia" },
-               { "juliaLib":"<(juliaBase)/lib/julia" , "juliaInclude":"<(juliaBase)/include/julia" }
-            ]
-         ]
+        "variables":
+        {
+          "conditions":
+          [
+            [ "OS=='linux'", { "gcc":"<!(gcc --version 2>&1 | head -1 | sed -e 's/^.*(.*) \(.*\)\..*$/\\1/')" } , { "gcc":"" } ]
+          ],
+          "juliaBase":"<!(python tools/nj_config.py <(OS) find)",
+        },
+        "version":"<!(python tools/nj_config.py <(OS) version)",
+        "NJ_LIB":"<!(python tools/nj_config.py <(OS) nj_lib_define)",
+        "juliaBin":"<(juliaBase)/bin",
+        "conditions":
+        [
+          [ "gcc=='4.6'", { "std":"c++0x" } , { "std":"c++11" } ],
+          [ "OS=='linux' and juliaBase=='/usr'",
+            { 
+              "juliaLib":"<(juliaBase)/lib/x86_64-linux-gnu/julia",
+              "JULIA_LIB":"<(juliaBase)/lib/x86_64-linux-gnu/julia",
+              "juliaInclude":"<(juliaBase)/include/julia" 
+            },
+            { 
+              "juliaLib":"<(juliaBase)/lib/julia",
+              "JULIA_LIB":"<(juliaBase)/lib/julia",
+              "juliaInclude":"<(juliaBase)/include/julia"
+            }
+          ],
+          [ "OS=='win'", 
+            {
+              "juliaLib":"<(juliaBase)/bin",
+              "JULIA_LIB":"<!(python tools/nj_config.py <(OS) julia_lib_define)",
+              "juliaInclude":"<(juliaBase)/include/julia"
+            }
+          ]
+        ]
       },
       "target_name": "nj",
       "sources":
@@ -60,7 +75,7 @@
       [
          '<(OS)',
          'NJ_LIB="<(NJ_LIB)"',
-         'JULIA_LIB="<(juliaLib)"'
+         'JULIA_LIB="<(JULIA_LIB)"'
       ],
       "cflags_cc!":  [ "-fno-exceptions" ],
       "include_dirs":
@@ -119,7 +134,11 @@
               {
                 "AdditionalLibraryDirectories":
                 [
-                  "<(juliaBin)"
+                  "<(juliaLib)"
+                ],
+                "DelayLoadDLLs":
+                [
+                   "libjulia.dll"
                 ]
               }
             }
