@@ -67,7 +67,7 @@ def get_nj_lib_define_variable():
    return re.sub(r"\\","\\\\\\\\",path)
 
 def get_julia_lib_define_variable(platform):
-   if platform == "win": path = find_julia(platform) + "\\bin"
+   if platform == "win": path = find_julia(platform) + "\\lib\\julia"
    else: path = find_julia(platform) + "/julia/lib" 
    return re.sub(r"\\","\\\\\\\\",path)
 

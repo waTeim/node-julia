@@ -89,14 +89,27 @@
             "-L<(juliaLib)",
             "-Wl,-rpath,<(juliaLib)"
          ],
-         "libraries":
+         "conditions":
          [
-            "-ljulia"
+           [ "OS == 'win'",
+             {
+               "libraries":
+               [
+                 "-llibjulia"
+               ]
+             },
+             {
+               "libraries":
+               [
+                 "-ljulia"
+               ]
+             }
+           ]
          ]
       },
       "conditions":
       [
-        [ "OS=='mac'",
+        [ "OS == 'mac'",
           {
             "xcode_settings":
             {
@@ -117,7 +130,7 @@
             }
           }
         ],
-        [ "OS=='win'",
+        [ "OS == 'win'",
           {
             "msvs_settings":
             {
@@ -134,7 +147,8 @@
               {
                 "AdditionalLibraryDirectories":
                 [
-                  "<(juliaLib)"
+                  "<(juliaLib)",
+#                  "lib"
                 ],
                 "DelayLoadDLLs":
                 [
@@ -144,7 +158,7 @@
             }
           }
         ],
-        [ "version=='0.10.x'",
+        [ "version == '0.10.x'",
           {
             "sources":
             [
@@ -156,7 +170,7 @@
             ]
           }
         ],
-        [ "version!='0.10.x'",
+        [ "version != '0.10.x'",
           {
             "sources":
             [
