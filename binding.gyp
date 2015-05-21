@@ -148,11 +148,6 @@
                 "AdditionalLibraryDirectories":
                 [
                   "<(juliaLib)",
-#                  "lib"
-                ],
-                "DelayLoadDLLs":
-                [
-                   "libjulia.dll"
                 ]
               }
             }
