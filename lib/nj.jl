@@ -49,8 +49,12 @@ newRegex(pattern) = Regex(pattern)
 getPattern(re::Regex) = re.pattern
 getRegexType() = Regex
 
-@vers04x_only getDateTimeType() = DateTime
 @vers03x_only getDateTimeType() = typeof(nothing)
+@vers04x_only getDateTimeType() = DateTime
+@vers03x_only toDate(milliseconds) = nothing
+@vers04x_only toDate(milliseconds) = Base.Dates.unix2datetime(milliseconds);
+@vers03x_only toMilliseconds(date) = nothing
+@vers04x_only toMilliseconds(date) = Base.Dates.datetime2unix(date);
 
 function getError(ex,bt)
    io = IOBuffer();

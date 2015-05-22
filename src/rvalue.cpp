@@ -13,33 +13,12 @@
 
 using namespace std;
 
+jl_value_t *getDate(const double &milliseconds) throw(nj::JuliaException)
+{   
+   nj::Kernel *kernel = nj::Kernel::getSingleton();
 
-static jl_value_t *getDateTime(jl_value_t *float64Value) throw(nj::JuliaException)
-{
-   jl_module_t *datesModule = (jl_module_t*)jl_get_global(jl_base_module,jl_symbol("Dates"));
-
-   if(!datesModule) throw nj::getJuliaException("unable to locate module Dates");
-
-   jl_function_t *func = jl_get_function(datesModule,"unix2datetime");
-
-   if(!func) throw nj::getJuliaException("Could not locate function unix2datetime");
-
-   JL_GC_PUSH1(&float64Value);
-
-   jl_value_t *dateTimeValue = jl_call1(func,float64Value);
-   jl_value_t *ex = jl_exception_occurred();
-
-   JL_GC_POP();
-   if(ex) throw nj::getJuliaException(ex);
-   return dateTimeValue;
-}
-
-jl_value_t *getJuliaDateTimeFromDouble(const double &val) throw(nj::JuliaException)
-{
-   jl_value_t *milliseconds = jl_box_float64(val/1000);
-
-   return getDateTime(milliseconds);
-}
+   return kernel->toDate(milliseconds);
+}   
 
 jl_value_t *getJuliaRegexFromString(const string &val) throw(nj::JuliaException)
 {
@@ -151,7 +130,7 @@ static jl_value_t *rPrimitive(const nj::Primitive &prim) throw(nj::JuliaExceptio
       {
          const nj::Date &v = static_cast<const nj::Date&>(prim);
 
-         res = getJuliaDateTimeFromDouble(v.val());
+         res = getDate(v.val());
       }
       break;
       case nj::regex_type:
@@ -249,7 +228,7 @@ jl_array_t *rArray(const shared_ptr<nj::Value> &array) throw(nj::JuliaException)
          nj::Kernel *kernel = nj::Kernel::getSingleton();
          jl_datatype_t *dateTimeType = kernel->getDateTimeType();
 
-         res = arrayFromElements<double,nj::Date_t,getJuliaDateTimeFromDouble>(array,dateTimeType);
+         res = arrayFromElements<double,nj::Date_t,getDate>(array,dateTimeType);
       }
       break;
       case nj::regex_type:

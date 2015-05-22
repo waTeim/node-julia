@@ -36,6 +36,8 @@ namespace nj
          jl_value_t *newRegex(jl_value_t *pattern) throw(JuliaException);
          jl_value_t *getPattern(jl_value_t *re) throw(JuliaException);
          jl_datatype_t *getDateTimeType() throw(JuliaException);
+         jl_value_t *toDate(double milliseconds) throw(JuliaException);
+         double toMilliseconds(jl_value_t *date) throw(JuliaException);
          jl_datatype_t *getRegexType() throw(JuliaException);
          jl_value_t *getError(jl_value_t *ex,jl_value_t *bt) throw(JuliaException);
          int64_t preserve(jl_value_t *val) throw(JuliaException);

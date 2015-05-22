@@ -20,26 +20,6 @@ static const string JuliaDateTime("DateTime");
 static const string JuliaRegex("Regex");
 static const string JuliaFunction("Function");
 
-static jl_value_t *getUnixTime(jl_value_t *dateTime) throw(nj::JuliaException)
-{
-   jl_module_t *datesModule = (jl_module_t*)jl_get_global(jl_base_module,jl_symbol("Dates"));
-
-   if(!datesModule) throw nj::getJuliaException("unable to locate module Dates");
-
-   jl_function_t *func = jl_get_function(datesModule,"datetime2unix");
-
-   if(!func) throw nj::getJuliaException("Could not locate function datetime2unix");
-
-   JL_GC_PUSH1(&dateTime);
-
-   jl_value_t *unixTime = jl_call1(func,dateTime);
-   jl_value_t *ex = jl_exception_occurred();
-
-   JL_GC_POP();
-   if(ex) throw nj::getJuliaException(ex);
-   return unixTime;
-}
-
 template <typename V,typename E> static shared_ptr<nj::Value> arrayFromBuffer(jl_value_t *Ainput)
 {
    shared_ptr<nj::Value> value;
@@ -63,12 +43,11 @@ string getSTDStringFromJuliaString(jl_value_t *val)
    return res;
 }
 
-double getDoubleFromJuliaDateTime(jl_value_t *val) throw(nj::JuliaException)
+double getMilliseconds(jl_value_t *val) throw(nj::JuliaException)
 {
-   jl_value_t *unixTime = getUnixTime(val);
-   double res = jl_unbox_float64(unixTime)*1000;
+   nj::Kernel *kernel = nj::Kernel::getSingleton();
 
-   return res;
+   return kernel->toMilliseconds(val);
 }
 
 string getStringFromJuliaRegex(jl_value_t *val) throw(nj::JuliaException)
@@ -150,8 +129,7 @@ void getNamedTypeValue(jl_value_t *from,shared_ptr<nj::Value> &value) throw(nj::
    }
    else if(juliaTypename == JuliaDateTime)
    {
-      jl_value_t *unixTime = getUnixTime(from);
-      if(unixTime) value.reset(new nj::Date(jl_unbox_float64(unixTime)*1000));
+      value.reset(new nj::Date(getMilliseconds(from)));
    }
    else if(juliaTypename == JuliaRegex)
    {
@@ -211,7 +189,7 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *Ainput)
 
          if(utfArray) value = arrayFromElements<string,nj::UTF8String_t,getSTDStringFromJuliaString>(utfArray);
       }
-      else if(juliaTypename == JuliaDateTime) value = arrayFromElements<double,nj::Date_t,getDoubleFromJuliaDateTime>(Ainput);
+      else if(juliaTypename == JuliaDateTime) value = arrayFromElements<double,nj::Date_t,getMilliseconds>(Ainput);
       else if(juliaTypename == JuliaRegex) value = arrayFromElements<string,nj::Regex_t,getStringFromJuliaRegex>(Ainput);
    }
 

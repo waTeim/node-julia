@@ -179,6 +179,21 @@ jl_value_t *nj::Kernel::newRegex(jl_value_t *pattern) throw(JuliaException)
 
 jl_value_t *nj::Kernel::getPattern(jl_value_t *re) throw(JuliaException) { return invoke("getPattern",re); }
 jl_datatype_t *nj::Kernel::getDateTimeType() throw(JuliaException) { return (jl_datatype_t*)invoke("getDateTimeType"); }
+
+jl_value_t *nj::Kernel::toDate(double milliseconds) throw(JuliaException)
+{
+   jl_value_t *val = jl_box_float64(milliseconds/1000);
+
+   return invoke("toDate",val);
+}
+
+double nj::Kernel::toMilliseconds(jl_value_t *date) throw(JuliaException)
+{
+   jl_value_t *val = invoke("toMilliseconds",date);
+
+   return jl_unbox_float64(val)*1000;
+}
+
 jl_datatype_t *nj::Kernel::getRegexType() throw(JuliaException) { return (jl_datatype_t*)invoke("getRegexType"); }
 jl_value_t *nj::Kernel::getError(jl_value_t *ex,jl_value_t *bt) throw(JuliaException) { return invoke("getError",ex,bt); }
 
