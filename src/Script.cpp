@@ -42,35 +42,36 @@ nj::Result nj::Script::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
 
    try
    {
-      string isolatingModName = string("njIsoMod") + to_string(modNum++);
+      string isoName = string("njIsoMod") + to_string(modNum++);
       jl_value_t *filenameToInclude = jl_cstr_to_string(text.toString().c_str());
-      jl_sym_t *isolatingModSym = jl_symbol(isolatingModName.c_str());
-      jl_module_t *isolatingMod = (jl_module_t*)jl_new_module(isolatingModSym);
+      jl_sym_t *isoSym = jl_symbol(isoName.c_str());
+      jl_module_t *isoMod = (jl_module_t*)jl_new_module(isoSym);
 
       jl_ex = jl_exception_occurred();
       if(jl_ex) return exceptionResult(jl_ex,exprId);
 
-      (void)jl_add_standard_imports(isolatingMod);
+      isoMod->parent = jl_main_module;
+      (void)jl_add_standard_imports(isoMod);
       jl_ex = jl_exception_occurred();
       if(jl_ex) return exceptionResult(jl_ex,exprId);
 
-      jl_set_global(jl_main_module,isolatingModSym,(jl_value_t*)isolatingMod);
+      jl_set_global(jl_main_module,isoSym,(jl_value_t*)isoMod);
       jl_ex = jl_exception_occurred();
       if(jl_ex) return exceptionResult(jl_ex,exprId);
 
-      jl_value_t *ast = kernel->scriptify(isolatingMod,filenameToInclude);
+      jl_value_t *ast = kernel->scriptify(isoMod,filenameToInclude);
       jl_function_t *func = jl_get_function(jl_core_module,"eval");
 
       if(!func) return loadErrorResult("unable to locate Core.eval",exprId);
 
-      JL_GC_PUSH2(isolatingMod,ast);
-      (void)jl_call2(func,(jl_value_t*)isolatingMod,ast);
+      JL_GC_PUSH2(isoMod,ast);
+      (void)jl_call2(func,(jl_value_t*)isoMod,ast);
       JL_GC_POP();
       jl_ex = jl_exception_occurred();
       if(jl_ex) return exceptionResult(jl_ex,exprId);
 
-      res.push_back(shared_ptr<nj::Value>(new nj::ASCIIString(isolatingModName)));
-      res.push_back(shared_ptr<nj::Value>(new nj::JuliaHandle((jl_value_t*)isolatingMod)));
+      res.push_back(shared_ptr<nj::Value>(new nj::ASCIIString(isoName)));
+      res.push_back(shared_ptr<nj::Value>(new nj::JuliaHandle((jl_value_t*)isoMod)));
 
       return Result(res,exprId);
    }
