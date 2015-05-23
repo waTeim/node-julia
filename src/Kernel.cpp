@@ -2,6 +2,7 @@
 #pragma warning(disable:4200)
 #endif
 
+#include <math.h>
 #include <iostream>
 #include "Kernel.h"
 #include "error.h"
