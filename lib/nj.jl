@@ -52,7 +52,11 @@ getRegexType() = Regex
 @vers03x_only getDateTimeType() = typeof(nothing)
 @vers04x_only getDateTimeType() = DateTime
 @vers03x_only toDate(milliseconds) = nothing
-@vers04x_only toDate(milliseconds) = Base.Dates.unix2datetime(milliseconds);
+
+@vers04x_only function toDate(milliseconds::Int64)
+   return DateTime(1970) + Base.Dates.Millisecond(milliseconds)
+end
+
 @vers03x_only toMilliseconds(date) = nothing
 @vers04x_only toMilliseconds(date) = Base.Dates.datetime2unix(date);
 

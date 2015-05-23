@@ -182,7 +182,8 @@ jl_datatype_t *nj::Kernel::getDateTimeType() throw(JuliaException) { return (jl_
 
 jl_value_t *nj::Kernel::toDate(double milliseconds) throw(JuliaException)
 {
-   jl_value_t *val = jl_box_float64(milliseconds/1000);
+   int64_t rounded = (int64_t)round(milliseconds);
+   jl_value_t *val = jl_box_int64(rounded);
 
    return invoke("toDate",val);
 }
