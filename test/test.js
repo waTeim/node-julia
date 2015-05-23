@@ -580,28 +580,24 @@ describe('Regression Tests',function()
       expect(julia.exec('identity',re)).to.eql(re);
    });
 
-  /***
-    *
-    * Kind of a workaround here
-    *
-    */
-   it('date (Julia version 0.4+ only)',function()
+   if(julia.eval('VERSION.minor') == 4)
    {
-      var now = new Date();
-      var version = julia.eval('VERSION.minor');
+      it('preserve Date value of now()',function()
+      {
+         var now = new Date();
 
-      if(version == 4) expect(julia.exec('identity',now)).to.eql(now);
-   });
+         expect(julia.exec('identity',now)).to.eql(now);
+      });
 
-   it('array of Date (Julia version 0.4+ only)',function()
-   {
-      var now = new Date();
-      var nowMinus20 = new Date(now - 20);
-      var version = julia.eval('VERSION.minor');
-      var a = [ now, nowMinus20 ];
+      it('array of Date',function()
+      {
+         var now = new Date();
+         var nowMinus20 = new Date(now - 20);
+         var a = [ now, nowMinus20 ];
 
-      if(version == 4) expect(julia.exec('identity',a)).to.eql([now,nowMinus20]);
-   });
+         expect(julia.exec('identity',a)).to.eql([now,nowMinus20]);
+      });
+   }
 
    it('array of Regex',function()
    {
