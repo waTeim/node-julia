@@ -253,10 +253,11 @@ end
 
 
 function importModule(modulePath::ASCIIString)
-   require(modulePath);
+   substitutedModulePath= reduce((x,y)->"$x$(Base.path_separator)$y",split(modulePath,"/"))
+   require(substitutedModulePath);
 
    functionNames::Array{UTF8String,1} = Array(UTF8String,0);
-   m::Module = Base.eval(Main,symbol(split(modulePath,Base.path_separator)[end]));
+   m::Module = Base.eval(Main,symbol(split(substitutedModulePath,Base.path_separator)[end]));
 
    for name in names(m)
       push!(functionNames,"$name");
