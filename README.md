@@ -75,9 +75,6 @@ Calculate the inverse of a matrix and print the result.
     });
     setTimeout(function(){ console.log('done.'); },1000);
 
-
-
-
 ## import
 
 Julia modules may be imported using import and the functions exported by
@@ -149,8 +146,10 @@ Tested with [node](http://nodejs.org/) 0.10.x, 0.12.x, [io.js](https://iojs.org/
 
 # Limitations
 
-* Windows is currently not supported.  Julia's primary compilation method
-is to use gcc while gyp expects MSVS. Reconciling this is underway, but
-incomplete.
-* Recent changes to the development version of Julia have caused an
-incompatibility between Julia v0.4 and node 0.10.x on OS/X
+* Windows is experimentally supported, but requires a manual step to 
+create a pre-requisite library [see here](http://node-julia.readme.io/docs/the-windows-situation)
+for details.
+
+* node 0.10 is deprecated due to a Recent changes to the development
+version of Julia that has caused an incompatibility between Julia 0.4
+and node 0.10.x.
