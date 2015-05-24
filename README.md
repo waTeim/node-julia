@@ -150,6 +150,5 @@ Tested with [node](http://nodejs.org/) 0.10.x, 0.12.x, [io.js](https://iojs.org/
 create a pre-requisite library [see here](http://node-julia.readme.io/docs/the-windows-situation)
 for details.
 
-* node 0.10 is deprecated due to recent changes to the development
-version of Julia that has caused an incompatibility between Julia 0.4
-and node 0.10.
+* node 0.10 is deprecated due to recent changes to Julia that have caused
+an incompatibility between Julia 0.4 and node 0.10.
