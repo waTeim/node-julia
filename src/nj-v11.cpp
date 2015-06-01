@@ -11,6 +11,7 @@
 #include "JMain.h"
 #include "NativeArray.h"
 #include "Callback.h"
+#include "Allocation.h"
 #include "nj-v11.h"
 #include "dispatch.h"
 #include "util.h"
@@ -252,20 +253,46 @@ template<typename V,typename N,typename Nv> static void connectSubArrays(const v
 template<typename V,typename E,typename N,typename Nv> Local<Value> createArrayRes(HandleScope &scope,const shared_ptr<nj::Value> &value)
 {
    Isolate *I = Isolate::GetCurrent();
-   const nj::Array<V,E> &array = static_cast<const nj::Array<V,E>&>(*value);
+   nj::Array<V,E> &array = static_cast<nj::Array<V,E>&>(*value);
 
    if(array.size() == 0) return Array::New(I,0);
    if(array.dims().size() == 1)
    {
       size_t size0 = array.dims()[0];
-      Local<ArrayBuffer> buffer = ArrayBuffer::New(I,size0*sizeof(Nv));
-      Local<N> dest = N::New(buffer,0,size0);
-      nj::NativeArray<Nv> arr(dest);
-      V *p = array.ptr();
-      Nv *dptr = arr.dptr();
+      const nj::Type *etype = E::instance();
 
-      for(size_t i = 0;i < size0;i++) *dptr++ = Nv(*p++);
-      return dest;
+      switch(etype->id())
+      {
+         case nj::int8_type:
+         case nj::uint8_type:
+         case nj::int16_type:
+         case nj::uint16_type:
+         case nj::int32_type:
+         case nj::uint32_type:
+         case nj::float32_type:
+         case nj::float64_type:
+         {
+            Local<ArrayBuffer> buffer = ArrayBuffer::New(I,array.ptr(),size0*sizeof(Nv));
+            Local<N> dest = N::New(buffer,0,size0);
+
+            array.relinguish();
+            (void)nj::Allocation::store(buffer,(char*)array.ptr());
+            return dest;
+         }
+         break;
+         default:
+         {
+            Local<ArrayBuffer> buffer = ArrayBuffer::New(I,size0*sizeof(Nv));
+            Local<N> dest = N::New(buffer,0,size0);
+            nj::NativeArray<Nv> arr(dest);
+            V *p = array.ptr();
+            Nv *dptr = arr.dptr();
+
+            for(size_t i = 0;i < size0;i++) *dptr++ = Nv(*p++);
+            return dest;
+         }
+         break;
+      }
    }
    else
    {

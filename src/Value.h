@@ -43,18 +43,32 @@ namespace nj
          std::vector<size_t> dimensions;
          std::shared_ptr<std::vector<V>> data;
          size_t num_elements;
+         bool _owned;
 
+         struct D
+         {
+            Array *a;
+
+            D(Array *a) { this->a = a; }
+
+            void operator()(std::vector<V> *p) const
+            {
+               if(a->owned()) delete p;
+            }
+         };
+     
       public:
 
-         Array(const std::vector<size_t> &dimensions)
+         Array(const std::vector<size_t> &dimensions,bool owned = true)
          {  
+            _owned = owned;
             this->dimensions = dimensions;
             if(dimensions.size() == 0) num_elements = 0;
             else
             {
                num_elements = 1;
                for(size_t dimension: dimensions) num_elements *= dimension;
-               if(num_elements) data = std::shared_ptr<std::vector<V>>(new std::vector<V>(num_elements));
+               if(num_elements) data = std::shared_ptr<std::vector<V>>(new std::vector<V>(num_elements),D(this));
             }
          }
 
@@ -63,6 +77,8 @@ namespace nj
          virtual const Type *type() const {  return Array_t::instance(E::instance());  }
          virtual V *ptr() const {  return data.get()?data.get()->data():0;  }
          virtual size_t size() const {  return num_elements;  }
+         virtual bool owned() { return _owned; }
+         virtual void relinguish() { _owned = false; }
          virtual ~Array() throw(JuliaException) {}
    };
 };

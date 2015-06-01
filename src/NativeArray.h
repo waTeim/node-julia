@@ -9,15 +9,18 @@ namespace nj
 {
    template <typename V> class NativeArray
    {
-      public:
-
-
       protected:
 
          V *_dptr;
-         unsigned int _len;
+         unsigned _len;
 
       public:
+
+         NativeArray(V *dptr,unsigned len)
+         {
+            _dptr = dptr;
+            _len = len;
+         }
 
 #if NODE_MINOR_VERSION == 10
 
@@ -33,7 +36,7 @@ namespace nj
             if(buffer->IsUndefined() || byteOffset->IsUndefined() || byteLength->IsUndefined()) return;
 
             v8::Local<v8::Object> bufferObject = buffer->ToObject();
-            unsigned int offset = byteOffset->Uint32Value();
+            unsigned offset = byteOffset->Uint32Value();
 
             _len = byteLength->Uint32Value()/sizeof(V);
             _dptr = (V*)(((char*)bufferObject->GetIndexedPropertiesExternalArrayData()) + offset);
@@ -53,7 +56,7 @@ namespace nj
 
             if(byteOffset->IsUndefined() || byteLength->IsUndefined() || buffer->IsUndefined()) return;
 
-            unsigned int offset = byteOffset->Uint32Value();
+            unsigned offset = byteOffset->Uint32Value();
 
             _len = byteLength->Uint32Value()/sizeof(V);
             _dptr = (V*)(((char*)array->GetIndexedPropertiesExternalArrayData()) + offset);

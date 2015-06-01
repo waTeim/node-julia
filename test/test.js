@@ -621,14 +621,24 @@ describe('Regression Tests',function()
 
       expect(julia.exec('t1Mult',juliaObj)).to.eql(new Float64Array([5,10,15]));
    });
+ 
+   it('JRef random creation and deletion',function()
+   {
+      this.timeout(10000);
+      var a = [];
+      var i;
 
-//   it('JRef random creation and deletion',function()
-//   {
-//      var a = [];
-//      var i;
-//
-//      for(i = 0;i < 400;i++) a[julia.eval('rand(1:999)')] = julia.exec('t1Cons',julia.eval('rand(0:1000000)'),julia.exec('rand',5));
-//   });
+      for(i = 0;i < 10000;i++) a[julia.eval('rand(1:50)')] = julia.exec('t1Cons',julia.eval('rand(0:1000000)'),julia.exec('rand',5));
+   });
+
+   it('array random creation and deletion',function()
+   {
+      this.timeout(10000);
+      var a = [];
+      var i;
+
+      for(i = 0;i < 10000;i++) a[julia.eval('rand(1:50)')] = julia.exec('rand',1000);
+   });
 
    it('2D Array Request with Native Arrays ',function()
    {

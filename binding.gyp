@@ -169,6 +169,7 @@
           {
             "sources":
             [
+              "src/Allocation.cpp",
               "src/Callback-v11.cpp",
               "src/JRef-v11.cpp",
               "src/ScriptEncapsulated-v11.cpp",
