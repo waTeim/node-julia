@@ -624,7 +624,7 @@ describe('Regression Tests',function()
  
    it('JRef random creation and deletion',function()
    {
-      this.timeout(10000);
+      this.timeout(30000);
       var a = [];
       var i;
 
@@ -633,7 +633,7 @@ describe('Regression Tests',function()
 
    it('array random creation and deletion',function()
    {
-      this.timeout(10000);
+      this.timeout(30000);
       var a = [];
       var i;
 
