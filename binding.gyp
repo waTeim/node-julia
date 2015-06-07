@@ -51,6 +51,7 @@
         "src/Import.cpp",
         "src/JMain.cpp",
         "src/JuliaExecEnv.cpp",
+        "src/JuAlloc.cpp",
         "src/JuliaHandle.cpp",
         "src/Kernel.cpp",
         "src/NAlloc.cpp",
