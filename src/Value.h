@@ -41,7 +41,7 @@ namespace nj
       protected:
 
          std::vector<size_t> dimensions;
-         std::shared_ptr<std::vector<V>> data;
+         std::shared_ptr<std::vector<V>> v;
          size_t num_elements;
          bool _owned;
 
@@ -68,17 +68,19 @@ namespace nj
             {
                num_elements = 1;
                for(size_t dimension: dimensions) num_elements *= dimension;
-               if(num_elements) data = std::shared_ptr<std::vector<V>>(new std::vector<V>(num_elements),D(this));
+               //if(num_elements) v = std::shared_ptr<std::vector<V>>(new std::vector<V>(num_elements),D(this));
+               if(num_elements) v = std::shared_ptr<std::vector<V>>(new std::vector<V>(num_elements));
             }
          }
 
          virtual bool isPrimitive() const {  return false;  }
          virtual const std::vector<size_t> &dims() const {  return dimensions;  }
          virtual const Type *type() const {  return Array_t::instance(E::instance());  }
-         virtual V *ptr() const {  return data.get()?data.get()->data():0;  }
+         virtual V *ptr() const {  return v.get()?v.get()->data():0;  }
          virtual size_t size() const {  return num_elements;  }
          virtual bool owned() { return _owned; }
          virtual void relinguish() { _owned = false; }
+         std::shared_ptr<std::vector<V>> data() const { return v; }
          virtual ~Array() throw(JuliaException) {}
    };
 };

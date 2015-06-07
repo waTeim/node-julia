@@ -42,6 +42,7 @@
       "target_name": "nj",
       "sources":
       [
+        "src/Alloc.cpp",
         "src/Call.cpp",
         "src/Exception.cpp",
         "src/Expr.cpp",
@@ -52,6 +53,7 @@
         "src/JuliaExecEnv.cpp",
         "src/JuliaHandle.cpp",
         "src/Kernel.cpp",
+        "src/NAlloc.cpp",
         "src/NativeArray.cpp",
         "src/Script.cpp",
         "src/Trampoline.cpp",
@@ -169,7 +171,7 @@
           {
             "sources":
             [
-              "src/Allocation.cpp",
+              "src/JSAlloc.cpp",
               "src/Callback-v11.cpp",
               "src/JRef-v11.cpp",
               "src/ScriptEncapsulated-v11.cpp",

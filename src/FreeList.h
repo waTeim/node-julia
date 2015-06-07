@@ -2,6 +2,8 @@
 #define __nj_FreeList
 
 #include <memory>
+#include <vector>
+#include <map>
 
 namespace nj
 {

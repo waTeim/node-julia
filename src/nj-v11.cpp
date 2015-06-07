@@ -11,7 +11,9 @@
 #include "JMain.h"
 #include "NativeArray.h"
 #include "Callback.h"
-#include "Allocation.h"
+#include "NAlloc.h"
+#include "JSAlloc.h"
+#include "VAlloc.h"
 #include "nj-v11.h"
 #include "dispatch.h"
 #include "util.h"
@@ -274,9 +276,11 @@ template<typename V,typename E,typename N,typename Nv> Local<Value> createArrayR
          {
             Local<ArrayBuffer> buffer = ArrayBuffer::New(I,array.ptr(),size0*sizeof(Nv));
             Local<N> dest = N::New(buffer,0,size0);
+            shared_ptr<nj::Alloc> a1 = nj::VAlloc<V>::create(array.data());
+            shared_ptr<nj::Alloc> a2 = nj::NAlloc::create(a1);
+            nj::NAlloc *n = (nj::NAlloc*)a2.get();
 
-            array.relinguish();
-            (void)nj::Allocation::store(buffer,(char*)array.ptr());
+            n->add(nj::JSAlloc::create(dest));
             return dest;
          }
          break;
