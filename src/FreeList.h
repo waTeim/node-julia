@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <stdint.h>
 
 namespace nj
 {
