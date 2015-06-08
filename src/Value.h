@@ -5,6 +5,7 @@
 #include <vector>
 #include "Exception.h"
 #include "Type.h"
+#include "VAlloc.h"
 
 namespace nj
 {
@@ -40,48 +41,31 @@ namespace nj
    {
       protected:
 
-         std::vector<size_t> dimensions;
-         std::shared_ptr<std::vector<V>> v;
-         size_t num_elements;
-         bool _owned;
+         std::vector<size_t> _dimensions;
+         std::shared_ptr<Alloc> _v;
+         size_t _num_elements;
 
-         struct D
-         {
-            Array *a;
-
-            D(Array *a) { this->a = a; }
-
-            void operator()(std::vector<V> *p) const
-            {
-               if(a->owned()) delete p;
-            }
-         };
-     
       public:
 
          Array(const std::vector<size_t> &dimensions,bool owned = true)
          {  
-            _owned = owned;
-            this->dimensions = dimensions;
-            if(dimensions.size() == 0) num_elements = 0;
+            _dimensions = dimensions;
+            if(_dimensions.size() == 0) _num_elements = 0;
             else
             {
-               num_elements = 1;
-               for(size_t dimension: dimensions) num_elements *= dimension;
-               //if(num_elements) v = std::shared_ptr<std::vector<V>>(new std::vector<V>(num_elements),D(this));
-               if(num_elements) v = std::shared_ptr<std::vector<V>>(new std::vector<V>(num_elements));
+               _num_elements = 1;
+               for(size_t dimension: _dimensions) _num_elements *= dimension;
+               if(_num_elements) _v = VAlloc<V>::create(_num_elements);
             }
          }
 
          virtual bool isPrimitive() const {  return false;  }
-         virtual const std::vector<size_t> &dims() const {  return dimensions;  }
+         virtual const std::vector<size_t> &dims() const {  return _dimensions;  }
          virtual const Type *type() const {  return Array_t::instance(E::instance());  }
-         virtual V *ptr() const {  return v.get()?v.get()->data():0;  }
-         virtual size_t size() const {  return num_elements;  }
-         virtual bool owned() { return _owned; }
-         virtual void relinguish() { _owned = false; }
-         std::shared_ptr<std::vector<V>> data() const { return v; }
-         virtual ~Array() throw(JuliaException) {}
+         virtual V *ptr() const {  return (V*)(_v.get()?_v->ptr():0);  }
+         virtual size_t size() const {  return _num_elements;  }
+         virtual std::shared_ptr<Alloc> v() const {  return _v;  }
+         virtual ~Array() throw(JuliaException) { if(_v.get()) _v->free(); }
    };
 };
 

@@ -1,3 +1,4 @@
+#include <iostream>
 #include "NAlloc.h"
 
 using namespace std;
