@@ -14,7 +14,7 @@ std::shared_ptr<nj::Alloc> nj::NAlloc::create(const shared_ptr<Alloc> &loc0)
    NAlloc *res = new NAlloc(loc0);
    int64_t index = res->store();
 
-   return alloc_list.get(index);
+   return alloc_list->get(index);
 }
 
 shared_ptr<nj::Alloc> nj::NAlloc::free()

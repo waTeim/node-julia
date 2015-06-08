@@ -18,7 +18,7 @@ std::shared_ptr<nj::Alloc> nj::JuAlloc::create(jl_value_t *val) throw(JuliaExcep
    JuAlloc *res = new JuAlloc(val);
    int64_t index = res->store();
 
-   return alloc_list.get(index);
+   return alloc_list->get(index);
 }
 
 nj::JuAlloc::~JuAlloc()

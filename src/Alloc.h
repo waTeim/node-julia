@@ -11,7 +11,7 @@ namespace nj
    {
       protected:
 
-         static FreeList<Alloc> alloc_list;
+         static FreeList<Alloc> *alloc_list;
 
          int64_t _index;
          NAlloc *_container;

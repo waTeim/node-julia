@@ -27,7 +27,7 @@ namespace nj
             VAlloc *res = new VAlloc(numElements);
             int64_t index = res->store();
 
-            return alloc_list.get(index);
+            return alloc_list->get(index);
          }
 
          static std::shared_ptr<Alloc> create(const std::shared_ptr<std::vector<V>> &v)
@@ -35,7 +35,7 @@ namespace nj
             VAlloc *res = new VAlloc(v);
             int64_t index = res->store();
 
-            return alloc_list.get(index);
+            return alloc_list->get(index);
          }
 
          virtual char *ptr() const {  return (char*)(_v.get()?_v.get()->data():0);  }

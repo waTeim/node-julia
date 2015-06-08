@@ -20,7 +20,7 @@ std::shared_ptr<nj::Alloc> nj::JSAlloc::create(const v8::Local<v8::Object> &v8Ob
    JSAlloc *res = new JSAlloc(v8Obj);
    int64_t index = res->store();
 
-   return alloc_list.get(index);
+   return alloc_list->get(index);
 }
 
 nj::JSAlloc::JSAlloc(const v8::Local<v8::Object> &v8Obj):Alloc(),v8_obj(v8::Isolate::GetCurrent(),v8Obj)
