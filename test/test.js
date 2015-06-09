@@ -617,27 +617,27 @@ describe('Regression Tests',function()
 
    it('JRef from exec',function()
    {
-      var juliaObj = julia.exec('t1Cons',5,[1,2,3]);
+      var juliaObj = julia.exec('t1Cons1',5,3);
 
       expect(julia.exec('t1Mult',juliaObj)).to.eql(new Float64Array([5,10,15]));
    });
  
    it('JRef random creation and deletion',function()
    {
-      this.timeout(30000);
+      this.timeout(10000);
       var a = [];
       var i;
 
-      for(i = 0;i < 10000;i++) a[julia.eval('rand(1:50)')] = julia.exec('t1Cons',julia.eval('rand(0:1000000)'),julia.exec('rand',5));
+      for(i = 0;i < 10000;i++) a[Math.floor(Math.random()*50)] = julia.exec('t1Cons2',50,1000);
    });
 
    it('array random creation and deletion',function()
    {
-      this.timeout(30000);
+      this.timeout(10000);
       var a = [];
       var i;
 
-      for(i = 0;i < 10000;i++) a[julia.eval('rand(1:50)')] = julia.exec('rand',1000);
+      for(i = 0;i < 10000;i++) a[Math.floor(Math.random()*50)] = julia.exec('rand',1000);
    });
 
    it('2D Array Request with Native Arrays ',function()
@@ -785,7 +785,7 @@ describe('Regression Tests',function()
    
    it('JuliaHandle of struct type',function()
    {
-      var juliaObj = julia.exec('t1Cons',5,[1,2,3]);
+      var juliaObj = julia.exec('t1Cons1',5,3);
 
       expect(juliaObj.f1).to.equal(5);
       expect(juliaObj.f2).to.eql(new Float64Array([1,2,3]));

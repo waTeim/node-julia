@@ -6,6 +6,7 @@
 #include "Exception.h"
 #include "Type.h"
 #include "VAlloc.h"
+#include "JuAlloc.h"
 
 namespace nj
 {
@@ -47,7 +48,7 @@ namespace nj
 
       public:
 
-         Array(const std::vector<size_t> &dimensions,bool owned = true)
+         Array(const std::vector<size_t> &dimensions,jl_value_t *val = 0)
          {  
             _dimensions = dimensions;
             if(_dimensions.size() == 0) _num_elements = 0;
@@ -55,7 +56,11 @@ namespace nj
             {
                _num_elements = 1;
                for(size_t dimension: _dimensions) _num_elements *= dimension;
-               if(_num_elements) _v = VAlloc<V>::create(_num_elements);
+               if(_num_elements)
+               {
+                   if(val) _v = JuAlloc::create(val);
+                   else _v = VAlloc<V>::create(_num_elements);
+               }
             }
          }
 

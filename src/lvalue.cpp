@@ -29,10 +29,43 @@ template <typename V,typename E> static shared_ptr<nj::Value> arrayFromBuffer(jl
 
    for(int dim = 0;dim < ndims;dim++) dims.push_back(jl_array_dim(Ainput,dim));
 
-   nj::Array<V,E> *Aoutput = new nj::Array<V,E>(dims);
+   if(ndims == 1)
+   {
+      const nj::Type *etype = E::instance();
 
-   value.reset(Aoutput);
-   memcpy(Aoutput->ptr(),p,Aoutput->size()*sizeof(V));
+      switch(etype->id())
+      {
+         case nj::int8_type:
+         case nj::uint8_type:
+         case nj::int16_type:
+         case nj::uint16_type:
+         case nj::int32_type:
+         case nj::uint32_type:
+         case nj::float32_type:
+         case nj::float64_type:
+         {
+            nj::Array<V,E> *Aoutput = new nj::Array<V,E>(dims,Ainput);
+
+            value.reset(Aoutput);
+         }
+         break;
+         default:
+         {
+            nj::Array<V,E> *Aoutput = new nj::Array<V,E>(dims);
+
+            memcpy(Aoutput->ptr(),p,Aoutput->size()*sizeof(V));
+            value.reset(Aoutput);
+         }
+         break;
+      }
+   }
+   else
+   {
+      nj::Array<V,E> *Aoutput = new nj::Array<V,E>(dims);
+
+      value.reset(Aoutput);
+      memcpy(Aoutput->ptr(),p,Aoutput->size()*sizeof(V));
+   }
    return value;
 }
 

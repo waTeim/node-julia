@@ -11,6 +11,8 @@ nj::JuAlloc::JuAlloc(jl_value_t *val) throw(JuliaException):Alloc()
    Kernel *kernel = Kernel::getSingleton();
 
    _pindex = kernel->preserve(val);
+   _ptr = (char*)jl_array_data(val);
+   _len = jl_array_len(val);
 }
 
 std::shared_ptr<nj::Alloc> nj::JuAlloc::create(jl_value_t *val) throw(JuliaException)
