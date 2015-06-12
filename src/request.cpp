@@ -8,11 +8,11 @@
 #include "request.h"
 #include "JMain.h"
 #include "Trampoline.h"
-#include "JSAlloc.h"
 
 #if NODE_MINOR_VERSION == 10
 #include "JRef-v10.h"
 #else
+#include "JSAlloc.h"
 #include "JRef-v11.h"
 #endif
 
@@ -423,10 +423,13 @@ static shared_ptr<nj::Value> createArrayReqFromBuffer(const Local<Value> &from)
 template <typename V,typename E> static shared_ptr<nj::Value> createArrayReqFromNativeArray(const Local<Object> &array)
 {
    shared_ptr<nj::Value> to;
+
+   #if NODE_MINOR_VERSION != 10
    shared_ptr<nj::Alloc> L = nj::JSAlloc::find(array);
 
    if(L.get()) to.reset(new nj::Array<V,E>(L));
    else
+   #endif
    {
       nj::NativeArray<V> nat(array);
       vector<size_t> dims;
