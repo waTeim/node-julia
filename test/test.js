@@ -2,6 +2,8 @@ var chai = require('chai'),
     julia = require('..'),
     expect = chai.expect;
 
+var version = process.version.replace(/v([^.]*)\.([^.]*)\..*/,"$1 $2").split(' ');
+
 function verifyIdentityMatrix(X,expectedLength)
 {
    var len = X.length;
@@ -798,17 +800,18 @@ describe('Regression Tests',function()
       expect(juliaObj.getHIndex).to.exist;
    });
 
-/*
-   it('Shared Array',function()
+   if(version[0] > 0 || version[1] > 10)
    {
-      var a = julia.eval('shared = zeros(100)');
+      it('Shared Array',function()
+      {
+         var a = julia.eval('shared = zeros(100)');
 
-      expect(julia.exec('sum',a)).to.equal(0);
-      for(var i = 0;i < 100;i++) a[i] = i;
-      expect(julia.eval('sum(shared)')).to.equal(4950);
-      expect(julia.eval('sum(shared)')).to.equal(julia.exec('sum',a));
-   });
-*/
+         expect(julia.exec('sum',a)).to.equal(0);
+         for(var i = 0;i < 100;i++) a[i] = i;
+         expect(julia.eval('sum(shared)')).to.equal(4950);
+         expect(julia.eval('sum(shared)')).to.equal(julia.exec('sum',a));
+      });
+   }
 
 // Keep it around but commented for now.
 //
