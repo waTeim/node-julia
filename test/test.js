@@ -798,6 +798,16 @@ describe('Regression Tests',function()
       expect(juliaObj.getHIndex).to.exist;
    });
 
+   it('Shared Array',function()
+   {
+      var a = julia.eval('shared = zeros(100)');
+
+      expect(julia.exec('sum',a)).to.equal(0);
+      for(var i = 0;i < 100;i++) a[i] = i;
+      expect(julia.eval('sum(shared)')).to.equal(4950);
+      expect(julia.eval('sum(shared)')).to.equal(julia.exec('sum',a));
+   });
+
 // Keep it around but commented for now.
 //
 //   it('JuMP',function()

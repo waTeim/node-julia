@@ -1,6 +1,7 @@
 #ifndef __nj_NAlloc
 #define __nj_NAlloc
 
+#include <iostream>
 #include "Alloc.h"
 
 namespace nj
@@ -19,11 +20,12 @@ namespace nj
 
          static std::shared_ptr<Alloc> create(const std::shared_ptr<Alloc> &loc0);
 
+         virtual std::shared_ptr<Alloc> loc0() const { return locus.size() > 0?locus[0]:std::shared_ptr<Alloc>(); }
          virtual char *ptr() const { return locus.size() > 0?locus[0]->ptr():0; }
          virtual size_t len() const { return locus.size() > 0?locus[0]->len():0; }
          virtual std::shared_ptr<Alloc> free();
          virtual int64_t store();
-         virtual void  add(const std::shared_ptr<Alloc> &loc);
+         virtual void add(const std::shared_ptr<Alloc> &loc);
          virtual ~NAlloc() {}
    };
 };

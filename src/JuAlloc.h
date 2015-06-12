@@ -27,6 +27,7 @@ namespace nj
 
          virtual char *ptr() const { return _ptr; }
          virtual size_t len() const { return _len; }
+         virtual int64_t pindex() const { return _pindex; }
          virtual ~JuAlloc();
    };
 

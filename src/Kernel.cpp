@@ -242,6 +242,17 @@ jl_value_t *nj::Kernel::free(int64_t valIndex) throw(JuliaException)
    return val;
 }
 
+jl_value_t *nj::Kernel::get(int64_t valIndex) throw(JuliaException)
+{
+   if(!preserve_array) preserve_array = get_preserve_array();
+
+   jl_value_t *val = jl_cellref(preserve_array,valIndex);
+   jl_value_t *ex = jl_exception_occurred();
+
+   if(ex) throw getJuliaException(ex);
+   return val;
+}
+
 jl_value_t *nj::Kernel::import(const string &moduleName) throw(JuliaException)
 {
    if(moduleName.length() != 0)

@@ -5,6 +5,7 @@
 #include <vector>
 #include "Exception.h"
 #include "Type.h"
+#include "NAlloc.h"
 #include "VAlloc.h"
 #include "JuAlloc.h"
 
@@ -62,6 +63,12 @@ namespace nj
                    else _v = VAlloc<V>::create(_num_elements);
                }
             }
+         }
+
+         Array(const std::shared_ptr<Alloc> &v)
+         {
+            if(v->container()) _v = v->container()->loc0();
+            else _v = v;
          }
 
          virtual bool isPrimitive() const {  return false;  }

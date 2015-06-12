@@ -8,6 +8,7 @@
 #include "request.h"
 #include "JMain.h"
 #include "Trampoline.h"
+#include "JSAlloc.h"
 
 #if NODE_MINOR_VERSION == 10
 #include "JRef-v10.h"
@@ -422,19 +423,25 @@ static shared_ptr<nj::Value> createArrayReqFromBuffer(const Local<Value> &from)
 template <typename V,typename E> static shared_ptr<nj::Value> createArrayReqFromNativeArray(const Local<Object> &array)
 {
    shared_ptr<nj::Value> to;
-   nj::NativeArray<V> nat(array);
-   const V *data = nat.dptr();
+   shared_ptr<nj::Alloc> L = nj::JSAlloc::find(array);
 
-   if(data)
+   if(L.get()) to.reset(new nj::Array<V,E>(L));
+   else
    {
+      nj::NativeArray<V> nat(array);
       vector<size_t> dims;
       dims.push_back(nat.len());
-      to.reset(new nj::Array<V,E>(dims));
+      const V *data = nat.dptr();
 
-      nj::Array<V,E> &a = static_cast<nj::Array<V,E>&>(*to);
-      V *p = a.ptr();
+      if(data)
+      {
+         to.reset(new nj::Array<V,E>(dims));
 
-      for(unsigned int index = 0;index < nat.len();index++) *p++ = *data++;
+         nj::Array<V,E> &a = static_cast<nj::Array<V,E>&>(*to);
+         V *p = a.ptr();
+
+         for(unsigned int index = 0;index < nat.len();index++) *p++ = *data++;
+      }
    }
 
    return to;
