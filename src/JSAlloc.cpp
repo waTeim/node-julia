@@ -63,12 +63,12 @@ shared_ptr<nj::Alloc> nj::JSAlloc::find(const v8::Local<v8::Object> &obj)
 }
 
 
-nj::JSAlloc::JSAlloc(const v8::Local<v8::Object> &obj):Alloc(),obj(v8::Isolate::GetCurrent(),obj)
+nj::JSAlloc::JSAlloc(const v8::Local<v8::Object> &obj):Alloc(),_obj(v8::Isolate::GetCurrent(),obj)
 {
-   this->obj.SetWeak(this,CollectWeak);
+   _obj.SetWeak(this,CollectWeak);
 }
 
 nj::JSAlloc::~JSAlloc()
 {
-   obj.Reset();
+   _obj.Reset();
 }

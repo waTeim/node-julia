@@ -274,13 +274,24 @@ template<typename V,typename E,typename N,typename Nv> Local<Value> createArrayR
          case nj::float32_type:
          case nj::float64_type:
          {
-            Local<ArrayBuffer> buffer = ArrayBuffer::New(I,array.ptr(),size0*sizeof(Nv));
-            Local<N> dest = N::New(buffer,0,size0);
-            shared_ptr<nj::Alloc> l_p = nj::NAlloc::create(array.v());
-            nj::NAlloc *l = (nj::NAlloc*)l_p.get();
+            shared_ptr<nj::Alloc> v = array.v();
 
-            l->add(nj::JSAlloc::create(dest));
-            return dest;
+            if(v->container())
+            {
+               nj::JSAlloc *L = static_cast<nj::JSAlloc*>(v->container()->loc(1).get());
+
+               return L->obj();
+            }
+            else
+            {
+               Local<ArrayBuffer> buffer = ArrayBuffer::New(I,array.ptr(),size0*sizeof(Nv));
+               Local<N> dest = N::New(buffer,0,size0);
+               shared_ptr<nj::Alloc> l_p = nj::NAlloc::create(array.v());
+               nj::NAlloc *l = (nj::NAlloc*)l_p.get();
+
+               l->add(nj::JSAlloc::create(dest));
+               return dest;
+            }
          }
          break;
          default:

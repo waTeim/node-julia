@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <julia.h>
 #include "Exception.h"
 
@@ -13,9 +14,10 @@ namespace nj
       protected:
 
          static Kernel *singleton;
-
+         
          int64_t freelist_start;
          std::vector<int64_t> freelist;
+         std::map<jl_value_t*,int64_t> freelist_index;
          jl_module_t *nj_module;
          jl_value_t *preserve_array;
 
@@ -43,6 +45,7 @@ namespace nj
          int64_t preserve(jl_value_t *val) throw(JuliaException);
          jl_value_t *free(int64_t valIndex) throw(JuliaException);
          jl_value_t *get(int64_t valIndex) throw(JuliaException);
+         int64_t get(jl_value_t *val);
          jl_value_t *import(const std::string &moduleName) throw(JuliaException);
          jl_value_t *newTuple(std::vector<jl_value_t*> &elements) throw(JuliaException);
    };

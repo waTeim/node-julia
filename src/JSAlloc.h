@@ -16,7 +16,7 @@ namespace nj
 
          static void CollectWeak(const v8::WeakCallbackData<v8::Object,JSAlloc> &data);
 
-         v8::UniquePersistent<v8::Object> obj;
+         v8::UniquePersistent<v8::Object> _obj;
 
          JSAlloc(const v8::Local<v8::Object> &obj);
 
@@ -27,6 +27,7 @@ namespace nj
 
          virtual char *ptr() const { return 0; }
          virtual size_t len() const { return 0; }
+         virtual v8::Local<v8::Object> obj() { return v8::Local<v8::Object>::New(v8::Isolate::GetCurrent(),_obj); }
          virtual ~JSAlloc();
    };
 

@@ -24,7 +24,8 @@ namespace nj
             _container = 0;
          }
 
-         virtual NAlloc *container() const { return _container; }
+         NAlloc *container() const { return _container; }
+         int64_t index() { return _index; }
          void setContainer(NAlloc *container) { _container = container; }
          virtual char *ptr() const = 0;
          virtual size_t len() const = 0;

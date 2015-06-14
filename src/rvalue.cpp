@@ -166,7 +166,7 @@ template<typename V,typename E> jl_array_t *arrayFromBuffer(const shared_ptr<nj:
 
    if(A.v()->container())
    {
-      shared_ptr<nj::Alloc> loc0 = A.v()->container()->loc0();
+      shared_ptr<nj::Alloc> loc0 = A.v()->container()->loc(0);
       nj::JuAlloc *L = static_cast<nj::JuAlloc*>(loc0.get());
 
       return (jl_array_t*)kernel->get(L->pindex());

@@ -15,6 +15,8 @@ namespace nj
    {
       protected:
 
+         static std::map<int64_t,JuAlloc*> pindex_index;
+
          int64_t _pindex;
          char *_ptr;
          size_t _len;

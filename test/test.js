@@ -811,6 +811,15 @@ describe('Regression Tests',function()
          expect(julia.eval('sum(shared)')).to.equal(4950);
          expect(julia.eval('sum(shared)')).to.equal(julia.exec('sum',a));
       });
+
+      it('Equate jl_value_t Alloc with Javascript Object',function()
+      {
+         var a = julia.eval('shared = Array(Int32,128)');
+         var b = julia.eval('shared');
+
+         for(var i = 0;i < 128;i++) a[i] = i;
+         expect(a).to.eql(b);
+      });
    }
 
 // Keep it around but commented for now.

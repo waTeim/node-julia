@@ -67,7 +67,7 @@ namespace nj
 
          Array(const std::shared_ptr<Alloc> &v)
          {
-            if(v->container()) _v = v->container()->loc0();
+            if(v->container()) _v = v->container()->loc(0);
             else _v = v;
          }
 

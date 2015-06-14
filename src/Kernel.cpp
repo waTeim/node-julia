@@ -222,6 +222,7 @@ int64_t nj::Kernel::preserve(jl_value_t *val) throw(JuliaException)
    jl_value_t *ex = jl_exception_occurred();
 
    if(ex) throw getJuliaException(ex);
+   freelist_index[val] = free_index;
    return free_index;
 }
 
@@ -236,6 +237,7 @@ jl_value_t *nj::Kernel::free(int64_t valIndex) throw(JuliaException)
    jl_value_t *ex = jl_exception_occurred();
 
    if(ex) throw getJuliaException(ex);
+   freelist_index.erase(val);
    jl_cellset(preserve_array,valIndex,0);
    ex = jl_exception_occurred();
    if(ex) throw getJuliaException(ex);
@@ -252,6 +254,15 @@ jl_value_t *nj::Kernel::get(int64_t valIndex) throw(JuliaException)
    if(ex) throw getJuliaException(ex);
    return val;
 }
+
+int64_t nj::Kernel::get(jl_value_t *val)
+{
+   map<jl_value_t*,int64_t>::iterator i = freelist_index.find(val);
+  
+   if(i == freelist_index.end()) return -1;
+   return i->second;
+}
+
 
 jl_value_t *nj::Kernel::import(const string &moduleName) throw(JuliaException)
 {
