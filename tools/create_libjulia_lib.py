@@ -24,7 +24,7 @@ DUMPBIN_EXPORT_HEADER             = "ordinal hint"
 DUMPBIN_EXPORT_FOOTER             = "Summary"
 
 def usage():
-   print "Usage: convert_libjulia <path_to_libjulia_bin_folder>"
+   print "Usage: create_libjulia_lib <path_to_libjulia_bin_folder>"
 
 def get_libjulia_path():
    if len(sys.argv) != 2:
