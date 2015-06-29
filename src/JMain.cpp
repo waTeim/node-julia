@@ -84,7 +84,7 @@ void JMain::operator()()
          {
             string sharedLibName = SHARED_LIB("sys");
 
-            jl_init_with_image((char*)install_directory.c_str(),sharedLibName.c_str());
+            jl_init_with_image((char*)install_directory.c_str(),(char*)sharedLibName.c_str());
          }
          else jl_init_with_image((char*)install_directory.c_str(),(char*)"sys.ji");
       }
