@@ -822,14 +822,30 @@ describe('Regression Tests',function()
       });
    }
 
-// Keep it around but commented for now.
-//
-//   it('JuMP',function()
-//   {
-//      this.timeout(6000);
-//      var JuMP = julia.import('JuMP');
-//      var m = julia.eval('JuMP.Model()');
-//
-//      expect(m.getHIndex).to.exist;
-//   });
+/*
+   it('Incremental updates',function()
+   {
+      this.timeout(120000);
+      var a = julia.exec('zeros',200000);
+      var s;
+
+      for(var i = 0;i < 200000;i++)
+      {
+         a[i] = i;
+         s = julia.exec('sum',a);
+      }
+      expect(s).to.eql(19999900000);
+   });
+
+   Keep it around but commented for now.
+  
+     it('JuMP',function()
+     {
+        this.timeout(6000);
+        var JuMP = julia.import('JuMP');
+        var m = julia.eval('JuMP.Model()');
+  
+        expect(m.getHIndex).to.exist;
+     });
+*/
 });

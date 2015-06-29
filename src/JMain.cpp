@@ -1,6 +1,12 @@
 #if defined(WIN32)
 #pragma warning(disable:4200)
+#define SHARED_LIB(base) (string(base) + ".dll")
+#elif defined(__APPLE__)
+#define SHARED_LIB(base) (string(base) + ".dylib")
+#else  
+#define SHARED_LIB(base) (string(base) + ".so")
 #endif
+
 
 #include <iostream>
 #include <sstream>
@@ -53,6 +59,7 @@ void JMain::initialize(int argc,const char *argv[]) throw(nj::InitializationExce
    c_state.notify_all();
 }
 
+
 void JMain::operator()()
 {
    bool done = false;
@@ -67,9 +74,20 @@ void JMain::operator()()
 
    if(!deactivated)
    {
+      string sharedLibPath = SHARED_LIB(install_directory + "/sys");
+      struct stat buf;
 
       if(install_directory == "") jl_init(0);
-      else jl_init_with_image((char*)install_directory.c_str(),(char*)"sys.ji");
+      else
+      {
+         if(stat(sharedLibPath.c_str(),&buf) == 0)
+         {
+            string sharedLibName = SHARED_LIB("sys");
+
+            jl_init_with_image((char*)install_directory.c_str(),sharedLibName.c_str());
+         }
+         else jl_init_with_image((char*)install_directory.c_str(),(char*)"sys.ji");
+      }
 
       #ifdef JL_SET_STACK_BASE
       JL_SET_STACK_BASE;
