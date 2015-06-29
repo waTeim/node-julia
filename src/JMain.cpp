@@ -74,19 +74,19 @@ void JMain::operator()()
 
    if(!deactivated)
    {
-      string sharedLibPath = SHARED_LIB(install_directory + "/sys");
+      string jiPath = install_directory + "/sys.ji";
       struct stat buf;
 
       if(install_directory == "") jl_init(0);
-      else
+      else 
       {
-         if(stat(sharedLibPath.c_str(),&buf) == 0)
+         if(stat(jiPath.c_str(),&buf) == 0) jl_init_with_image((char*)install_directory.c_str(),(char*)"sys.ji");
+         else
          {
             string sharedLibName = SHARED_LIB("sys");
 
             jl_init_with_image((char*)install_directory.c_str(),(char*)sharedLibName.c_str());
          }
-         else jl_init_with_image((char*)install_directory.c_str(),(char*)"sys.ji");
       }
 
       #ifdef JL_SET_STACK_BASE
