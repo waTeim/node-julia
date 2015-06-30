@@ -59,12 +59,12 @@ void JMain::initialize(int argc,const char *argv[]) throw(nj::InitializationExce
    c_state.notify_all();
 }
 
-string getSysImageName(const string &installdirectory)
+string getSysImageName(const string &installDirectory)
 {
 #if defined(WIN32)
    return SHARED_LIB("sys");
 #else
-   string jiPath = install_directory + "\\sys.ji";
+   string jiPath = installDirectory + "\\sys.ji";
    struct stat buf;
 
    if(stat(jiPath.c_str(),&buf) == 0) return "sys.ji";

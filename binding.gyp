@@ -57,9 +57,13 @@
               {
                 "action": [ "python","tools/create_libjulia_lib.py","<(juliaLib)"],
                 "message": "Building julialib.lib"
+              },
+              { 
+                "action": [ "true" ],
+                "message": ""
               }
             ]
-          ],
+          ]
         }
       ],
       "target_name": "nj",
