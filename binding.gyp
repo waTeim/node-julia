@@ -39,6 +39,29 @@
           ]
         ]
       },
+      "actions":
+      [
+        {
+          "action_name": 'mklib',
+          "inputs":
+          [
+            "tools/create_libjulia_lib.py"
+          ],
+          "outputs":
+          [
+            "<(juliaLib)/libjulia.lib"
+          ],
+          "conditions":
+          [
+            [ "OS == 'win'",
+              {
+                "action": [ "python","tools/create_libjulia_lib.py","<(juliaLib)"],
+                "message": "Building julialib.lib"
+              }
+            ]
+          ],
+        }
+      ],
       "target_name": "nj",
       "sources":
       [

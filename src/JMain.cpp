@@ -59,6 +59,19 @@ void JMain::initialize(int argc,const char *argv[]) throw(nj::InitializationExce
    c_state.notify_all();
 }
 
+string getSysImageName(const string &installdirectory)
+{
+#if defined(WIN32)
+   return SHARED_LIB("sys");
+#else
+   string jiPath = install_directory + "\\sys.ji";
+   struct stat buf;
+
+   if(stat(jiPath.c_str(),&buf) == 0) return "sys.ji";
+   else return SHARED_LIB("sys");
+#endif
+}
+
 
 void JMain::operator()()
 {
@@ -74,20 +87,8 @@ void JMain::operator()()
 
    if(!deactivated)
    {
-      string jiPath = install_directory + "/sys.ji";
-      struct stat buf;
-
       if(install_directory == "") jl_init(0);
-      else 
-      {
-         if(stat(jiPath.c_str(),&buf) == 0) jl_init_with_image((char*)install_directory.c_str(),(char*)"sys.ji");
-         else
-         {
-            string sharedLibName = SHARED_LIB("sys");
-
-            jl_init_with_image((char*)install_directory.c_str(),(char*)sharedLibName.c_str());
-         }
-      }
+      else jl_init_with_image((char*)install_directory.c_str(),(char*)getSysImageName(install_directory).c_str());
 
       #ifdef JL_SET_STACK_BASE
       JL_SET_STACK_BASE;
