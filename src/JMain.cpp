@@ -1,16 +1,15 @@
 #if defined(WIN32)
 #pragma warning(disable:4200)
-#define SHARED_LIB(base) (string(base) + ".dll")
-#elif defined(__APPLE__)
-#define SHARED_LIB(base) (string(base) + ".dylib")
-#else  
-#define SHARED_LIB(base) (string(base) + ".so")
+#define IFS '\\'
+#else
+#define IFS '/'
 #endif
 
 
 #include <iostream>
 #include <sstream>
 #include <julia.h>
+#include "util.h"
 #include "JMain.h"
 #include "Call.h"
 #include "Script.h"
@@ -59,16 +58,15 @@ void JMain::initialize(int argc,const char *argv[]) throw(nj::InitializationExce
    c_state.notify_all();
 }
 
-string getSysImageName(const string &installDirectory)
+string getSysImageName()
 {
-#if defined(WIN32)
-   return SHARED_LIB("sys");
-#else
-   string jiPath = installDirectory + "/sys.ji";
-   struct stat buf;
+#if defined(JULIA_VERSION_MINOR) && JULIA_VERSION_MINOR == 4 && !defined(JL_OPTIONS_DUMPBITCODE_ON)
+   string imageFile = jl_options.image_file;
+   vector<string> pathParts = nj::split(imageFile,IFS);
 
-   if(stat(jiPath.c_str(),&buf) == 0) return "sys.ji";
-   else return SHARED_LIB("sys");
+   return pathParts[pathParts.size() - 1];
+#else
+   return "sys.ji";
 #endif
 }
 
@@ -88,7 +86,7 @@ void JMain::operator()()
    if(!deactivated)
    {
       if(install_directory == "") jl_init(0);
-      else jl_init_with_image((char*)install_directory.c_str(),(char*)getSysImageName(install_directory).c_str());
+      else jl_init_with_image((char*)install_directory.c_str(),(char*)getSysImageName().c_str());
 
       #ifdef JL_SET_STACK_BASE
       JL_SET_STACK_BASE;
