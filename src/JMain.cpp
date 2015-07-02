@@ -62,7 +62,7 @@ string getSysImageName()
 {
 #if defined(JULIA_VERSION_MINOR) && JULIA_VERSION_MINOR == 4 && !defined(JL_OPTIONS_DUMPBITCODE_ON)
    string imageFile = jl_options.image_file;
-   vector<string> pathParts = nj::split(imageFile,IFS);
+   vector<string> pathParts = nj::split(imageFile,'/');
 
    return pathParts[pathParts.size() - 1];
 #else

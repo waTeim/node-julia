@@ -34,36 +34,21 @@
             {
               "juliaLib":"<(juliaBase)/bin",
               "JULIA_LIB":"<!(python tools/nj_config.py <(OS) julia_lib_define)",
-              "juliaInclude":"<(juliaBase)/include/julia"
+              "juliaInclude":"<(juliaBase)/include/julia",
+              "libjulialib":"libjulia.lib"
             }
           ]
         ]
       },
-      "actions":
+      "rules":
       [
         {
-          "action_name": 'mklib',
-          "inputs":
-          [
-            "tools/create_julia_libs.py"
-          ],
-          "outputs":
-          [
-            "<(juliaLib)/libjulia.lib"
-          ],
-          "conditions":
-          [
-            [ "OS == 'win'",
-              {
-                "action": [ "python","tools/create_julia_libs.py","<(juliaLib)"],
-                "message": "Building julialib.lib"
-              },
-              { 
-                "action": [ "true" ],
-                "message": ""
-              }
-            ]
-          ]
+          "rule_name": "Create Static LIBS",
+          "extension": "dll",
+          "inputs": "<(RULE_INPUT_NAME)",
+          "outputs": "<(RULE_INPUT_NAME)",
+          "action": [ "python","tools/create_julia_libs.py","--bin","<(juliaLib)","--files","<(RULE_INPUT_NAME)"],
+          "message": "Generating <(RULE_INPUT_ROOT).lib"
         }
       ],
       "target_name": "nj",
@@ -163,6 +148,11 @@
         ],
         [ "OS == 'win'",
           {
+            "sources": 
+            [
+              "<(juliaLib)/libjulia.dll",
+              "<(juliaLib)/libopenlibm.dll",
+            ],
             "msvs_settings":
             {
               "VCCLCompilerTool":

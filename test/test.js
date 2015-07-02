@@ -822,6 +822,13 @@ describe('Regression Tests',function()
       });
    }
 
+   it('libm use',function()
+   {
+      var x = julia.eval('round(5.51)')
+
+      expect(x).to.equal(6);
+   });
+
 /*
    it('Incremental updates',function()
    {
