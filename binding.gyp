@@ -45,7 +45,7 @@
           "action_name": 'mklib',
           "inputs":
           [
-            "tools/create_libjulia_lib.py"
+            "tools/create_julia_libs.py"
           ],
           "outputs":
           [
@@ -55,7 +55,7 @@
           [
             [ "OS == 'win'",
               {
-                "action": [ "python","tools/create_libjulia_lib.py","<(juliaLib)"],
+                "action": [ "python","tools/create_julia_libs.py","<(juliaLib)"],
                 "message": "Building julialib.lib"
               },
               { 
@@ -125,7 +125,8 @@
              {
                "libraries":
                [
-                 "-llibjulia"
+                 "-llibjulia",
+                 "-llibopenlibm"
                ]
              },
              {
