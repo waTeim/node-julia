@@ -401,7 +401,7 @@ void raiseException(HandleScope &scope,const shared_ptr<nj::Result> &res)
    ThrowException(ex);
 }
 
-Handle<Value> callbackWithResult(HandleScope &scope,const Local<Function> &cb,const shared_ptr<nj::Result> &res)
+Handle<Value> callbackWithResult(HandleScope &scope,const Local<Function> &cb,const shared_ptr<nj::Result> &res,bool useMakeCallback)
 {
    if(res.get())
    {
@@ -413,7 +413,8 @@ Handle<Value> callbackWithResult(HandleScope &scope,const Local<Function> &cb,co
          Local<Value> *argv = new Local<Value>[argc];
 
          argv[0] = genError(scope,res);
-         return callback(scope,cb,argc,argv);
+         if(useMakeCallback) return node::MakeCallback(Context::GetCurrent()->Global(),cb,argc,argv);
+         else return callback(scope,cb,argc,argv);
       }
       else
       {
@@ -422,7 +423,8 @@ Handle<Value> callbackWithResult(HandleScope &scope,const Local<Function> &cb,co
 
          argv[0] = Local<Value>::New(Null());
          argc = createResponse(scope,res,argc,argv);
-         return callback(scope,cb,argc,argv);
+         if(useMakeCallback) return node::MakeCallback(Context::GetCurrent()->Global(),cb,argc,argv);
+         else return callback(scope,cb,argc,argv);
       }
    }
    else return callback(scope,cb,0,0);

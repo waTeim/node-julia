@@ -26,7 +26,7 @@ void doDispatch(uv_async_t *handle,int status)
    {
       HandleScope scope;
 
-      callbackWithResult(scope,binding->target()->cb(),binding->res());
+      callbackWithResult(scope,binding->target()->cb(),binding->res(),true);
    }
 }
 

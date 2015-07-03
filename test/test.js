@@ -829,6 +829,19 @@ describe('Regression Tests',function()
       expect(x).to.equal(6);
    });
 
+   it('asynchronous call followed by process.nextTick()',function(done)
+   {
+      julia.eval("2+3",function(err,result)
+      {
+         expect(err).to.equal(null);
+         expect(result).to.equal(5);
+      });
+      julia.eval("2+3",function(err,result)
+      {
+         process.nextTick(done);
+      });
+   });
+
 /*
    it('Incremental updates',function()
    {
