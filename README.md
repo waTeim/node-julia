@@ -128,7 +128,7 @@ to the callback function.
 Typed arrays are used when possible which will be whenever the element
 type is numeric in either single dimension or multidimensional arrays
 
-Additionally
+## Additionally
 * Javascript **Buffer** will be mapped to Julia **UInt8** Arrays
 * Julia single dimension **UInt8** arrays will be mapped to **Buffer**, but
 Julia multidimensional **UInt8** arrays will be mapped to JavaScript Arrays
@@ -136,19 +136,31 @@ of **UInt8Array**.
 * Julia **UInt64** and **Int64** arrays will be mapped to JavaScript
 **Float64Array**.
 
+## Use of Shared Buffers
+If the result of an expression would resolve to a JavaScript typed array, then
+the buffer that underlies that array is shared, not copied, between Julia and JavaScript.
+* This feature is currently supported on node 0.11, 0.12, and all versions of iojs
+* this feature is currently not avaiable when using node 0.10.
+* If the array originates within Julia, then a Javascript typed array will be
+created as described above with the same buffer used by Julia.
+* If the array originates within JavaScript then an equivalent Julia array will be created
+by reusing the same memory buffer as the JavaScript array.
+* Reuse of the same array across multiple calls is detected to prevent re-creation.
+* Premature garbage collection is prevented.
+
 # Tests
 Tests run using npm
 
     npm test
 
 # Compatibility
-Tested with [node](http://nodejs.org/) 0.10.x, 0.12.x, [io.js](https://iojs.org/) 2.0.x
+Tested with [node](http://nodejs.org/) 0.10.x, 0.11.x, 0.12.x, [io.js](https://iojs.org/) 1.0
+and 2.x. Julia version 0.3.x is supported on all version of node and iojs, but Julia
+0.4.x and node 0.10.x are currently incompatible.
+
+Tested on OS/X, Linux, Windows.
 
 # Limitations
-
-* Windows is experimentally supported, but requires a manual step to 
-create a pre-requisite library [see here](http://node-julia.readme.io/docs/the-windows-situation)
-for details.
 
 * node 0.10 is deprecated due to recent changes to Julia that have caused
 an incompatibility between Julia 0.4 and node 0.10.
