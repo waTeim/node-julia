@@ -58,16 +58,24 @@ void JMain::initialize(int argc,const char *argv[]) throw(nj::InitializationExce
    c_state.notify_all();
 }
 
+void setPrecompiled(bool usePrecompiled)
+{
+   #if defined(JULIA_VERSION_MINOR) && JULIA_VERSION_MINOR == 4 && !defined(JL_OPTIONS_DUMPBITCODE_ON)
+   if(usePrecompiled) jl_options.use_precompiled = 1;
+   else jl_options.use_precompiled = 0;
+   #endif
+}
+
 string getSysImageName()
 {
-#if defined(JULIA_VERSION_MINOR) && JULIA_VERSION_MINOR == 4 && !defined(JL_OPTIONS_DUMPBITCODE_ON)
+   #if defined(JULIA_VERSION_MINOR) && JULIA_VERSION_MINOR == 4 && !defined(JL_OPTIONS_DUMPBITCODE_ON)
    string imageFile = jl_options.image_file;
    vector<string> pathParts = nj::split(imageFile,'/');
 
    return pathParts[pathParts.size() - 1];
-#else
+   #else
    return "sys.ji";
-#endif
+   #endif
 }
 
 
@@ -85,6 +93,11 @@ void JMain::operator()()
 
    if(!deactivated)
    {
+
+      #ifdef WIN32
+      setPrecompiled(true);
+      #endif
+
       if(install_directory == "") jl_init(0);
       else jl_init_with_image((char*)install_directory.c_str(),(char*)getSysImageName().c_str());
 
