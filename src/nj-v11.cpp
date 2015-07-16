@@ -442,7 +442,7 @@ void raiseException(HandleScope &scope,const shared_ptr<nj::Result> &res)
    I->ThrowException(ex);
 }
 
-void callbackWithResult(HandleScope &scope,const Local<Function> &cb,const shared_ptr<nj::Result> &res,bool useMakeCallback)
+void callbackWithResult(HandleScope &scope,const Local<Function> &cb,const shared_ptr<nj::Result> &res,const Handle<Object> &recv)
 {
    Isolate *I = Isolate::GetCurrent();
 
@@ -456,7 +456,7 @@ void callbackWithResult(HandleScope &scope,const Local<Function> &cb,const share
          Local<Value> *argv = new Local<Value>[argc];
 
          argv[0] = genError(scope,res);
-         if(useMakeCallback) node::MakeCallback(I,I->GetCurrentContext()->Global(),cb,argc,argv);
+         if(!recv->IsUndefined()) node::MakeCallback(I,recv,cb,argc,argv);
          else callback(I,cb,argc,argv);
       }
       else
@@ -466,7 +466,7 @@ void callbackWithResult(HandleScope &scope,const Local<Function> &cb,const share
 
          argv[0] = Null(I);
          (void)createResponse(scope,res,argc,argv);
-         if(useMakeCallback) node::MakeCallback(I,I->GetCurrentContext()->Global(),cb,argc,argv);
+         if(!recv->IsUndefined()) node::MakeCallback(I,recv,cb,argc,argv);
          else callback(I,cb,argc,argv);
       }
    }
@@ -549,7 +549,7 @@ void doEval(const FunctionCallbackInfo<Value> &args)
       }
       else
       {
-         nj::Callback *c = new nj::Callback(cb);
+         nj::Callback *c = new nj::Callback(cb,args.This());
 
          engine->eval(*text,c);
       }
@@ -639,7 +639,7 @@ void doExec(const FunctionCallbackInfo<Value> &args)
          }
          else
          {
-            nj::Callback *c = new nj::Callback(cb);
+            nj::Callback *c = new nj::Callback(cb,args.This());
 
             if(funcNameIndex == 0) engine->exec(*funcName,req,c);
             else engine->exec(module,*funcName,req,c);
@@ -707,7 +707,7 @@ void doImport(const FunctionCallbackInfo<Value> &args)
       }
       else
       {
-         nj::Callback *c = new nj::Callback(cb);
+         nj::Callback *c = new nj::Callback(cb,args.This());
 
          engine->import(*text,c);
       }

@@ -9,12 +9,14 @@ namespace nj
    {
       protected:
 
-         v8::Persistent<v8::Function> resource;
+         v8::Persistent<v8::Function> callback_persist;
+         v8::Persistent<v8::Object> recv_persist;
 
       public:
-     
-         Callback(v8::Local<v8::Function> cb);
+
+         Callback(const v8::Local<v8::Function> &cb,const v8::Local<v8::Object> &recv);
          v8::Local<v8::Function> cb();
+         v8::Local<v8::Object> recv();
          ~Callback();
    };
 };

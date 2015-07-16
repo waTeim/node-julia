@@ -64,7 +64,7 @@ Handle<Value> nj::ScriptEncapsulated::New(const Arguments& args)
 
          if(exceptionId != nj::Exception::no_exception) raiseException(scope,cruw);
          else
-         {  
+         {
             unwrapped->Wrap(args.This());
             return args.This();
          }
@@ -135,7 +135,7 @@ Handle<Value> nj::ScriptEncapsulated::exec(const Arguments &args)
       }
       else
       {
-         nj::Callback *c = new nj::Callback(cb);
+         nj::Callback *c = new nj::Callback(cb,args.This());
 
          engine->exec(obj->compile_res->results()[1],funcName,req,c);
       }

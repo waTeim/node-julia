@@ -401,7 +401,7 @@ void raiseException(HandleScope &scope,const shared_ptr<nj::Result> &res)
    ThrowException(ex);
 }
 
-Handle<Value> callbackWithResult(HandleScope &scope,const Local<Function> &cb,const shared_ptr<nj::Result> &res,bool useMakeCallback)
+Handle<Value> callbackWithResult(HandleScope &scope,const Local<Function> &cb,const shared_ptr<nj::Result> &res,const Handle<Object> &recv)
 {
    if(res.get())
    {
@@ -413,7 +413,7 @@ Handle<Value> callbackWithResult(HandleScope &scope,const Local<Function> &cb,co
          Local<Value> *argv = new Local<Value>[argc];
 
          argv[0] = genError(scope,res);
-         if(useMakeCallback) return node::MakeCallback(Context::GetCurrent()->Global(),cb,argc,argv);
+         if(!recv->IsUndefined()) return node::MakeCallback(recv,cb,argc,argv);
          else return callback(scope,cb,argc,argv);
       }
       else
@@ -423,7 +423,7 @@ Handle<Value> callbackWithResult(HandleScope &scope,const Local<Function> &cb,co
 
          argv[0] = Local<Value>::New(Null());
          argc = createResponse(scope,res,argc,argv);
-         if(useMakeCallback) return node::MakeCallback(Context::GetCurrent()->Global(),cb,argc,argv);
+         if(!recv->IsUndefined()) return node::MakeCallback(recv,cb,argc,argv);
          else return callback(scope,cb,argc,argv);
       }
    }
@@ -496,7 +496,7 @@ Handle<Value> doEval(const Arguments &args)
       }
       else
       {
-         nj::Callback *c = new nj::Callback(cb);
+         nj::Callback *c = new nj::Callback(cb,args.This());
 
          engine->eval(*text,c);
          return scope.Close(Undefined());
@@ -578,7 +578,7 @@ Handle<Value> doExec(const Arguments &args)
          }
          else
          {
-            nj::Callback *c = new nj::Callback(cb);
+            nj::Callback *c = new nj::Callback(cb,args.This());
 
             if(funcNameIndex == 0) engine->exec(*funcName,req,c);
             else engine->exec(module,*funcName,req,c);
@@ -646,7 +646,7 @@ Handle<Value> doImport(const Arguments &args)
       }
       else
       {
-         nj::Callback *c = new nj::Callback(cb);
+         nj::Callback *c = new nj::Callback(cb,args.This());
 
          engine->import(*text,c);
          return scope.Close(Undefined());

@@ -3,18 +3,26 @@
 
 using namespace v8;
 
-nj::Callback::Callback(Local<Function> cb)
-{ 
-   resource = Persistent<Function>::New(cb);
+nj::Callback::Callback(const Local<Function> &cb,const Local<Object> &recv)
+{
+   callback_persist = Persistent<Function>::New(cb);
+   recv_persist = Persistent<Object>::New(recv);
 }
 
 Local<Function> nj::Callback::cb()
 {
-   return *resource;
+   return *callback_persist;
+}
+
+Local<Object> nj::Callback::recv()
+{
+   return *recv_persist;
 }
 
 nj::Callback::~Callback()
 {
-   resource.Dispose();
-   resource.Clear();
+   callback_persist.Dispose();
+   callback_persist.Clear();
+   recv_persist.Dispose();
+   recv_persist.Clear();
 }

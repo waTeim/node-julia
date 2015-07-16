@@ -141,7 +141,7 @@ void nj::ScriptEncapsulated::exec(const FunctionCallbackInfo<v8::Value> &args)
       }
       else
       {
-         nj::Callback *c = new nj::Callback(cb);
+         nj::Callback *c = new nj::Callback(cb,args.This());
 
          engine->exec(obj->compile_res->results()[1],funcName,req,c);
       }

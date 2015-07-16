@@ -1,6 +1,7 @@
-var chai = require('chai'),
-    julia = require('..'),
-    expect = chai.expect;
+var chai = require('chai');
+var julia = require('..');
+var domain = require('domain');
+var expect = chai.expect;
 
 var version = process.version.replace(/v([^.]*)\.([^.]*)\..*/,"$1 $2").split(' ');
 
@@ -623,7 +624,7 @@ describe('Regression Tests',function()
 
       expect(julia.exec('t1Mult',juliaObj)).to.eql(new Float64Array([5,10,15]));
    });
- 
+
    it('JRef random creation and deletion',function()
    {
       this.timeout(10000);
@@ -784,7 +785,7 @@ describe('Regression Tests',function()
          done();
       });
    });
-   
+
    it('JuliaHandle of struct type',function()
    {
       var juliaObj = julia.exec('t1Cons1',5,3);
@@ -842,6 +843,71 @@ describe('Regression Tests',function()
       });
    });
 
+   it('throw errors to the domain context',function(done)
+   {
+      var d = domain.create();
+
+      d.on('error',function() { done() });
+      d.run(function ()
+      {
+         julia.eval("2+3",function() { throw new Error("some error"); })
+      });
+   });
+
+   it('set active domain inside timeout',function(done)
+   {
+      var d = domain.create();
+
+      d.on('error',done);
+      d.run(function()
+      {
+         setTimeout(function()
+         {
+            expect(domain.active).to.equal(d);
+            done();
+         },0);
+      });
+   });
+
+   it('set active domain inside callback',function(done)
+   {
+      var d = domain.create();
+
+      d.on('error',done);
+      d.run(function()
+      {
+         julia.exec('+',2,3,function(err,res)
+         {
+            expect(domain.active).to.equal(d);
+            expect(res).to.equal(5);
+            done();
+         });
+      });
+   });
+
+   it('set active domain inside callback when using bind()',function(done)
+   {
+      var d = domain.create();
+
+      d.on('error',done);
+      julia.eval("2+3",d.bind(function()
+      {
+         expect(domain.active).to.equal(d);
+         done();
+      }));
+   });
+
+   it('preserve scope',function(done)
+   {
+      var x = 5;
+
+      julia.eval("2+3",function(err,res)
+      {
+         expect(x).to.equal(res);
+         done();
+      });
+   });
+
 /*
    it('Incremental updates',function()
    {
@@ -858,13 +924,13 @@ describe('Regression Tests',function()
    });
 
    Keep it around but commented for now.
-  
+
      it('JuMP',function()
      {
         this.timeout(6000);
         var JuMP = julia.import('JuMP');
         var m = julia.eval('JuMP.Model()');
-  
+
         expect(m.getHIndex).to.exist;
      });
 */
