@@ -130,9 +130,9 @@ void JMain::operator()()
          }
       }
 
-#if defined(JULIA_VERSION_MINOR) && JULIA_VERSION_MINOR == 4
-      jl_atexit_hook();
-#endif
+//#if defined(JULIA_VERSION_MINOR) && JULIA_VERSION_MINOR == 4
+//      jl_atexit_hook();
+//#endif
 
    }
 }

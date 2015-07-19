@@ -35,7 +35,7 @@ nj::Result nj::Script::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
 
    if(args.size() != 1 || !args[0]->isPrimitive()) return Result(res,exprId);
 
-   Primitive &text = static_cast<Primitive&>(*args[0]);
+   Primitive &filename = static_cast<Primitive&>(*args[0]);
 
    jl_value_t *jl_ex = 0;
    Kernel *kernel = Kernel::getSingleton();
@@ -43,7 +43,6 @@ nj::Result nj::Script::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
    try
    {
       string isoName = string("njIsoMod") + to_string(modNum++);
-      jl_value_t *filenameToInclude = jl_cstr_to_string(text.toString().c_str());
       jl_sym_t *isoSym = jl_symbol(isoName.c_str());
       jl_module_t *isoMod = (jl_module_t*)jl_new_module(isoSym);
 
@@ -59,7 +58,7 @@ nj::Result nj::Script::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
       jl_ex = jl_exception_occurred();
       if(jl_ex) return exceptionResult(jl_ex,exprId);
 
-      jl_value_t *ast = kernel->scriptify(isoMod,filenameToInclude);
+      jl_value_t *ast = kernel->scriptify(isoMod,filename.toString());
       jl_function_t *func = jl_get_function(jl_core_module,"eval");
 
       if(!func) return loadErrorResult("unable to locate Core.eval",exprId);

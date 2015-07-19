@@ -138,8 +138,7 @@ nj::Kernel::Kernel()
    freelist_start = -1;
 }
 
-
-jl_value_t *nj::Kernel::scriptify(jl_module_t *isolatingMod,jl_value_t *filenameToInclude) throw(JuliaException)
+jl_value_t *nj::Kernel::scriptify(jl_module_t *mod,const string &filename) throw(JuliaException)
 {
    if(!nj_module) nj_module = load();
 
@@ -147,9 +146,11 @@ jl_value_t *nj::Kernel::scriptify(jl_module_t *isolatingMod,jl_value_t *filename
 
    if(!func) throw getJuliaException("Could not locate function nj.scriptify");
 
-   JL_GC_PUSH2(&isolatingMod,&filenameToInclude);
+   jl_value_t *val = jl_cstr_to_string(filename.c_str());
 
-   jl_value_t *ast = jl_call2(func,(jl_value_t*)isolatingMod,filenameToInclude);
+   JL_GC_PUSH2(&mod,&val);
+
+   jl_value_t *ast = jl_call2(func,(jl_value_t*)mod,val);
    jl_value_t *ex = jl_exception_occurred();
 
    JL_GC_POP();
@@ -258,7 +259,7 @@ jl_value_t *nj::Kernel::get(int64_t valIndex) throw(JuliaException)
 int64_t nj::Kernel::get(jl_value_t *val)
 {
    map<jl_value_t*,int64_t>::iterator i = freelist_index.find(val);
-  
+
    if(i == freelist_index.end()) return -1;
    return i->second;
 }

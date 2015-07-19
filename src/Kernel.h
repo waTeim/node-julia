@@ -14,7 +14,7 @@ namespace nj
       protected:
 
          static Kernel *singleton;
-         
+
          int64_t freelist_start;
          std::vector<int64_t> freelist;
          std::map<jl_value_t*,int64_t> freelist_index;
@@ -34,7 +34,7 @@ namespace nj
 
          Kernel();
 
-         jl_value_t *scriptify(jl_module_t *isolatingMod,jl_value_t *filenameToInclude) throw(JuliaException);
+         jl_value_t *scriptify(jl_module_t *mod,const std::string &filename) throw(JuliaException);
          jl_value_t *newRegex(jl_value_t *pattern) throw(JuliaException);
          jl_value_t *getPattern(jl_value_t *re) throw(JuliaException);
          jl_datatype_t *getDateTimeType() throw(JuliaException);
