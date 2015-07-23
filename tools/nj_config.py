@@ -19,10 +19,10 @@ def julia_base_from_where_julia():
    DEVNULL = open(os.devnull, 'w')
    where_julia = subprocess.Popen(["where","julia.exe"],stdout=subprocess.PIPE,stderr=DEVNULL).communicate()[0];
    if len(where_julia) > 0:
-      real_path = os.path.realpath(where_julia.split()[0])
+      real_path = os.path.realpath(where_julia.rstrip(os.linesep))
       if real_path:
-         head,tail = os.path.split(real_path)
-         path,tail = os.path.split(head)
+         dirname = os.path.dirname(real_path)
+         path = os.path.split(dirname)[0]
    return path 
 
 def julia_base_from_home_directory():
