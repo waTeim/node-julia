@@ -4,17 +4,11 @@ import StringIO
 import subprocess
 import sys 
 import _winreg 
+import platform
 
 # This script will create a .lib from a given .dll using the C tools provided
-# by Microsoft Visual Studio.
-
-# Please note on 64-bit versions of Windows, registry operations to "HKLM\Software\..."
-# are redirected to "HKLM\Software\Wow6432Node\..." 
-# See https://msdn.microsoft.com/en-us/library/windows/desktop/aa384232%28v=vs.85%29.aspx 
-VISUAL_STUDIO_2013_REGISTRY_PATH  = r"Software\Microsoft\VisualStudio\12.0" 
-#VISUAL_STUDIO_2013_REGISTRY_PATH  = r"Software\Wow6432Node\Microsoft\VisualStudio\12.0" 
-VISUAL_STUDIO_2012_REGISTRY_PATH  = r"Software\Microsoft\VisualStudio\11.0" 
-#VISUAL_STUDIO_2012_REGISTRY_PATH  = r"Software\Wow6432Node\Microsoft\VisualStudio\11.0" 
+# by Microsoft Visual Studio.  We support Visual Studio 2015, 2013, and 2012.
+VISUAL_STUDIO_VERSIONS            = ['14.0', '12.0', '11.0']	#2015, 2013, 2012
 VISUAL_STUDIO_SHELL_FOLDER_KEY    = "ShellFolder" 
 VISUAL_C_BIN_FOLDER               = r"VC\bin"
 DUMPBIN_EXPORT_HEADER             = "ordinal hint"
@@ -60,9 +54,10 @@ def get_hklm_value(reg_path, reg_key):
    hKey = None 
    value = None 
    
-   try: 
-      hKey = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, reg_path, _winreg.KEY_READ) 
+   try:
+      hKey = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, reg_path, _winreg.KEY_READ)
       value, type = _winreg.QueryValueEx(hKey, reg_key) 
+      #print value
    except Exception, e: 
       #print str(e) 
       pass 
@@ -70,13 +65,27 @@ def get_hklm_value(reg_path, reg_key):
       if hKey != None: 
          _winreg.CloseKey(hKey) 
    return value 
- 
+
+def IsWin64():
+   # My God, this is lame...
+   return os.environ.get("PROGRAMFILES(X86)") != None
+
+def build_visual_studio_reg_path(version):
+   if IsWin64:
+      # Visual Studio is a 32-bit application so explicitly check the 32-bit registry.
+      path = "Software\\Wow6432Node\\Microsoft\\VisualStudio\\" + version
+   else:
+      path = "Software\\Microsoft\\VisualStudio" + version
+   return path
+
 # Search the registry to find Visual Studio, giving preference to newer versions
-def find_visual_studio(): 
-   path = get_hklm_value(VISUAL_STUDIO_2013_REGISTRY_PATH, VISUAL_STUDIO_SHELL_FOLDER_KEY) 
-   if path == None: 
-      path = get_hklm_value(VISUAL_STUDIO_2012_REGISTRY_PATH, VISUAL_STUDIO_SHELL_FOLDER_KEY) 
-   return path 
+def find_visual_studio():
+   for ver in VISUAL_STUDIO_VERSIONS:
+      reg_path = build_visual_studio_reg_path(ver)
+      value = get_hklm_value(reg_path, VISUAL_STUDIO_SHELL_FOLDER_KEY)
+      if value != None:
+	     break;
+   return value
 
 def get_symbol_name(temp):
    if "=" in temp:
