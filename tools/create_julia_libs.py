@@ -4,7 +4,6 @@ import StringIO
 import subprocess
 import sys 
 import _winreg 
-import platform
 
 # This script will create a .lib from a given .dll using the C tools provided
 # by Microsoft Visual Studio.  We support Visual Studio 2015, 2013, and 2012.
