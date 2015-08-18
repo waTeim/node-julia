@@ -214,8 +214,10 @@ static shared_ptr<nj::Value> getArrayValue(jl_value_t *Ainput)
    else if(elementType == (jl_value_t*)jl_any_type && jl_array_size(Ainput,0) == 0) value = arrayOfNull(Ainput);
    else
    {
-      const char *juliaTypename = jl_typename_str(elementType);
+      const char *juliaTypename = 0;
 
+      if(!jl_is_uniontype(elementType)) juliaTypename = jl_typename_str(elementType);
+      if(!juliaTypename) return 0;
       if(juliaTypename == JuliaSubString)
       {
          jl_value_t *utfArray = convertArray(Ainput,jl_utf8_string_type);

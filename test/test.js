@@ -908,6 +908,22 @@ describe('Regression Tests',function()
       });
    });
 
+   if(julia.eval('VERSION.minor') == 4)
+   {
+      it('eval Union Array ops',function()
+      {
+         expect(julia.eval('Array(Union{UTF8String,ASCIIString},0)')).to.equal(undefined);
+      });
+   }
+   else
+   {
+      it('eval Union Array ops',function()
+      {
+         expect(julia.eval('Array(Union(UTF8String,ASCIIString),0)')).to.equal(undefined);
+      });
+   }
+
+
 /*
    it('Incremental updates',function()
    {
