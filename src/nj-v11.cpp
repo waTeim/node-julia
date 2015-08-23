@@ -350,16 +350,25 @@ Local<Value> createArrayRes(HandleScope &scope,const shared_ptr<nj::Value> &valu
    return Array::New(I,0);
 }
 
-Local<Object> createBufferRes(HandleScope &scope,const shared_ptr<nj::Value> &value)
+Local<Value> createBufferRes(HandleScope &scope,const shared_ptr<nj::Value> &value)
 {
    const nj::Array<unsigned char,nj::UInt8_t> &array = static_cast<const nj::Array<unsigned char,nj::UInt8_t>&>(*value);
    Isolate *I = Isolate::GetCurrent();
    size_t length = array.dims()[0];
    unsigned char *p = array.ptr();
+
+#if V8MAJOR < 4 || V8MAJOR == 4 && V8MINOR < 4
    Local<Object> buffer = node::Buffer::New(I,length);
 
    memcpy(node::Buffer::Data(buffer),p,length);
    return buffer;
+#else
+   MaybeLocal<Object> buffer = node::Buffer::New(I,length);
+   Local<Value> localized = buffer.FromMaybe<Value>(v8::Undefined(I));
+
+   if(!buffer.IsEmpty()) memcpy(node::Buffer::Data(localized),p,length);
+   return localized;
+#endif
 }
 
 Local<Value> createResponse(HandleScope &scope,const shared_ptr<nj::Value> &value)

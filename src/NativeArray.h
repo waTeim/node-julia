@@ -42,7 +42,7 @@ namespace nj
             _dptr = (V*)(((char*)bufferObject->GetIndexedPropertiesExternalArrayData()) + offset);
          }
 
-#else
+#elif V8MAJOR < 4 || V8MAJOR == 4 && V8MINOR < 4
 
          NativeArray(const v8::Local<v8::Object> &array)
          {
@@ -62,11 +62,22 @@ namespace nj
             _dptr = (V*)(((char*)array->GetIndexedPropertiesExternalArrayData()) + offset);
          }
 
+#else
+
+         NativeArray(const v8::Local<v8::Object> &arrayObject)
+         {
+            v8::Local<v8::TypedArray> array = v8::Local<v8::TypedArray>::Cast(arrayObject);
+            v8::Local<v8::ArrayBuffer> buffer = array->Buffer();
+            v8::ArrayBuffer::Contents contents = buffer->GetContents();
+
+            _dptr = (V*)contents.Data();
+            _len = contents.ByteLength()/sizeof(V);
+         }
+
 #endif
 
          V *dptr() const { return _dptr; }
          unsigned int len() { return _len; }
-
    };
 
    enum NativeArrayType
