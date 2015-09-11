@@ -19,7 +19,6 @@ before_install:
       sudo add-apt-repository ppa:staticfloat/${JULIA_VERSION} -y;
       sudo apt-get update -qq -y;
       sudo apt-get install libpcre3-dev julia -y;
-      sudo apt-get install -qq g++-4.8;
       export CXX="g++-4.8";
       nvm install $NODE_VERSION;
       npm install -g mocha chai sinon bindings node-gyp;
@@ -40,6 +39,13 @@ before_install:
     fi
   - node --version
   - julia -e 'versioninfo()'
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.8
+    - g++-4.8
 script:
   - npm install
   - npm test
