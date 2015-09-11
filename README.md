@@ -154,15 +154,15 @@ Tests run using npm
     npm test
 
 # Compatibility
-Tested with [node](http://nodejs.org/) 0.10.x, 0.11.x, 0.12.x, [io.js](https://iojs.org/)
-1.x, 2.x. 3.x, and also the newly merged iojs and node node 4.x.
+Tested with [node](http://nodejs.org/) 0.10, 0.11, 0.12, [io.js](https://iojs.org/)
+1.x, 2.x. 3.x, and also re-merge of the two; node 4.x.
 
-Julia version 0.3.x is supported on all versions of node and iojs, but Julia 0.4.x and node
-0.10.x are currently incompatible.
+Julia version 0.3 is supported on all versions of node and iojs, but Julia 0.4+ and node
+0.10 are currently incompatible.
 
 Tested on OS/X, Linux, Windows.
 
 # Limitations
 
-* node 0.10 is deprecated due to recent changes to Julia that have caused
-an incompatibility between Julia 0.4 and node 0.10.
+* node 0.10 is deprecated due to Julia changes that have caused an incompatibility
+between Julia 0.4 and node 0.10.

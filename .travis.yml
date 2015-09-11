@@ -1,13 +1,17 @@
 language: cpp
 os:
-  - osx  
+  - osx
   - linux
 env:
   - NODE_VERSION="0.10"
-    JULIA_VERSION="juliareleases" 
+    JULIA_VERSION="juliareleases"
   - NODE_VERSION="0.12"
-    JULIA_VERSION="juliareleases" 
+    JULIA_VERSION="juliareleases"
   - NODE_VERSION="0.12"
+    JULIA_VERSION="julianightlies"
+  - NODE_VERSION="4.0"
+    JULIA_VERSION="juliareleases"
+  - NODE_VERSION="4.0"
     JULIA_VERSION="julianightlies"
 before_install:
   - if [ `uname` = "Linux" ]; then

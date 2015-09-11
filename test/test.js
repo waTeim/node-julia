@@ -583,7 +583,7 @@ describe('Regression Tests',function()
       expect(julia.exec('identity',re)).to.eql(re);
    });
 
-   if(julia.eval('VERSION.minor') == 4)
+   if(julia.eval('VERSION.minor') >= 4)
    {
       it('preserve Date value of now()',function()
       {
@@ -908,7 +908,7 @@ describe('Regression Tests',function()
       });
    });
 
-   if(julia.eval('VERSION.minor') == 4)
+   if(julia.eval('VERSION.minor') >= 4)
    {
       it('eval Union Array ops',function()
       {
