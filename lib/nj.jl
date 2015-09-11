@@ -16,6 +16,14 @@ macro vers04x_only(ex)
    @vers04x(ex)?esc(ex):nothing
 end
 
+macro vers04orGreater(ex)
+   VERSION.minor >= 4
+end
+
+macro vers04orGreater_only(ex)
+   @vers04orGreater(ex)?esc(ex):nothing
+end
+
 preserve = Array(Any,0);
 
 function topExpr(mod::Module,paths::Array{ASCIIString,1})
@@ -50,15 +58,15 @@ getPattern(re::Regex) = re.pattern
 getRegexType() = Regex
 
 @vers03x_only getDateTimeType() = typeof(nothing)
-@vers04x_only getDateTimeType() = DateTime
+@vers04orGreater_only getDateTimeType() = DateTime
 @vers03x_only toDate(milliseconds) = nothing
 
-@vers04x_only function toDate(milliseconds::Int64)
+@vers04orGreater_only function toDate(milliseconds::Int64)
    return DateTime(1970) + Base.Dates.Millisecond(milliseconds)
 end
 
 @vers03x_only toMilliseconds(date) = nothing
-@vers04x_only toMilliseconds(date) = Base.Dates.datetime2unix(date);
+@vers04orGreater_only toMilliseconds(date) = Base.Dates.datetime2unix(date);
 
 function getError(ex,bt)
    io = IOBuffer();
@@ -75,7 +83,7 @@ end
 #
 #  This can be removed once the issue is resolved in base.
 
-@vers04x_only function pwd()
+@vers04orGreater_only function pwd()
     b = Array(UInt8,1024)
     len = Csize_t[length(b),]
     Base.uv_error(:getcwd, ccall((:uv_cwd,"libjulia"), Cint, (Ptr{UInt8}, Ptr{Csize_t}), b, len))

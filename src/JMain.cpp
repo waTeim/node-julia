@@ -60,7 +60,7 @@ void JMain::initialize(int argc,const char *argv[]) throw(nj::InitializationExce
 
 void setPrecompiled(bool usePrecompiled)
 {
-   #if defined(JULIA_VERSION_MINOR) && JULIA_VERSION_MINOR == 4 && !defined(JL_OPTIONS_DUMPBITCODE_ON)
+   #if defined(JULIA_VERSION_MINOR) && JULIA_VERSION_MINOR >= 4 && !defined(JL_OPTIONS_DUMPBITCODE_ON)
    if(usePrecompiled) jl_options.use_precompiled = 1;
    else jl_options.use_precompiled = 0;
    #endif
@@ -68,7 +68,7 @@ void setPrecompiled(bool usePrecompiled)
 
 string getSysImageName()
 {
-   #if defined(JULIA_VERSION_MINOR) && JULIA_VERSION_MINOR == 4 && !defined(JL_OPTIONS_DUMPBITCODE_ON)
+   #if defined(JULIA_VERSION_MINOR) && JULIA_VERSION_MINOR >= 4 && !defined(JL_OPTIONS_DUMPBITCODE_ON)
    string imageFile = jl_options.image_file;
    vector<string> pathParts = nj::split(imageFile,'/');
 

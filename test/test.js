@@ -67,7 +67,7 @@ describe('Regression Tests',function()
 
    it('version',function()
    {
-      expect(julia.eval('VERSION.minor')).to.within(3,4);
+      expect(julia.eval('VERSION.minor')).to.within(3,5);
    });
 
    it('eval max 32 bit Integer (4294967296)',function()
