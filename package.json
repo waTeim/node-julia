@@ -1,6 +1,6 @@
 {
   "name": "node-julia",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Fast and simple access to Julia embedded in node",
   "main": "lib/nj.js",
   "repository": {
