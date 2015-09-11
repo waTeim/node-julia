@@ -33,13 +33,18 @@ def julia_base_from_home_directory():
 
 def julia_base_from_home_directory_win():
    home = os.path.expanduser("~")
+   path = "";
    search_folder = os.path.join(home, "AppData\Local")
    DEVNULL = open(os.devnull, 'w')
    if os.path.isdir(search_folder):
       where_julia = subprocess.Popen(["where","julia.exe", "/r", search_folder],stdout=subprocess.PIPE,stderr=DEVNULL).communicate()[0];
-      julia_dir,filename = os.path.split(where_julia)
-      if os.path.isdir(julia_dir): return julia_dir
-   return "";
+      #julia_dir,filename = os.path.split(where_julia)
+      real_path = os.path.realpath(where_julia.rstrip(os.linesep))
+      #if os.path.isdir(julia_dir): return julia_dir
+      if real_path:
+         dirname = os.path.dirname(real_path)
+         path = os.path.split(dirname)[0]
+   return path 
 
 def julia_base_from_applications():
    julia_dir = "/Applications/Julia-0.3.0.app/Contents/Resources/julia/"
