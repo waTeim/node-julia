@@ -98,6 +98,10 @@ void JMain::operator()()
       setPrecompiled(true);
       #endif
 
+      #if defined(JL_OPTIONS_HANDLE_SIGNALS_OFF)
+      jl_options.handle_signals = JL_OPTIONS_HANDLE_SIGNALS_OFF;
+      #endif
+
       if(install_directory == "") jl_init(0);
       else jl_init_with_image((char*)install_directory.c_str(),(char*)getSysImageName().c_str());
 
