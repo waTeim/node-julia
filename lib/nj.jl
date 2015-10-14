@@ -24,6 +24,38 @@ macro vers04orGreater_only(ex)
    @vers04orGreater(ex)?esc(ex):nothing
 end
 
+# lifted from Compat.jl; minimum required
+macro compat(ex)
+    esc(_compat(ex))
+end
+
+function _compat(ex::Expr)
+    if ex.head == :curly
+        f = ex.args[1]
+        if VERSION < v"0.4.0-dev+5379" && f == :Union
+            ex = Expr(:call,:Union,ex.args[2:end]...)
+        end
+    elseif ex.head == :quote && isa(ex.args[1], Symbol)
+        # Passthrough
+        return ex
+    end
+    return Expr(ex.head, map(_compat, ex.args)...)
+end
+function _compat(ex::Symbol)
+    if VERSION < v"0.4.0-dev+768" && ex == :Void
+        return :Nothing
+    end
+    return ex
+end
+_compat(ex) = ex
+
+if VERSION < v"0.4.0-dev+1387"
+    typealias AbstractString String
+    export AbstractString
+end
+
+#--------- end compat.jl lifting ----------
+
 preserve = Array(Any,0);
 
 function topExpr(mod::Module,paths::Array{ASCIIString,1})
@@ -97,15 +129,15 @@ end
     bytestring(b[1:len[1]-1])
 end
 
-abspath(a::String) = normpath(isabspath(a) ? a : joinpath(pwd(),a))
-abspath(a::String, b::String...) = abspath(joinpath(a,b...))
+abspath(a::AbstractString) = normpath(isabspath(a) ? a : joinpath(pwd(),a))
+abspath(a::AbstractString, b::AbstractString...) = abspath(joinpath(a,b...))
 
-function find_in_path(name::String)
+function find_in_path(name::AbstractString)
     isabspath(name) && return name
     isfile(name) && return abspath(name)
     base = name
     if endswith(name,".jl")
-        base = name[1:end-3]
+        base = name[1:end-3] # this is valid because ".jl" is representable in 3 bytes
     else
         name = string(base,".jl")
         isfile(name) && return abspath(name)
@@ -136,13 +168,13 @@ end
 package_list = Dict{ByteString,Float64}()
 # to synchronize multiple tasks trying to require something
 package_locks = Dict{ByteString,Any}()
-require(fname::String) = require(bytestring(fname))
-require(f::String, fs::String...) = (require(f); for x in fs require(x); end)
+require(fname::AbstractString) = require(bytestring(fname))
+require(f::AbstractString, fs::AbstractString...) = (require(f); for x in fs require(x); end)
 
 # only broadcast top-level (not nested) requires and reloads
 toplevel_load = true
 
-function require(name::String)
+function require(name::AbstractString)
     path = find_in_node1_path(name)
     path == nothing && throw(ArgumentError("$name not found in path"))
 
@@ -171,7 +203,7 @@ function _require(path)
     end
 end
 
-function reload(name::String)
+function reload(name::AbstractString)
     global toplevel_load
     path = find_in_node1_path(name)
     path == nothing && throw(ArgumentError("$name not found in path"))
@@ -194,7 +226,7 @@ end
 
 # remote/parallel load
 
-function source_path(default::Union(String,Void)="")
+function source_path(default::@compat(Union{AbstractString,Void})="")
     t = current_task()
     while true
         s = t.storage
@@ -210,7 +242,7 @@ end
 
 macro __FILE__() source_path() end
 
-function include_from_node1(path::String)
+function include_from_node1(path::AbstractString)
     prev = source_path(nothing)
     path = (prev == nothing) ? abspath(path) : joinpath(dirname(prev),path)
     tls = task_local_storage()
@@ -235,7 +267,7 @@ function include_from_node1(path::String)
     result
 end
 
-function reload_path(path::String)
+function reload_path(path::AbstractString)
     had = haskey(package_list, path)
     if !had
         package_locks[path] = RemoteRef()
