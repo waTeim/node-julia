@@ -54,13 +54,17 @@ static string methodErrorMsg(jl_value_t *ex)
    jl_value_t *f0 = jl_get_nth_field(ex,0);
    jl_value_t *f1 = jl_get_nth_field(ex,1);
 
-#if defined(USES_SVEC)
+   #if defined(USES_SVEC)
    size_t numArgs = jl_nfields(f1);
-#else
+   #else
    size_t numArgs = jl_tuple_len(f1);
-#endif
+   #endif
 
+   #if defined(jl_symbol_name)
+   ss << "unmatched method " << jl_symbol_name(jl_gf_name(f0)) << "(";
+   #else
    ss << "unmatched method " << jl_gf_name(f0)->name << "(";
+   #endif
 
    for(size_t i = 0;i < numArgs;i++)
    {
@@ -94,7 +98,11 @@ static string undefVarErrorMsg(jl_value_t *ex)
    jl_value_t *f0 = jl_get_nth_field(ex,0);
    stringstream ss;
 
+   #if defined(jl_symbol_name)
+   ss << "undefined variable " << jl_symbol_name((jl_sym_t*)f0);
+   #else
    ss << "undefined variable " << ((jl_sym_t*)f0)->name;
+   #endif
 
    return ss.str();
 }

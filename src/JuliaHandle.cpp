@@ -47,18 +47,22 @@ nj::JuliaHandle::JuliaHandle(jl_value_t *val,bool preserve) throw(JuliaException
    if((jl_is_structtype(vtype) || jl_is_bitstype(vtype)) && !jl_is_module(val) && !jl_is_tuple(val) && !jl_is_expr(val) && !jl_is_function(val))
    {
 
-#if defined(USES_SVEC)
+      #if defined(USES_SVEC)
       size_t numFields = jl_datatype_nfields(vtype);
 
       for(size_t i = 0;i < numFields;i++)
       {
          jl_value_t *fieldValue = jl_fieldref(val,i);
          jl_sym_t *fieldNameSym = jl_field_name(vtype,i);
+         #if defined(jl_symbol_name)
+         char *fieldName = jl_symbol_name(fieldNameSym);
+         #else
          char *fieldName = fieldNameSym->name;
+         #endif
 
          if(fieldName && fieldValue) element_list[fieldName] = shared_ptr<JuliaHandle>(new JuliaHandle(fieldValue));
       }
-#else
+      #else
       jl_tuple_t *fieldNames = ((jl_datatype_t*)vtype)->names;
 
       if(fieldNames)
@@ -74,7 +78,7 @@ nj::JuliaHandle::JuliaHandle(jl_value_t *val,bool preserve) throw(JuliaException
             if(fieldName && fieldValue) element_list[fieldName] = shared_ptr<JuliaHandle>(new JuliaHandle(fieldValue));
          }
       }
-#endif
+      #endif
    }
 }
 

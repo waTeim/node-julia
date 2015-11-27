@@ -154,7 +154,7 @@ Tests run using npm
     npm test
 
 # Compatibility
-Tested with [node](http://nodejs.org/) 0.10, 0.11, 0.12, and 4.0 as well as
+Tested with [node](http://nodejs.org/) 0.10, 0.11, 0.12, 4.2, and 5.0 as well as
 [io.js](https://iojs.org/) 1.x, 2.x. 3.x.
 
 Julia version 0.3 is supported on all versions of node and iojs, but Julia 0.4+

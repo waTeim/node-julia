@@ -4,19 +4,25 @@ os:
   - linux
 env:
   - NODE_VERSION="0.10"
-    JULIA_VERSION="juliareleases"
+    JULIA_VERSION="0.3"
   - NODE_VERSION="0.12"
-    JULIA_VERSION="juliareleases"
+    JULIA_VERSION="0.4"
   - NODE_VERSION="0.12"
-    JULIA_VERSION="julianightlies"
-  - NODE_VERSION="4.0"
-    JULIA_VERSION="juliareleases"
-  - NODE_VERSION="4.0"
-    JULIA_VERSION="julianightlies"
+    JULIA_VERSION="0.5"
+  - NODE_VERSION="4.2"
+    JULIA_VERSION="0.4"
+  - NODE_VERSION="4.2"
+    JULIA_VERSION="0.5"
 before_install:
   - if [ `uname` = "Linux" ]; then
       sudo add-apt-repository ppa:staticfloat/julia-deps -y;
-      sudo add-apt-repository ppa:staticfloat/${JULIA_VERSION} -y;
+      if [ "$JULIA_VERSION" = "0.3" ]; then
+         sudo add-apt-repository ppa:staticfloat/archive+/juliareleases -y;
+      elif [ "$JULIA_VERSION" = "0.4" ]; then
+         sudo add-apt-repository ppa:staticfloat/juliareleases -y;
+      else
+         sudo add-apt-repository ppa:staticfloat/julianightlies -y;
+      fi
       sudo apt-get update -qq -y;
       sudo apt-get install libpcre3-dev julia -y;
       export CXX="g++-4.8";
@@ -28,10 +34,12 @@ before_install:
       source $(brew --prefix nvm)/nvm.sh;
       nvm install $NODE_VERSION;
       npm install -g mocha chai sinon bindings node-gyp;
-      if [ "$JULIA_VERSION" = "julianightlies" ]; then
-        wget -O julia.dmg "http://status.julialang.org/download/osx10.7+";
-      else
+      if [ "$JULIA_VERSION" = "0.3" ]; then
+        wget -O julia.dmg "https://s3.amazonaws.com/julialang/bin/osx/x64/0.3/julia-0.3.12-osx10.7+.dmg";
+      elif [ "$JULIA_VERSION" = "0.4" ]; then
         wget -O julia.dmg "http://status.julialang.org/stable/osx10.7+";
+      else
+        wget -O julia.dmg "http://status.julialang.org/download/osx10.7+";
       fi;
       hdiutil mount julia.dmg;
       cp -Ra /Volumes/Julia/*.app/Contents/Resources/julia ~;
