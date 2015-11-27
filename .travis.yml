@@ -9,22 +9,22 @@ env:
     JULIA_VERSION="0.4"
   - NODE_VERSION="0.12"
     JULIA_VERSION="0.5"
-  - NODE_VERSION="4.2"
-    JULIA_VERSION="0.4"
-  - NODE_VERSION="4.2"
-    JULIA_VERSION="0.5"
 before_install:
   - if [ `uname` = "Linux" ]; then
       sudo add-apt-repository ppa:staticfloat/julia-deps -y;
       if [ "$JULIA_VERSION" = "0.3" ]; then
-         sudo add-apt-repository ppa:staticfloat/archive+/juliareleases -y;
+         sudo add-apt-repository ppa:staticfloat/juliareleases -y;
+         sudo apt-get update -qq -y;
+         sudo apt-get install libpcre3-dev julia0.3 -y;
       elif [ "$JULIA_VERSION" = "0.4" ]; then
          sudo add-apt-repository ppa:staticfloat/juliareleases -y;
+         sudo apt-get update -qq -y;
+         sudo apt-get install libpcre3-dev julia -y;
       else
          sudo add-apt-repository ppa:staticfloat/julianightlies -y;
+         sudo apt-get update -qq -y;
+         sudo apt-get install libpcre3-dev julia -y;
       fi;
-      sudo apt-get update -qq -y;
-      sudo apt-get install libpcre3-dev julia -y;
       export CXX="g++-4.8";
       nvm install $NODE_VERSION;
       npm install -g mocha chai sinon bindings node-gyp;
