@@ -22,7 +22,7 @@ before_install:
          sudo add-apt-repository ppa:staticfloat/juliareleases -y;
       else
          sudo add-apt-repository ppa:staticfloat/julianightlies -y;
-      fi
+      fi;
       sudo apt-get update -qq -y;
       sudo apt-get install libpcre3-dev julia -y;
       export CXX="g++-4.8";
