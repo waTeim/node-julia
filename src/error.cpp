@@ -14,7 +14,11 @@
 
 extern "C"
 {
+#if defined(DLLEXPORT)
 DLLEXPORT jl_value_t *jl_get_backtrace(void);
+#elif defined(JL_DLLEXPORT)
+JL_DLLEXPORT jl_value_t *jl_get_backtrace(void);
+#endif
 };
 
 using namespace std;
