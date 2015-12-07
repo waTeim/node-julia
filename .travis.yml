@@ -19,6 +19,7 @@ env:
     JULIA_VERSION="0.5"
 before_install:
   - git clone https://github.com/creationix/nvm.git /tmp/.nvm
+  - export NVM_DIR=$(readlink "$HOME/.nvm")
   - source /tmp/.nvm/nvm.sh
   - nvm install $NODE_VERSION
   - nvm use $NODE_VERSION
