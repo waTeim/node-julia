@@ -9,7 +9,7 @@ env:
     JULIA_VERSION="0.4"
   - NODE_VERSION="0.12"
     JULIA_VERSION="0.5"
-  - NODE_VERSION="4.2"
+  - NODE_VERSION="4.2.3"
     JULIA_VERSION="0.4"
   - NODE_VERSION="4.2"
     JULIA_VERSION="0.5"
@@ -19,10 +19,8 @@ env:
     JULIA_VERSION="0.5"
 before_install:
   - git clone https://github.com/creationix/nvm.git /tmp/.nvm
-  - export NVM_DIR=$(readlink "$HOME/.nvm")
   - source /tmp/.nvm/nvm.sh
   - nvm install $NODE_VERSION
-  - nvm use $NODE_VERSION
   - if [ `uname` = "Linux" ]; then
       sudo add-apt-repository ppa:staticfloat/julia-deps -y;
       if [ "$JULIA_VERSION" = "0.3" ]; then
