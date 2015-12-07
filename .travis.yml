@@ -18,6 +18,9 @@ env:
   - NODE_VERSION="5.1"
     JULIA_VERSION="0.5"
 before_install:
+  - if [ `uname` = "Linux" ]; then
+      nvm install $NODE_VERSION;
+    fi 
   - sudo npm -g install npm
   - sudo npm -g install n
   - n --version
