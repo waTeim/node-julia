@@ -19,7 +19,7 @@ env:
     JULIA_VERSION="0.5"
 before_install:
   - if [ `uname` = "Darwin" ]; then
-      brew uninstall nvm
+      brew uninstall nvm;
     fi
   - git clone https://github.com/creationix/nvm.git /tmp/.nvm
   - source /tmp/.nvm/nvm.sh
