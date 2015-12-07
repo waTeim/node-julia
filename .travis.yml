@@ -18,9 +18,13 @@ env:
   - NODE_VERSION="5.1"
     JULIA_VERSION="0.5"
 before_install:
+  - if [ `uname` = "Darwin" ]; then
+      brew uninstall nvm
+    fi
   - git clone https://github.com/creationix/nvm.git /tmp/.nvm
   - source /tmp/.nvm/nvm.sh
   - nvm install $NODE_VERSION
+  - nvm use $NODE_VERSION
   - if [ `uname` = "Linux" ]; then
       sudo add-apt-repository ppa:staticfloat/julia-deps -y;
       if [ "$JULIA_VERSION" = "0.3" ]; then
