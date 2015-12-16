@@ -87,7 +87,7 @@
       "cflags!":     [ "-fno-exceptions" ],
       "cflags":
       [
-         "-std=<(std)",
+         "-std=<(std)", "-Wno-strict-aliasing"
       ],
       "defines":
       [
