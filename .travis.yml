@@ -9,13 +9,13 @@ env:
     JULIA_VERSION="0.4"
   - NODE_VERSION="0.12"
     JULIA_VERSION="0.5"
-  - NODE_VERSION="4.2.3"
+  - NODE_VERSION="4.2"
     JULIA_VERSION="0.4"
   - NODE_VERSION="4.2"
     JULIA_VERSION="0.5"
-  - NODE_VERSION="5.1"
+  - NODE_VERSION="5.2"
     JULIA_VERSION="0.4"
-  - NODE_VERSION="5.1"
+  - NODE_VERSION="5.2"
     JULIA_VERSION="0.5"
 before_install:
   - if [ `uname` = "Linux" ]; then
