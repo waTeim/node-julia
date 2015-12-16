@@ -166,6 +166,7 @@
                 "AdditionalOptions": [ "/EHa" ],
                 "DisableSpecificWarnings":
                 [
+                  4146,
                   4290,
                   4200
                 ]
