@@ -24,6 +24,23 @@ macro vers04orGreater_only(ex)
    @vers04orGreater(ex)?esc(ex):nothing
 end
 
+macro vers04orLess(ex)
+   VERSION.minor <= 4
+end
+
+macro vers04orLess_only(ex)
+   @vers04orLess(ex)?esc(ex):nothing
+end
+
+macro vers05x(ex)
+   VERSION.minor == 5
+end
+
+macro vers05x_only(ex)
+   @vers05x(ex)?esc(ex):nothing
+end
+
+
 # lifted from Compat.jl; minimum required
 macro compat(ex)
     esc(_compat(ex))
@@ -67,9 +84,11 @@ function topExpr(mod::Module,paths::Array{ASCIIString,1})
 end
 
 include(mod::Module,path,args::Vector) = include(mod,path,UTF8String[args...])
+@vers04orLess_only readAllFromFile(filename) = readall(filename)
+@vers05x_only readAllFromFile(filename) = readstring(filename)
 
 function scriptify(mod::Module,filename::ASCIIString)
-    ast = parse("function _(args...)\n" * readall(filename) * "end");
+    ast = parse("function _(args...)\n" * readAllFromFile(filename) * "end");
     args2 = Array(Any,0);
     paths = Array(ASCIIString,0);
 
@@ -168,7 +187,7 @@ end
 package_list = Dict{ByteString,Float64}()
 # to synchronize multiple tasks trying to require something
 package_locks = Dict{ByteString,Any}()
-require(fname::AbstractString) = require(bytestring(fname))
+#require(fname::AbstractString) = require(bytestring(fname))
 require(f::AbstractString, fs::AbstractString...) = (require(f); for x in fs require(x); end)
 
 # only broadcast top-level (not nested) requires and reloads
@@ -267,11 +286,22 @@ function include_from_node1(path::AbstractString)
     result
 end
 
+@vers04orLess_only function getReference()
+   if :RemoteRef in names(Base)
+      return RemoteRef()
+   else
+      return RemoteChannel()
+   end
+end
+
+@vers05x_only function getReference()
+  return RemoteChannel()
+end
+
 function reload_path(path::AbstractString)
     had = haskey(package_list, path)
     if !had
-        if :RemoteRef in names(Base) package_locks[path] = RemoteRef()
-        else package_locks[path] = RemoteChannel() end
+       package_locks[path] = getReference()
     end
     package_list[path] = time()
     tls = task_local_storage()

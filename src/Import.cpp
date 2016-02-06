@@ -10,6 +10,10 @@
 #include "lvalue.h"
 #include "JuliaHandle.h"
 
+#if !defined(jl_is_function)
+#define jl_is_function(v) ((jl_value_t*)jl_gf_mtable(v)->defs != (jl_value_t*)jl_nothing)
+#endif
+
 using namespace std;
 
 nj::Result nj::Import::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
@@ -48,7 +52,7 @@ nj::Result nj::Import::eval(vector<shared_ptr<nj::Value>> &args,int64_t exprId)
 
       for(size_t i = 0;i < dims[0];i++) *p++ = filteredNames[i];
       res.push_back(shared_ptr<Value>(res1));
-      
+
       return Result(res,exprId);
    }
    catch(JuliaException e)

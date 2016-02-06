@@ -7,6 +7,10 @@
 #include "Kernel.h"
 #include "JuliaHandle.h"
 
+#if !defined(jl_is_function)
+#define jl_is_function(v) ((jl_value_t*)jl_gf_mtable(v)->defs != (jl_value_t*)jl_nothing)
+#endif
+
 using namespace std;
 
 vector<size_t> nj::JuliaHandle::none;
@@ -25,18 +29,18 @@ nj::JuliaHandle *nj::JuliaHandle::atIndex(int64_t htabIndex)
 nj::JuliaHandle *nj::JuliaHandle::forVal(jl_value_t* val)
 {
    map<jl_value_t*,int64_t>::iterator i = vtab.find(val);
- 
+
    if(i == vtab.end()) return 0;
    return atIndex(i->second);
 }
 
 nj::JuliaHandle::JuliaHandle(jl_value_t *val,bool preserve) throw(JuliaException)
-{ 
+{
    _val = val;
    if(preserve)
    {
       Kernel *kernel = Kernel::getSingleton();
- 
+
       preserve_index = kernel->preserve(val);
    }
    else preserve_index = -1;
@@ -74,7 +78,7 @@ nj::JuliaHandle::JuliaHandle(jl_value_t *val,bool preserve) throw(JuliaException
             jl_value_t *fieldValue = jl_fieldref(val,i);
             jl_sym_t *fieldNameSym = (jl_sym_t*)jl_tupleref(fieldNames,i);
             char *fieldName = fieldNameSym->name;
- 
+
             if(fieldName && fieldValue) element_list[fieldName] = shared_ptr<JuliaHandle>(new JuliaHandle(fieldValue));
          }
       }
