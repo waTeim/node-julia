@@ -40,6 +40,17 @@ macro vers05x_only(ex)
    @vers05x(ex)?esc(ex):nothing
 end
 
+# Something more parametric.  Work around the problem of julia version 0.3
+# not having a VersionNumber constructor by always returning true
+macro vLT(v,ex)
+   VERSION.minor <= 3 || VERSION < VersionNumber(v)?esc(ex):nothing
+end
+
+# Likewise as above always return false for version minor <= 3 and only
+# differentiate for later versions.
+macro vGE(v,ex)
+   VERSION.minor > 3 && VERSION >= VersionNumber(v)?esc(ex):nothing
+end
 
 # lifted from Compat.jl; minimum required
 macro compat(ex)
@@ -286,7 +297,7 @@ function include_from_node1(path::AbstractString)
     result
 end
 
-@vers04orLess_only function getReference()
+@vLT "0.5.0-dev+9657" function getReference()
    if :RemoteRef in names(Base)
       return RemoteRef()
    else
@@ -294,8 +305,8 @@ end
    end
 end
 
-@vers05x_only function getReference()
-  return RemoteChannel()
+@vGE "0.5.0-dev+9657" function getReference()
+   return RemoteChannel()
 end
 
 function reload_path(path::AbstractString)

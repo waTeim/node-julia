@@ -7,7 +7,7 @@
 #include "debug.h"
 
 #if !defined(jl_is_function)
-#define jl_is_function(v) ((jl_value_t*)jl_gf_mtable(v)->defs != (jl_value_t*)jl_nothing)
+#define jl_is_function(v) ((jl_value_t*)jl_gf_mtable(v)->defs != jl_nothing)
 #endif
 
 using namespace std;
