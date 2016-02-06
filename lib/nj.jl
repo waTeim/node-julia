@@ -95,8 +95,8 @@ function topExpr(mod::Module,paths::Array{ASCIIString,1})
 end
 
 include(mod::Module,path,args::Vector) = include(mod,path,UTF8String[args...])
-@vers04orLess_only readAllFromFile(filename) = readall(filename)
-@vers05x_only readAllFromFile(filename) = readstring(filename)
+@vLT "0.5.0-dev+2400" readAllFromFile(filename) = readall(filename)
+@vGE "0.5.0-dev+2400" readAllFromFile(filename) = readstring(filename)
 
 function scriptify(mod::Module,filename::ASCIIString)
     ast = parse("function _(args...)\n" * readAllFromFile(filename) * "end");
@@ -297,7 +297,7 @@ function include_from_node1(path::AbstractString)
     result
 end
 
-@vLT "0.5.0-dev+9657" function getReference()
+@vers04orLess_only function getReference()
    if :RemoteRef in names(Base)
       return RemoteRef()
    else
@@ -305,7 +305,7 @@ end
    end
 end
 
-@vGE "0.5.0-dev+9657" function getReference()
+@vers05x_only function getReference()
    return RemoteChannel()
 end
 
