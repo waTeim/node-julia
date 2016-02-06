@@ -8,7 +8,7 @@
         {
           "conditions":
           [
-            [ "OS=='linux'", { "gcc":"<!(gcc --version 2>&1 | head -1 | sed -e 's/^.*(.*) \(.*\)\..*$/\\1/')" } , { "gcc":"" } ]
+            [ "OS=='linux'", { "gcc":"<!(python tools/nj_config.py <(OS) gcc_version)" }, { "gcc":"" } ]
           ],
           "juliaBase":"<!(python tools/nj_config.py <(OS) base)"
         },

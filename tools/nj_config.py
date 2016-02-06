@@ -4,15 +4,18 @@ import sys
 import subprocess
 
 
+def which(cmd):
+   return subprocess.Popen(["/usr/bin/which",cmd],stdout=subprocess.PIPE).communicate()[0].rstrip(os.linesep)
+
 def julia_base_from_which_julia():
    path = "";
-   which_julia = subprocess.Popen(["/usr/bin/which","julia"],stdout=subprocess.PIPE).communicate()[0];
+   which_julia = which("julia")
    if len(which_julia) > 0:
-      real_path = os.path.realpath(which_julia.rstrip(os.linesep))
+      real_path = os.path.realpath(which_julia)
       if real_path:
          dirname = os.path.dirname(real_path)
          path = os.path.split(dirname)[0]
-   return path 
+   return path
 
 def julia_base_from_where_julia():
    path = "";
@@ -77,6 +80,15 @@ def get_julia_lib_define_variable(platform):
    else: path = re.sub(r"\\ "," ",find_julia_base(platform)) + "/lib/julia" 
    return re.sub(r"\\","\\\\\\\\",path)
 
+def get_gcc_version():
+   version = ""
+   which_gcc = which("gcc")
+   if len(which_gcc) > 0:
+      output = subprocess.Popen([which_gcc,"--version"],stdout=subprocess.PIPE).communicate()[0]
+      line1 = output.split("\n")[0]
+      version = re.sub(r"^gcc.*\) ([0-9]*\.[0-9]*)\.([0-9]*)$","\g<1>",line1)
+   return version
+
 if sys.argv[2] == "version": print node_version()
 elif sys.argv[2] == "base":
    path = find_julia_base(sys.argv[1])
@@ -85,3 +97,5 @@ elif sys.argv[2] == "nj_lib_define":
    print get_nj_lib_define_variable()
 elif sys.argv[2] == "julia_lib_define":
    print get_julia_lib_define_variable(sys.argv[1])
+elif sys.argv[2] == "gcc_version":
+   print get_gcc_version()
