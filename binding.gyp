@@ -41,7 +41,8 @@
             }
           ],
           [ "OS == 'linux'",
-            { "gcc_target":"<!(python tools/nj_config.py <(OS) gcc_target)" }
+            { "gcc_target":"<!(python tools/nj_config.py <(OS) gcc_target)" },
+            { "gcc_target":"" }
           ],
           [ "OS=='win'",
             {
