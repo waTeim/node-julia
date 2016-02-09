@@ -85,9 +85,18 @@ def get_gcc_version():
    which_gcc = which("gcc")
    if len(which_gcc) > 0:
       output = subprocess.Popen([which_gcc,"--version"],stdout=subprocess.PIPE).communicate()[0]
-      line1 = output.split("\n")[0]
-      version = re.sub(r"^gcc.*\) ([0-9]*\.[0-9]*)\.([0-9]*)$","\g<1>",line1)
+      line = output.split("\n")[0]
+      version = re.sub(r"^gcc.*\) ([0-9]*\.[0-9]*)\.([0-9]*)$","\g<1>",line)
    return version
+
+def get_gcc_target():
+   version = ""
+   which_gcc = which("gcc")
+   if len(which_gcc) > 0:
+      output = subprocess.Popen([which_gcc,"-v"],stdout=subprocess.PIPE,stderr=subprocess.PIPE).communicate()[1]
+      line = output.split("\n")[3]
+      target = line.split()[1]
+   return target
 
 if sys.argv[2] == "version": print node_version()
 elif sys.argv[2] == "base":
@@ -99,3 +108,5 @@ elif sys.argv[2] == "julia_lib_define":
    print get_julia_lib_define_variable(sys.argv[1])
 elif sys.argv[2] == "gcc_version":
    print get_gcc_version()
+elif sys.argv[2] == "gcc_target":
+   print get_gcc_target()

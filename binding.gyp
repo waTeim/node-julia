@@ -8,7 +8,14 @@
         {
           "conditions":
           [
-            [ "OS=='linux'", { "gcc":"<!(python tools/nj_config.py <(OS) gcc_version)" }, { "gcc":"" } ]
+            [ "OS=='linux'", 
+              { 
+                "gcc":"<!(python tools/nj_config.py <(OS) gcc_version)"
+              },
+              { 
+                "gcc":""
+              }
+            ]
           ],
           "juliaBase":"<!(python tools/nj_config.py <(OS) base)"
         },
@@ -32,6 +39,9 @@
               "JULIA_LIB":"<!(python tools/nj_config.py <(OS) julia_lib_define)",
               "juliaInclude":"<(juliaBase)/include/julia"
             }
+          ],
+          [ "OS == 'linux'",
+            { "gcc_target":"<!(python tools/nj_config.py <(OS) gcc_target)" }
           ],
           [ "OS=='win'",
             {
@@ -85,10 +95,6 @@
         "src/util.cpp"
       ],
       "cflags!":     [ "-fno-exceptions" ],
-      "cflags":
-      [
-         "-std=<(std)", "-Wno-strict-aliasing"
-      ],
       "defines":
       [
          '<(OS)',
@@ -112,12 +118,13 @@
          ],
          "conditions":
          [
-           [ "OS == 'win'",
+           [ "gcc_target == 'arm-poky-linux-gnueabi'",
              {
                "libraries":
                [
-                 "-llibjulia",
-                 "-llibopenlibm"
+                 "-lgfortran",
+                 "-lopenblas",
+                 "-ljulia"
                ]
              },
              {
@@ -131,6 +138,14 @@
       },
       "conditions":
       [
+        [ "gcc_target == 'arm-poky-linux-gnueabi'",
+          {
+            "cflags": [ "-std=<(std)", "-Wno-strict-aliasing", "-march=armv7-a" ]
+          },
+          {
+            "cflags": [ "-std=<(std)", "-Wno-strict-aliasing" ]
+          }
+        ],
         [ "OS == 'mac'",
           {
             "xcode_settings":
