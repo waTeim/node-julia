@@ -1,6 +1,7 @@
 #ifndef __nj_Alloc
 #define __nj_Alloc
 
+#include <mutex>
 #include "FreeList.h"
 
 namespace nj
@@ -12,6 +13,7 @@ namespace nj
       protected:
 
          static FreeList<Alloc> *alloc_list;
+         static std::mutex m_alloc_list;
 
          int64_t _index;
          NAlloc *_container;
