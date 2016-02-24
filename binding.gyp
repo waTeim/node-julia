@@ -8,11 +8,11 @@
         {
           "conditions":
           [
-            [ "OS=='linux'", 
-              { 
+            [ "OS=='linux'",
+              {
                 "gcc":"<!(python tools/nj_config.py <(OS) gcc_version)"
               },
-              { 
+              {
                 "gcc":""
               }
             ]
@@ -25,20 +25,13 @@
         "V8MAJOR":"<!(node tools/nodev.js major)",
         "V8MINOR":"<!(node tools/nodev.js minor)",
         "V8PATCH":"<!(node tools/nodev.js patch)",
+        "JULIA_LIB":"<!(python tools/nj_config.py <(OS) julia_lib_define)",
         "conditions":
         [
           [ "gcc=='4.6'", { "std":"c++0x" } , { "std":"c++11" } ],
           [ "OS=='linux' and juliaBase=='/usr'",
-            {
-              "juliaLib":"/usr/lib/x86_64-linux-gnu/julia",
-              "JULIA_LIB":"/usr/lib/x86_64-linux-gnu/julia",
-              "juliaInclude":"/usr/include/julia"
-            },
-            {
-              "juliaLib":"<(juliaBase)/lib/julia",
-              "JULIA_LIB":"<!(python tools/nj_config.py <(OS) julia_lib_define)",
-              "juliaInclude":"<(juliaBase)/include/julia"
-            }
+            { "juliaInclude":"/usr/include/julia" },
+            { "juliaInclude":"<(juliaBase)/include/julia" }
           ],
           [ "OS == 'linux'",
             { "gcc_target":"<!(python tools/nj_config.py <(OS) gcc_target)" },
@@ -47,10 +40,10 @@
           [ "OS=='win'",
             {
               "juliaLib":"<(juliaBase)/bin",
-              "JULIA_LIB":"<!(python tools/nj_config.py <(OS) julia_lib_define)",
               "juliaInclude":"<(juliaBase)/include/julia",
               "libjulialib":"libjulia.lib"
-            }
+            },
+            { "juliaLib":"<!(python tools/nj_config.py <(OS) julia_lib)" }
           ]
         ]
       },
