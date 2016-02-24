@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import subprocess
+import platform
 
 
 def which(cmd):
@@ -54,8 +55,8 @@ def julia_base_from_applications():
    if os.path.isdir(julia_dir): return julia_dir
    return ""
 
-def find_julia_base(platform):
-   if platform == "win":
+def find_julia_base(operating_system):
+   if operating_system == "win":
       path = julia_base_from_where_julia()
       if path == "": path = julia_base_from_home_directory_win()
    else:
@@ -79,8 +80,8 @@ def julia_version(julia_path):
    line = subprocess.Popen([julia_path,"-v"],stdout=subprocess.PIPE).communicate()[0].rstrip(os.linesep)
    return re.sub(r".* ([0-9]\.[0-9])\.[0-9]+.*","\g<1>",line)
 
-def get_julia_lib(platform):
-   if platform == "win": path = find_julia_base(platform) + "\\lib\\julia"
+def get_julia_lib(operating_system):
+   if operating_system == "win": path = find_julia_base(operating_system) + "\\lib\\julia"
    else:
       which_julia = which("julia")
       if len(which_julia) > 0:
@@ -89,17 +90,17 @@ def get_julia_lib(platform):
          if version == "0.4" or version == "0.5":
             path = subprocess.Popen([julia_path,"-e",'println(abspath(dirname(Libdl.dlpath("libjulia"))))'],stdout=subprocess.PIPE).communicate()[0].rstrip(os.linesep)
          else:
-            path = re.sub(r"\\ "," ",find_julia_base(platform))
+            path = re.sub(r"\\ "," ",find_julia_base(operating_system))
             if path == "/usr":
-               if platform.linux_distribution()[0] == "centos": path = path + "/lib64/julia";
-               elif platform.linux_distribution()[0] == "Ubuntu": path = path + "/lib/x86_64-linux-gnu/julia"
+               if operating_system.linux_distribution()[0] == "centos": path = path + "/lib64/julia";
+               elif operating_system.linux_distribution()[0] == "Ubuntu": path = path + "/lib/x86_64-linux-gnu/julia"
                else: path = path + "/lib/julia"
             else: path = path + "/lib/julia"
-      else: path = re.sub(r"\\ "," ",find_julia_base(platform)) + "/lib/julia"
+      else: path = re.sub(r"\\ "," ",find_julia_base(operating_system)) + "/lib/julia"
    return path
 
-def get_julia_lib_define_variable(platform):
-   path = get_julia_lib(platform)
+def get_julia_lib_define_variable(operating_system):
+   path = get_julia_lib(operating_system)
    return re.sub(r"\\","\\\\\\\\",path)
 
 def get_gcc_version():
