@@ -92,8 +92,8 @@ def get_julia_lib(operating_system):
          else:
             path = re.sub(r"\\ "," ",find_julia_base(operating_system))
             if path == "/usr":
-               if operating_system.linux_distribution()[0] == "centos": path = path + "/lib64/julia";
-               elif operating_system.linux_distribution()[0] == "Ubuntu": path = path + "/lib/x86_64-linux-gnu/julia"
+               if platform.linux_distribution()[0] == "centos": path = path + "/lib64/julia";
+               elif platform.linux_distribution()[0] == "Ubuntu": path = path + "/lib/x86_64-linux-gnu/julia"
                else: path = path + "/lib/julia"
             else: path = path + "/lib/julia"
       else: path = re.sub(r"\\ "," ",find_julia_base(operating_system)) + "/lib/julia"
