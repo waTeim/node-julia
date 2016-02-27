@@ -84,7 +84,7 @@ def get_julia_lib(operating_system):
    if operating_system == "win": path = find_julia_base(operating_system) + "\\lib\\julia"
    else:
       which_julia = which("julia")
-      if len(which_julia) > 0:
+      if len(which_julia) > 0 and (operating_system != "linux" or platform.linux_distribution()[0] != ""):
          julia_path = os.path.realpath(which_julia)
          version = julia_version(julia_path)
          if version == "0.4" or version == "0.5":
