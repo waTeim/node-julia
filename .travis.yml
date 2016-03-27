@@ -49,7 +49,7 @@ before_install:
         wget -O julia.dmg "http://status.julialang.org/download/osx10.7+";
       fi;
       hdiutil mount julia.dmg;
-      cp -Ra /Volumes/Julia/*.app/Contents/Resources/julia ~;
+      cp -Ra /Volumes/Julia*/*.app/Contents/Resources/julia ~;
       export PATH=$PATH:~/julia/bin;
     fi
   - node --version
