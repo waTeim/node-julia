@@ -106,14 +106,17 @@ jl_value_t *nj::Kernel::invoke(const std::string &functionName,std::vector<jl_va
 
 jl_module_t *nj::Kernel::load() throw(JuliaException)
 {
-   string njPath = libDir + "/nj.jl";
+   #if defined(JULIA_VERSION_MINOR) && JULIA_VERSION_MINOR >= 5
+   string njPath = libDir + "/nj-v2.jl";
+   #else
+   string njPath = libDir + "/nj-v1.jl";
+   #endif
    jl_function_t *func = jl_get_function(jl_core_module,"include");
+   jl_value_t *ex;
 
    if(!func) throw getJuliaException("unable to locate Core.include");
    jl_call1(func,jl_cstr_to_string(njPath.c_str()));
-
-   jl_value_t *ex = jl_exception_occurred();
-
+   ex = jl_exception_occurred();
    if(ex) throw getJuliaException(ex);
 
    jl_sym_t *modName = jl_symbol("nj");

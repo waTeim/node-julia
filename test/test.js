@@ -766,10 +766,10 @@ describe('Regression Tests',function()
 
    it('Import (asynchronous)',function(done)
    {
-      julia.import('test/testMod',function(err,testMod)
+      julia.import('test/testMod1',function(err,testMod)
       {
          expect(err).to.equal(null);
-         expect(testMod.test(100)).to.equal(5050);
+         expect(testMod.test(100)).to.equal(338350);
          done();
       });
    });
@@ -781,7 +781,8 @@ describe('Regression Tests',function()
       julia.import('x',function(err,testMod)
       {
          if(version == 3) expect(err).to.equal('ArgumentError("x not found in path")');
-         else expect(err).to.equal('ArgumentError: x not found in path');
+         else if(version == 4) expect(err).to.equal('ArgumentError: x not found in path');
+         else expect(err).to.equal('ArgumentError: x not found in path.');
          done();
       });
    });
